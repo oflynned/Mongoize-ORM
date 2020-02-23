@@ -15,6 +15,8 @@ export type ConnectionOptions = Partial<UriConnectionOptions> & Partial<AuthConn
 export class ConnectionValidator {
     validate(connection: ConnectionOptions): string {
         if (connection.uri) {
+            // TODO should split uri into auth connections options style with regex instead and throw an error
+            //      in the case of passing a non-numeric port number
             return connection.uri;
         }
 
