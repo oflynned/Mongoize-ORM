@@ -1,4 +1,4 @@
-import {Connection, ConnectionValidator} from "./connection.validator";
+import {ConnectionOptions, ConnectionValidator} from "./connection.validator";
 
 interface IDatabaseOperation {
     save(): void;
@@ -29,11 +29,11 @@ interface IDatabaseOperation {
 }
 
 class DatabaseClient implements IDatabaseOperation {
-    connection: Connection;
+    options: ConnectionOptions;
     validator: ConnectionValidator;
 
-    constructor(connection: Connection) {
-        this.connection = connection;
+    constructor(options: ConnectionOptions) {
+        this.options = options;
         this.validator = new ConnectionValidator();
     }
 
@@ -71,7 +71,7 @@ class DatabaseClient implements IDatabaseOperation {
     }
 
     connect(): void {
-        const connectionUri = this.validator.validate(this.connection);
+        const connectionUri = this.validator.validate(this.options);
         console.log("connecting", connectionUri);
     }
 
