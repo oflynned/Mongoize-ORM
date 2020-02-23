@@ -4,12 +4,11 @@ describe('Connection Validator', () => {
     const validator: ConnectionValidator = new ConnectionValidator();
 
     describe("validate", () => {
-
-        xit('should validate uri', () => {
-            // const options: ConnectionOptions = {
-            //   uri: "mongodb://username:password@host:port/database"
-            // };
-            // expect(validator.validate(options)).toEqual("mongodb://username:password@host:port/database")
+        it('should validate uri', () => {
+            const options: ConnectionOptions = {
+              uri: "mongodb://username:password@host:port/database"
+            };
+            expect(validator.validate(options)).toEqual("mongodb://username:password@host:port/database")
         });
 
         it('should validate without username and password', function () {
@@ -42,8 +41,16 @@ describe('Connection Validator', () => {
             expect(validator.validate({password: "password", ...options})).toEqual("mongodb://host:1234/database")
         });
 
-        xit('should prefer uri', function () {
-
+        it('should prefer uri', function () {
+            const options: ConnectionOptions = {
+                uri: "mongodb://username:password@host:port/database",
+                username: "username1",
+                password: "password1",
+                host: "host1",
+                port: 12345,
+                database: "database1"
+            };
+            expect(validator.validate(options)).toEqual("mongodb://username:password@host:port/database")
         });
     });
 });
