@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "lib": [
+      "es5",
+      "es2015",
+      "es6",
+      "dom"
+    ],
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "paths": {
+      "@db/*": [
+        "./lib/db/*"
+      ],
+      "@models/*": [
+        "./lib/models/*"
+      ]
+    }
+  },
+  "include": [
+    "./src/**/*.ts"
+  ],
+  "exclude": [
+    "./__tests__",
+    "./node_modules",
+    "./assets"
+  ]
+}
