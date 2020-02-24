@@ -1,81 +1,93 @@
 import {ConnectionOptions, ConnectionValidator} from "./connection.validator";
 
 interface IDatabaseOperation {
-    save(): void;
+    save(): Promise<void>;
 
-    findOne(collection: string): void;
+    findOne(collection: string): Promise<void>;
 
-    findMany(collection: string): void;
+    findMany(collection: string): Promise<void>;
 
-    findOneAndUpdate(collection: string): void;
+    findOneAndUpdate(collection: string): Promise<void>;
 
-    findOneAndDelete(collection: string): void;
+    findOneAndDelete(collection: string): Promise<void>;
 
-    count(collection: string, query: object): void;
+    count(collection: string, query: object): Promise<void>;
 
-    deleteCollection(collection: string): void;
+    deleteCollection(collection: string): Promise<void>;
 
-    deleteOne(collection: string, query: object): void;
+    deleteOne(collection: string, query: object): Promise<void>;
 
-    deleteMany(collection: string, query: object): void;
+    deleteMany(collection: string, query: object): Promise<void>;
 
-    clearCollection(collection: string): void;
+    clearCollection(collection: string): Promise<void>;
 
-    dropDatabase(): void;
+    dropDatabase(): Promise<void>;
 
-    connect(): void;
+    connect(): Promise<void>;
 
-    close(): void;
+    close(): Promise<void>;
 }
 
-class DatabaseClient implements IDatabaseOperation {
+abstract class DatabaseClient implements IDatabaseOperation {
     options: ConnectionOptions;
     validator: ConnectionValidator;
 
-    constructor(options: ConnectionOptions) {
+    protected constructor(options: ConnectionOptions) {
         this.options = options;
         this.validator = new ConnectionValidator();
     }
 
-    count(collection: string, query: object): void {
-    }
-
-    deleteCollection(collection: string): void {
-    }
-
-    deleteMany(collection: string, query: object): void {
-    }
-
-    deleteOne(collection: string, query: object): void {
-    }
-
-    findMany(collection: string): void {
-    }
-
-    findOne(collection: string): void {
-    }
-
-    findOneAndDelete(collection: string): void {
-    }
-
-    findOneAndUpdate(collection: string): void {
-    }
-
-    save(): void {
-    }
-
-    clearCollection(collection: string) {
-    }
-
-    close(): void {
-    }
-
-    connect(): void {
+    async connect(): Promise<void> {
         const connectionUri = this.validator.validate(this.options);
         console.log("connecting", connectionUri);
     }
 
-    dropDatabase() {
+    clearCollection(collection: string):Promise<void>{
+        return undefined;
+    }
+
+    close(): Promise<void> {
+        return undefined;
+    }
+
+    count(collection: string, query: object): Promise<void> {
+        return undefined;
+    }
+
+    deleteCollection(collection: string): Promise<void> {
+        return undefined;
+    }
+
+    deleteMany(collection: string, query: object): Promise<void> {
+        return undefined;
+    }
+
+    deleteOne(collection: string, query: object): Promise<void> {
+        return undefined;
+    }
+
+    dropDatabase(): Promise<void> {
+        return undefined;
+    }
+
+    findMany(collection: string): Promise<void> {
+        return undefined;
+    }
+
+    findOne(collection: string): Promise<void> {
+        return undefined;
+    }
+
+    findOneAndDelete(collection: string): Promise<void> {
+        return undefined;
+    }
+
+    findOneAndUpdate(collection: string): Promise<void> {
+        return undefined;
+    }
+
+    save(): Promise<void> {
+        return undefined;
     }
 }
 

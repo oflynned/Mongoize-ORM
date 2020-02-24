@@ -7,7 +7,6 @@ interface AnimalSchema extends Schema {
 }
 
 class Animal extends Document<AnimalSchema> {
-
     static build(params: AnimalSchema) {
 
     }

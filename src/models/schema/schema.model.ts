@@ -2,7 +2,9 @@ import BaseSchema from './base.schema'
 
 class Schema extends BaseSchema {
     static schema() {
-        return {};
+        return {
+            ...super.schema()
+        };
     }
 }
 
