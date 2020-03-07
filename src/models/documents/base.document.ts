@@ -21,6 +21,10 @@ interface ISchema<T, S extends Schema<any>> {
     toJson(): T;
 }
 
+type IDeletionParams = {
+    hard: boolean
+}
+
 // TODO
 //      what about a use case of hashing a password before saving?
 //      auto update timestamps on an update being made (CUD)
@@ -80,9 +84,10 @@ abstract class BaseDocument<T, S extends Schema<any>> implements IBaseDocument, 
         return this;
     }
 
-    delete(purge = false): void {
+    delete(params: IDeletionParams = {hard: false}): void {
         Logger.debug("delete()");
-        if (purge) {
+        const {hard} = params;
+        if (hard) {
             this.record = undefined
         } else {
             const deletionFields = {deleted: true, deletedAt: new Date()};

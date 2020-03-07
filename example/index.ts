@@ -54,7 +54,7 @@ const main = async () => {
     Logger.info("I've been soft deleted");
     Logger.info(animal.toJson());
 
-    await animal.delete(true);
+    await animal.delete({hard: true});
     Logger.info("I've been hard deleted");
     Logger.info(animal.toJson());
 };
