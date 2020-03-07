@@ -31,10 +31,7 @@ type IDeletionParams = {
 //      pseudo-relational data, ie type relations (1-n, n-1, n-n)
 
 abstract class BaseDocument<T, S extends Schema<any>> implements IBaseDocument, ISchema<T, S> {
-    private record: T;
-
-    constructor() {
-    }
+    protected record: T;
 
     static collection(): string {
         return "collections"

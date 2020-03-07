@@ -24,7 +24,7 @@ class Animal extends BaseDocument<IAnimal, AnimalSchema> {
 
     onPreValidate(): void {
         super.onPreValidate();
-        // super.record.legs = 1;
+        this.record.legs = 10;
     }
 }
 
