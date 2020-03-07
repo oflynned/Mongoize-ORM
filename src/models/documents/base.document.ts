@@ -16,7 +16,14 @@ interface IBaseDocument {
 
 interface ISchema<T, S extends Schema<any>> {
     joiSchema(): S;
+
+    toJson(): T;
 }
+
+// TODO
+//      what about a use case of hashing a password before saving?
+//      auto update timestamps on an update being made (CUD)
+//      pseudo-relational data, ie type relations (1-n, n-1, n-n)
 
 abstract class BaseDocument<T, S extends Schema<any>> implements IBaseDocument, ISchema<T, S> {
     private record: T;
@@ -35,31 +42,43 @@ abstract class BaseDocument<T, S extends Schema<any>> implements IBaseDocument, 
         return this;
     }
 
-    validate(): void {
+    async validate(): Promise<void> {
         console.log("validate()");
-        this.joiSchema().validate(this.record);
+
+        await this.onPreValidate();
+        console.log("validating...");
+        await this.joiSchema().validate(this.record);
+        await this.onPostValidate();
     }
 
     async save(): Promise<BaseDocument<T, S>> {
-        await this.onPreValidate();
-        await this.onPostValidate();
+        await this.validate();
+
+        console.log("save()");
         await this.onPreSave();
 
         // TODO replace me with a repo style function call to the persistence layer
-        console.log("save()");
+        console.log("saving...");
 
         await this.onPostSave();
         return Promise.resolve(this);
     }
 
-    update(newPayload: Partial<T>): Promise<BaseDocument<T, S>> {
+    async update(newPayload: Partial<T>): Promise<BaseDocument<T, S>> {
         console.log("update()");
         this.record = {...this.record, ...newPayload, updatedAt: new Date()};
-        return Promise.resolve(this);
+        await this.validate();
+        return this;
     }
 
-    delete(): void {
+    delete(purge = false): void {
         console.log("delete()");
+        if (purge) {
+            this.record = undefined
+        } else {
+            const deletionFields = {deleted: true, deletedAt: new Date()};
+            this.record = {...this.record, ...deletionFields}
+        }
     }
 
     onPostDelete(): void {

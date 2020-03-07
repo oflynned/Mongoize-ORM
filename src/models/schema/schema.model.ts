@@ -1,28 +1,30 @@
 import Joi from 'joi';
 import {v4 as uuid} from 'uuid';
 
-interface ISchema {
-    joiSchema(): Joi.ObjectSchema;
-}
-
-interface IBaseModel {
+export type IBaseModel = {
     _id: string;
     createdAt: number;
     updatedAt: number | null;
+    deletedAt: number | null;
+    deleted: boolean;
 }
 
 const baseJoiSchema = {
     _id: Joi.string().required(),
-    createdAt: Joi.number().required(),
-    updatedAt: Joi.number().allow(null).required()
+    createdAt: Joi.date().required(),
+    updatedAt: Joi.date().allow(null).required(),
+    deletedAt: Joi.date().allow(null).required(),
+    deleted: Joi.boolean().required()
 };
 
-abstract class Schema<T> implements ISchema {
+abstract class Schema<T> {
     baseSchemaContent(): object {
         return {
             _id: uuid(),
             createdAt: new Date(),
-            updatedAt: null
+            updatedAt: null,
+            deletedAt: null,
+            deleted: false
         };
     }
 
@@ -31,7 +33,7 @@ abstract class Schema<T> implements ISchema {
         return Joi.validate(data, joiSchema);
     }
 
-    abstract joiSchema(): Joi.ObjectSchema;
+    abstract joiSchema(): object;
 }
 
 export default Schema;
