@@ -21,7 +21,8 @@ export class ConnectionValidator {
         }
 
         if (connection.username && connection.password) {
-            return `mongodb://${connection.username}:${connection.password}@${connection.host}:${connection.port}/${connection.database}`
+            const safeEncodedPassword = encodeURIComponent(connection.password);
+            return `mongodb://${connection.username}:${safeEncodedPassword}@${connection.host}:${connection.port}/${connection.database}`
         }
 
         return `mongodb://${connection.host}:${connection.port}/${connection.database}`

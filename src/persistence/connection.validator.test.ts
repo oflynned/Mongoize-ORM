@@ -2,6 +2,11 @@ import {ConnectionOptions, ConnectionValidator} from "./connection.validator";
 
 describe('Connection Validator', () => {
     const validator: ConnectionValidator = new ConnectionValidator();
+    const baseOptions: ConnectionOptions = {
+        host: "host",
+        port: 1234,
+        database: "database"
+    };
 
     describe("validate", () => {
         describe("with uri", () => {
@@ -12,7 +17,7 @@ describe('Connection Validator', () => {
                 expect(validator.validate(options)).toEqual("mongodb://username:password@host:1234/database")
             });
 
-            xit('should throw error on invalid port', function () {
+            xit('should throw error on invalid port', () => {
                 const options: ConnectionOptions = {
                     uri: "mongodb://username:password@host:port/database"
                 };
@@ -20,48 +25,41 @@ describe('Connection Validator', () => {
             });
         });
 
-        describe('with auth', function () {
-            it('should validate without username and password', function () {
-                const options: ConnectionOptions = {
-                    host: "host",
-                    port: 1234,
-                    database: "database"
-                };
-                expect(validator.validate(options)).toEqual("mongodb://host:1234/database")
+        describe('with auth', () => {
+            it('should validate without username and password', () => {
+                expect(validator.validate(baseOptions)).toEqual("mongodb://host:1234/database")
             });
 
-            it('should validate with username and password', function () {
+            it('should validate with username and password', () => {
                 const options: ConnectionOptions = {
                     username: "username",
                     password: "password",
-                    host: "host",
-                    port: 1234,
-                    database: "database"
+                    ...baseOptions
                 };
                 expect(validator.validate(options)).toEqual("mongodb://username:password@host:1234/database")
             });
 
-            it('should require both username and password to prefill connection uri', function () {
+            it('should require both username and password to prefill connection uri', () => {
+                expect(validator.validate({username: "username", ...baseOptions})).toEqual("mongodb://host:1234/database");
+                expect(validator.validate({password: "password", ...baseOptions})).toEqual("mongodb://host:1234/database")
+            });
+
+            it('should escape special characters in the password string', () => {
                 const options: ConnectionOptions = {
-                    host: "host",
-                    port: 1234,
-                    database: "database"
+                    username: "username",
+                    password: "p@ssword",
+                    ...baseOptions
                 };
-                expect(validator.validate({username: "username", ...options})).toEqual("mongodb://host:1234/database");
-                expect(validator.validate({password: "password", ...options})).toEqual("mongodb://host:1234/database")
+                expect(validator.validate(options)).toEqual('mongodb://username:p%40ssword@host:1234/database');
             });
         });
 
-        it('should prefer uri string', function () {
+        it('should prefer uri string', () => {
             const options: ConnectionOptions = {
-                uri: "mongodb://username:password@host:port/database",
-                username: "username1",
-                password: "password1",
-                host: "host1",
-                port: 12345,
-                database: "database1"
+                uri: "mongodb://username1:password1@host1:12345/database1",
+                ...baseOptions
             };
-            expect(validator.validate(options)).toEqual("mongodb://username:password@host:port/database")
+            expect(validator.validate(options)).toEqual("mongodb://username1:password1@host1:12345/database1")
         });
     });
 });
