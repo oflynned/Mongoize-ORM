@@ -1,6 +1,4 @@
-import UnimplementedError from '../errors/unimplemented.error';
-import SchemaValidator from "../validator/schema.validator";
-import BaseSchema from "../schema/schema.model";
+import Schema from "../schema/schema.model";
 
 interface IBaseDocument {
     onPreValidate(): void;
@@ -16,50 +14,80 @@ interface IBaseDocument {
     onPostDelete(): void;
 }
 
-class BaseDocument<T extends BaseSchema> implements IBaseDocument {
-    private schema: T;
-    private schemaValidator: SchemaValidator;
+interface ISchema<T, S extends Schema<any>> {
+    joiSchema(): S;
+}
+
+abstract class BaseDocument<T, S extends Schema<any>> implements IBaseDocument, ISchema<T, S> {
+    private record: T;
 
     constructor() {
-        this.schemaValidator = new SchemaValidator();
     }
 
-    static collection() {
-        throw new UnimplementedError();
+    static collection(): string {
+        return "collections"
     }
 
-    build(params: T): BaseDocument<T> {
+    abstract joiSchema(): S;
+
+    build(payload: T): BaseDocument<T, S> {
+        this.record = {...this.joiSchema().baseSchemaContent(), ...payload};
         return this;
     }
 
     validate(): void {
+        console.log("validate()");
+        this.joiSchema().validate(this.record);
     }
 
-    save(): void {
+    async save(): Promise<BaseDocument<T, S>> {
+        await this.onPreValidate();
+        await this.onPostValidate();
+        await this.onPreSave();
+
+        // TODO replace me with a repo style function call to the persistence layer
+        console.log("save()");
+
+        await this.onPostSave();
+        return Promise.resolve(this);
     }
 
-    update(): void {
+    update(newPayload: Partial<T>): Promise<BaseDocument<T, S>> {
+        console.log("update()");
+        this.record = {...this.record, ...newPayload, updatedAt: new Date()};
+        return Promise.resolve(this);
     }
 
     delete(): void {
+        console.log("delete()");
     }
 
     onPostDelete(): void {
+        console.log("onPostDelete")
     }
 
     onPostSave(): void {
+        console.log("onPostSave")
     }
 
     onPostValidate(): void {
+        console.log("onPostValidate")
     }
 
     onPreDelete(): void {
+        console.log("onPreDelete")
     }
 
     onPreSave(): void {
+        console.log("onPreSave")
     }
 
     onPreValidate(): void {
+        console.log("onPreValidate")
+    }
+
+    toJson() {
+        return this.record;
     }
 }
 
