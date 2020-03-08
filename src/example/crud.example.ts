@@ -21,9 +21,12 @@ const main = async () => {
     Logger.info("I've been created");
     Logger.info(animal.toJson());
 
-    // const result = await Animal.findMany({name: "Doggo"});
-    // Logger.info("I've been read");
-    // Logger.info(result.toJson());
+    // TODO change this, overriding collectionName() as a static method messes with the parent value
+    //      it changes the value to function -> functions instead of taking the actual override or constructor name value
+    //      the user should not have to pass an instance of the class to the static method
+    const result = await Animal.findMany(animal, {});
+    Logger.info("I've been read");
+    Logger.info(result);
 
     await animal.update({legs: 3});
     Logger.info("I've been updated");

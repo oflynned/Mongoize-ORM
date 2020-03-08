@@ -43,6 +43,10 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         this.client = client;
     }
 
+    get db() {
+        return this.client;
+    }
+
     static clearCollection(): Promise<void> {
         return undefined;
     }
@@ -63,12 +67,15 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return undefined;
     }
 
-    static findMany(query: object): Promise<any[]> {
-        return undefined;
+    static async findMany<T, S extends Schema<T>>(model: BaseDocument<T, S>, query: object): Promise<Array<BaseDocument<T, S>>> {
+        const records = await model.db.read(model.collection(), query);
+        return records.map((record: object) => {
+            return record as BaseDocument<T, S>
+        })
     }
 
-    static findOne(query: object): Promise<any> {
-        return;
+    static findOne<T>(query: object): Promise<T> {
+        return undefined;
     }
 
     static findOneAndDelete(query: object): Promise<void> {
