@@ -1,35 +1,24 @@
 import {ConnectionOptions, ConnectionValidator} from "./connection.validator";
-import Schema from "../models/schema/schema.model";
 
-interface IDatabaseOperation<T> {
-    save(collection: string, payload: T): Promise<void>;
+interface IClientOperation {
+    connect(): Promise<void>;
 
-    findOne(collection: string): Promise<T>;
+    create(collection: string, payload: object): Promise<object>;
 
-    findMany(collection: string): Promise<T[]>;
+    read(collection: string, query: object): Promise<object[]>;
 
-    findOneAndUpdate(collection: string): Promise<T>;
+    update(collection: string, payload: object): Promise<object>;
 
-    findOneAndDelete(collection: string): Promise<void>;
-
-    count(collection: string, query: object): Promise<number>;
-
-    deleteCollection(collection: string): Promise<void>;
-
-    deleteOne(collection: string, query: object): Promise<void>;
-
-    deleteMany(collection: string, query: object): Promise<void>;
-
-    clearCollection(collection: string): Promise<void>;
+    delete(collection: string, _id: string): Promise<void>;
 
     dropDatabase(): Promise<void>;
 
-    connect(): Promise<void>;
+    dropCollection(collection: string): Promise<void>;
 
     close(): Promise<void>;
 }
 
-abstract class DatabaseClient<T, S extends Schema<T>> implements IDatabaseOperation<T> {
+abstract class DatabaseClient implements IClientOperation {
     options: ConnectionOptions;
     validator: ConnectionValidator;
 
@@ -43,27 +32,7 @@ abstract class DatabaseClient<T, S extends Schema<T>> implements IDatabaseOperat
         console.log("connecting", connectionUri);
     }
 
-    async clearCollection(collection: string):Promise<void>{
-        return undefined;
-    }
-
     async close(): Promise<void> {
-        return undefined;
-    }
-
-    async count(collection: string, query: object): Promise<number> {
-        return 0;
-    }
-
-    async deleteCollection(collection: string): Promise<void> {
-        return undefined;
-    }
-
-    async deleteMany(collection: string, query: object): Promise<void> {
-        return undefined;
-    }
-
-    async deleteOne(collection: string, query: object): Promise<void> {
         return undefined;
     }
 
@@ -71,23 +40,23 @@ abstract class DatabaseClient<T, S extends Schema<T>> implements IDatabaseOperat
         return undefined;
     }
 
-    async findMany(collection: string): Promise<T[]> {
-        return [];
-    }
-
-    async findOne(collection: string): Promise<T> {
+    async dropCollection(collection: string): Promise<void> {
         return undefined;
     }
 
-    async findOneAndDelete(collection: string): Promise<void> {
+    async create(collection: string, payload: object): Promise<object> {
         return undefined;
     }
 
-    async findOneAndUpdate(collection: string): Promise<T> {
+    async read(collection: string, query: object): Promise<object[]> {
         return undefined;
     }
 
-    async save(collection: string, payload: T): Promise<void> {
+    async update(collection: string, payload: object): Promise<object> {
+        return undefined;
+    }
+
+    async delete(collection: string, _id: string): Promise<void> {
         return undefined;
     }
 }

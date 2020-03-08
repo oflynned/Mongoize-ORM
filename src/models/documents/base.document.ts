@@ -1,6 +1,7 @@
 import Schema, {IBaseModel} from "../schema/schema.model";
 import Logger from "../../logger";
 import MongoClient from "../../persistence/mongo.client";
+import MemoryClient from "../../persistence/memory.client";
 
 interface IBaseDocument {
     onPreValidate(): void;
@@ -17,13 +18,16 @@ interface IBaseDocument {
 }
 
 interface ISchema<T, S extends Schema<any>> {
+    collection(): string;
+
     joiSchema(): S;
 
     toJson(): T | IBaseModel;
 }
 
 type IDeletionParams = {
-    hard: boolean
+    hard: boolean;
+    cascade: boolean;
 }
 
 // TODO
@@ -33,12 +37,46 @@ type IDeletionParams = {
 
 abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, ISchema<T, S> {
     protected record: T | IBaseModel;
-    private client: MongoClient<T | IBaseModel, S>;
+    private client: MemoryClient | MongoClient;
 
-    constructor() {
-        this.client = new MongoClient({
-            uri: "mongodb://localhost:27017/test"
-        })
+    constructor(client: MemoryClient | MongoClient) {
+        this.client = client;
+    }
+
+    static clearCollection(): Promise<void> {
+        return undefined;
+    }
+
+    static count(query: object): Promise<number> {
+        return undefined;
+    }
+
+    static deleteCollection(): Promise<void> {
+        return undefined;
+    }
+
+    static deleteMany(query: object): Promise<void> {
+        return undefined;
+    }
+
+    static deleteOne(query: object): Promise<void> {
+        return undefined;
+    }
+
+    static findMany(query: object): Promise<any[]> {
+        return undefined;
+    }
+
+    static findOne(query: object): Promise<any> {
+        return;
+    }
+
+    static findOneAndDelete(query: object): Promise<void> {
+        return undefined;
+    }
+
+    static findOneAndUpdate(query: object): Promise<any> {
+        return undefined;
     }
 
     collection(): string {
@@ -61,22 +99,6 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         await this.onPostValidate();
     }
 
-    async save(): Promise<BaseDocument<T, S>> {
-        await this.validate();
-
-        Logger.debug("save()");
-        await this.onPreSave();
-
-        // TODO replace me with a repo style function call to the persistence layer
-        Logger.debug("saving...");
-        await this.client.connect();
-        await this.client.save(this.collection(), this.record);
-        await this.client.close();
-
-        await this.onPostSave();
-        return Promise.resolve(this);
-    }
-
     async update(newPayload: Partial<T>): Promise<BaseDocument<T, S>> {
         Logger.debug("update()");
 
@@ -93,11 +115,12 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return this;
     }
 
-    delete(params: IDeletionParams = {hard: false}): void {
+    delete(params: Partial<IDeletionParams> = {hard: false, cascade: false}): void {
         Logger.debug("delete()");
-        const {hard} = params;
+        const {hard, cascade} = params;
         if (hard) {
             this.record = undefined
+            // TODO if cascaded, then also ripple the deletion to relations
         } else {
             const deletionFields = {deleted: true, deletedAt: new Date()};
             this.record = {...this.record, ...deletionFields} as T | IBaseModel
@@ -130,6 +153,18 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
 
     toJson(): T & IBaseModel {
         return this.record as T & IBaseModel;
+    }
+
+    async save(): Promise<BaseDocument<T, S>> {
+        await this.validate();
+
+        Logger.debug("save()");
+        await this.onPreSave();
+        Logger.debug("saving...");
+        this.record = await this.client.create(this.collection(), this.record as object) as T & IBaseModel;
+        await this.onPostSave();
+
+        return Promise.resolve(this);
     }
 }
 

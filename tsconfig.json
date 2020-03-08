@@ -29,8 +29,7 @@
     "./src/**/*.ts"
   ],
   "exclude": [
-    "./__tests__",
     "./node_modules",
-    "./assets"
+    "./src/example"
   ]
 }
