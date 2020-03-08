@@ -1,5 +1,5 @@
 import MemoryClient, {ConnectionOptions} from "../persistence/memory.client";
-import {User} from "./models/user/model";
+import User from "./models/user";
 
 const main = async () => {
     // process.env.NODE_ENV = "development";

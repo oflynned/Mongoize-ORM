@@ -5,7 +5,7 @@ import Schema from "../../../models/schema/schema.model";
 export type IUser = {
     name: string;
     email: string;
-    password: string;
+    password?: string;
     hash?: string;
 }
 
