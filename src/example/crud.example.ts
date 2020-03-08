@@ -16,7 +16,7 @@ const main = async () => {
     // TODO move this to some global initialisation level as this is cumbersome to inject the client at every usage
     const animal = await new Animal()
         .build({name: 'Doggo', legs: 4})
-        .save(client);
+        .save(client, new Animal().collection());
 
     Logger.info("I've been created");
     Logger.info(animal.toJson());
@@ -24,7 +24,7 @@ const main = async () => {
     // TODO change this, overriding collectionName() as a static method messes with the parent value
     //      it changes the value to function -> functions instead of taking the actual override or constructor name value
     //      the user should not have to pass an instance of the class to the static method
-    const animals = await Animal.findMany(client);
+    const animals = await Animal.findMany(client, animal.collection());
     Logger.info("I've been read");
     Logger.info(animals);
 

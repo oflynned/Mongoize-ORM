@@ -15,7 +15,7 @@ const main = async () => {
 
     const animal = await new Animal()
         .build({name: 'Doggo', legs: 4})
-        .save(client);
+        .save(client, new Animal().collection());
 
     Logger.info("I've been saved");
     Logger.info(animal.toJson());

@@ -14,19 +14,19 @@ const main = async () => {
 
     const client: MemoryClient = new MemoryClient(options);
 
-    const animal = await new Animal()
-        .build({name: 'Doggo', legs: 4})
-        .save(client);
+    // await new Animal()
+    //     .build({name: 'Doggo', legs: 4})
+    //     .save(client);
 
-    const person = await new Person()
+    // const animals = await Animal.findMany(client);
+    // Logger.info(animals);
+
+    await new Person()
         .build({name: "John Smith"})
-        .save(client);
+        .save(client, new Person().collection());
 
-    Logger.info(animal.toJson());
-    await Animal.findMany(client);
-
-    Logger.info(person.toJson());
-    await Person.findMany(client);
+    const people = await Person.findMany(client);
+    Logger.info(people);
 };
 
 (async () => await main())();

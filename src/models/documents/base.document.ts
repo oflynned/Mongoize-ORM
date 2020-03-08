@@ -20,8 +20,6 @@ interface IBaseDocument {
 interface ISchema<T, S extends Schema<T>> {
     joiSchema(): S;
 
-    collection(): string;
-
     toJson(): T | IBaseModel;
 }
 
@@ -32,58 +30,58 @@ type IDeletionParams = {
 
 type Client = MongoClient | MemoryClient;
 
-// TODO
-//      pseudo-relational data, ie type relations (1-n, n-1, n-n)
+// TODO pseudo-relational data, ie type relations (1-n, n-1, n-n)
 
 abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, ISchema<T, S> {
     protected record: T | IBaseModel | any;
 
     constructor() {
-        console.log(BaseDocument.collection());
     }
 
-    static clearCollection(): Promise<void> {
+    static async clearCollection(): Promise<void> {
         return undefined;
     }
 
-    static count(query: object): Promise<number> {
+    static async count(query: object): Promise<number> {
         return undefined;
     }
 
-    static deleteCollection(): Promise<void> {
+    static async deleteCollection(): Promise<void> {
         return undefined;
     }
 
-    static deleteMany(query: object): Promise<void> {
+    static async deleteMany(query: object): Promise<void> {
         return undefined;
     }
 
-    static deleteOne(query: object): Promise<void> {
+    static async deleteOne(query: object): Promise<void> {
         return undefined;
     }
 
-    static async findMany<T, S extends Schema<T>>(client: Client, query: object = {}): Promise<BaseDocument<T, S>[]> {
-        const records = await client.read(BaseDocument.collection(), query);
+    static async findMany<T, S extends Schema<T>>(client: Client, collection: string, query: object = {}): Promise<BaseDocument<T, S>[]> {
+        const records = await client.read(collection, query);
         return records.map((record: object) => record as BaseDocument<T, S>)
     }
 
-    static findOne<T>(query: object): Promise<T> {
+    static async findOne<T>(query: object): Promise<T> {
         return undefined;
     }
 
-    static findOneAndDelete(query: object): Promise<void> {
+    static async findOneAndDelete(query: object): Promise<void> {
         return undefined;
     }
 
-    static findOneAndUpdate(query: object): Promise<any> {
+    static async findOneAndUpdate(query: object): Promise<any> {
         return undefined;
     }
 
-    static collection(): string {
-        return BaseDocument.name.toLowerCase() + "s";
+    static collectionName(): string {
+        return "";
     }
 
-    abstract collection(): string;
+    collection(): string {
+        return this.constructor.name.toLowerCase() + "s";
+    }
 
     abstract joiSchema(): S;
 
@@ -119,7 +117,7 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return this;
     }
 
-    delete(params: Partial<IDeletionParams> = {hard: false, cascade: false}): void {
+    async delete(params: Partial<IDeletionParams> = {hard: false, cascade: false}): Promise<void> {
         Logger.debug("delete()");
         const {hard, cascade} = params;
         if (hard) {
@@ -131,27 +129,27 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         }
     }
 
-    onPostDelete(): void {
+    async onPostDelete(): Promise<void> {
         Logger.debug("onPostDelete")
     }
 
-    onPostSave(): void {
+    async onPostSave(): Promise<void> {
         Logger.debug("onPostSave")
     }
 
-    onPostValidate(): void {
+    async onPostValidate(): Promise<void> {
         Logger.debug("onPostValidate")
     }
 
-    onPreDelete(): void {
+    async onPreDelete(): Promise<void> {
         Logger.debug("onPreDelete")
     }
 
-    onPreSave(): void {
+    async onPreSave(): Promise<void> {
         Logger.debug("onPreSave")
     }
 
-    onPreValidate(): void {
+    async onPreValidate(): Promise<void> {
         Logger.debug("onPreValidate")
     }
 
@@ -159,12 +157,13 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return this.record as T & IBaseModel;
     }
 
-    async save(client: Client): Promise<BaseDocument<T, S>> {
+    async save(client: Client, collection: string): Promise<BaseDocument<T, S>> {
         const validatedPayload = await this.validate();
         Logger.debug("save()");
         await this.onPreSave();
         Logger.debug("saving...");
-        this.record = await client.create(BaseDocument.collection(), validatedPayload as object) as T & IBaseModel;
+
+        this.record = await client.create(collection, validatedPayload as object) as T & IBaseModel;
         await this.onPostSave();
         return this;
     }
