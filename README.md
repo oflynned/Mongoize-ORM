@@ -39,7 +39,7 @@ class User extends BaseDocument<IUser, UserSchema> {
     }
 
     async onPreValidate(): Promise<void> {
-        this.record.hash = await hashPassword(secret, this.record.password);
+        this.record.hash = await saltUserCredentials(this.record.password);
     }
 }
 ```
