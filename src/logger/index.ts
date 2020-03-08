@@ -25,8 +25,9 @@ class Logger {
     }
 
     private static logEvent(level: Level, ...logs: any[]) {
-        const now = new Date();
-        console.info(`${level}: ${now.toLocaleTimeString()} ${now.toLocaleDateString('uk')} -`, ...logs);
+        // const now = new Date();
+        // console.info(`${level}: `, ...logs);
+        console.info(...logs);
     }
 }
 

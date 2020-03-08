@@ -1,17 +1,18 @@
 import {ConnectionOptions, ConnectionValidator} from "./connection.validator";
+import Schema from "../models/schema/schema.model";
 
-interface IDatabaseOperation {
-    save(): Promise<void>;
+interface IDatabaseOperation<T> {
+    save(collection: string, payload: T): Promise<void>;
 
-    findOne(collection: string): Promise<void>;
+    findOne(collection: string): Promise<T>;
 
-    findMany(collection: string): Promise<void>;
+    findMany(collection: string): Promise<T[]>;
 
-    findOneAndUpdate(collection: string): Promise<void>;
+    findOneAndUpdate(collection: string): Promise<T>;
 
     findOneAndDelete(collection: string): Promise<void>;
 
-    count(collection: string, query: object): Promise<void>;
+    count(collection: string, query: object): Promise<number>;
 
     deleteCollection(collection: string): Promise<void>;
 
@@ -28,7 +29,7 @@ interface IDatabaseOperation {
     close(): Promise<void>;
 }
 
-abstract class DatabaseClient implements IDatabaseOperation {
+abstract class DatabaseClient<T, S extends Schema<T>> implements IDatabaseOperation<T> {
     options: ConnectionOptions;
     validator: ConnectionValidator;
 
@@ -42,51 +43,51 @@ abstract class DatabaseClient implements IDatabaseOperation {
         console.log("connecting", connectionUri);
     }
 
-    clearCollection(collection: string):Promise<void>{
+    async clearCollection(collection: string):Promise<void>{
         return undefined;
     }
 
-    close(): Promise<void> {
+    async close(): Promise<void> {
         return undefined;
     }
 
-    count(collection: string, query: object): Promise<void> {
+    async count(collection: string, query: object): Promise<number> {
+        return 0;
+    }
+
+    async deleteCollection(collection: string): Promise<void> {
         return undefined;
     }
 
-    deleteCollection(collection: string): Promise<void> {
+    async deleteMany(collection: string, query: object): Promise<void> {
         return undefined;
     }
 
-    deleteMany(collection: string, query: object): Promise<void> {
+    async deleteOne(collection: string, query: object): Promise<void> {
         return undefined;
     }
 
-    deleteOne(collection: string, query: object): Promise<void> {
+    async dropDatabase(): Promise<void> {
         return undefined;
     }
 
-    dropDatabase(): Promise<void> {
+    async findMany(collection: string): Promise<T[]> {
+        return [];
+    }
+
+    async findOne(collection: string): Promise<T> {
         return undefined;
     }
 
-    findMany(collection: string): Promise<void> {
+    async findOneAndDelete(collection: string): Promise<void> {
         return undefined;
     }
 
-    findOne(collection: string): Promise<void> {
+    async findOneAndUpdate(collection: string): Promise<T> {
         return undefined;
     }
 
-    findOneAndDelete(collection: string): Promise<void> {
-        return undefined;
-    }
-
-    findOneAndUpdate(collection: string): Promise<void> {
-        return undefined;
-    }
-
-    save(): Promise<void> {
+    async save(collection: string, payload: T): Promise<void> {
         return undefined;
     }
 }

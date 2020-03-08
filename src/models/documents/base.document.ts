@@ -1,5 +1,6 @@
-import Schema from "../schema/schema.model";
+import Schema, {IBaseModel} from "../schema/schema.model";
 import Logger from "../../logger";
+import MongoClient from "../../persistence/mongo.client";
 
 interface IBaseDocument {
     onPreValidate(): void;
@@ -18,7 +19,7 @@ interface IBaseDocument {
 interface ISchema<T, S extends Schema<any>> {
     joiSchema(): S;
 
-    toJson(): T;
+    toJson(): T | IBaseModel;
 }
 
 type IDeletionParams = {
@@ -30,11 +31,18 @@ type IDeletionParams = {
 //      auto update timestamps on an update being made (CUD)
 //      pseudo-relational data, ie type relations (1-n, n-1, n-n)
 
-abstract class BaseDocument<T, S extends Schema<any>> implements IBaseDocument, ISchema<T, S> {
-    protected record: T;
+abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, ISchema<T, S> {
+    protected record: T | IBaseModel;
+    private client: MongoClient<T | IBaseModel, S>;
 
-    static collection(): string {
-        return "collections"
+    constructor() {
+        this.client = new MongoClient({
+            uri: "mongodb://localhost:27017/test"
+        })
+    }
+
+    collection(): string {
+        return this.constructor.name.toLowerCase() + "s";
     }
 
     abstract joiSchema(): S;
@@ -61,6 +69,9 @@ abstract class BaseDocument<T, S extends Schema<any>> implements IBaseDocument, 
 
         // TODO replace me with a repo style function call to the persistence layer
         Logger.debug("saving...");
+        await this.client.connect();
+        await this.client.save(this.collection(), this.record);
+        await this.client.close();
 
         await this.onPostSave();
         return Promise.resolve(this);
@@ -70,6 +81,7 @@ abstract class BaseDocument<T, S extends Schema<any>> implements IBaseDocument, 
         Logger.debug("update()");
 
         // FIXME this is really bad for consistency, we're updating prematurely and rolling back on fail
+        //       perhaps run a validation on a specific payload deep clone?
         const oldPayload = {...this.record};
         try {
             this.record = {...this.record, ...newPayload, updatedAt: new Date()};
@@ -88,7 +100,7 @@ abstract class BaseDocument<T, S extends Schema<any>> implements IBaseDocument, 
             this.record = undefined
         } else {
             const deletionFields = {deleted: true, deletedAt: new Date()};
-            this.record = {...this.record, ...deletionFields}
+            this.record = {...this.record, ...deletionFields} as T | IBaseModel
         }
     }
 
@@ -116,8 +128,8 @@ abstract class BaseDocument<T, S extends Schema<any>> implements IBaseDocument, 
         Logger.debug("onPreValidate")
     }
 
-    toJson() {
-        return this.record;
+    toJson(): T & IBaseModel {
+        return this.record as T & IBaseModel;
     }
 }
 
