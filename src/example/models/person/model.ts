@@ -23,6 +23,6 @@ export class Person extends BaseDocument<IPerson, PersonSchema> {
     }
 
     collection(): string {
-        return "people";
+        return "people"
     }
 }

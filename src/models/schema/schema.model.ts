@@ -30,7 +30,7 @@ abstract class Schema<T> {
 
     validate(data: IBaseModel | T) {
         const joiSchema = Joi.object({...baseJoiSchema, ...this.joiSchema()});
-        return Joi.validate(data, joiSchema);
+        return Joi.validate(data, joiSchema, {stripUnknown: true});
     }
 
     abstract joiSchema(): object;

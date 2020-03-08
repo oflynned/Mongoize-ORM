@@ -1,5 +1,6 @@
 import DatabaseClient from "./base.client";
 import {ConnectionOptions} from "./connection.validator";
+import Logger from "../logger";
 
 // TODO replace this with a faux-mongodb interface via npm
 //      otherwise it's not possible to pass the same queries
@@ -16,8 +17,8 @@ class MemoryClient extends DatabaseClient {
         }
 
         this.store[collection].push(payload);
-        console.log("store ->", this.store);
-        return this.store[collection].find((item: any) => item._id === payload._id);
+        Logger.debug("store ->", this.store);
+        return payload;
     }
 
     async read(collection: string, query: object): Promise<object[]> {

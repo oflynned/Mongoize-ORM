@@ -17,10 +17,10 @@ interface IBaseDocument {
     onPostDelete(): void;
 }
 
-interface ISchema<T, S extends Schema<any>> {
-    collection(): string;
-
+interface ISchema<T, S extends Schema<T>> {
     joiSchema(): S;
+
+    collection(): string;
 
     toJson(): T | IBaseModel;
 }
@@ -30,21 +30,16 @@ type IDeletionParams = {
     cascade: boolean;
 }
 
+type Client = MongoClient | MemoryClient;
+
 // TODO
-//      what about a use case of hashing a password before saving?
-//      auto update timestamps on an update being made (CUD)
 //      pseudo-relational data, ie type relations (1-n, n-1, n-n)
 
 abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, ISchema<T, S> {
-    protected record: T | IBaseModel;
-    private client: MemoryClient | MongoClient;
+    protected record: T | IBaseModel | any;
 
-    constructor(client: MemoryClient | MongoClient) {
-        this.client = client;
-    }
-
-    get db() {
-        return this.client;
+    constructor() {
+        console.log(BaseDocument.collection());
     }
 
     static clearCollection(): Promise<void> {
@@ -67,11 +62,9 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return undefined;
     }
 
-    static async findMany<T, S extends Schema<T>>(model: BaseDocument<T, S>, query: object): Promise<Array<BaseDocument<T, S>>> {
-        const records = await model.db.read(model.collection(), query);
-        return records.map((record: object) => {
-            return record as BaseDocument<T, S>
-        })
+    static async findMany<T, S extends Schema<T>>(client: Client, query: object = {}): Promise<BaseDocument<T, S>[]> {
+        const records = await client.read(BaseDocument.collection(), query);
+        return records.map((record: object) => record as BaseDocument<T, S>)
     }
 
     static findOne<T>(query: object): Promise<T> {
@@ -86,9 +79,11 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return undefined;
     }
 
-    collection(): string {
-        return this.constructor.name.toLowerCase() + "s";
+    static collection(): string {
+        return BaseDocument.name.toLowerCase() + "s";
     }
+
+    abstract collection(): string;
 
     abstract joiSchema(): S;
 
@@ -97,13 +92,15 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return this;
     }
 
-    async validate(): Promise<void> {
+    async validate(): Promise<T | IBaseModel> {
         Logger.debug("validate()");
 
         await this.onPreValidate();
         Logger.debug("validating...");
-        await this.joiSchema().validate(this.record);
+        const v = await this.joiSchema().validate(this.record);
         await this.onPostValidate();
+
+        return v;
     }
 
     async update(newPayload: Partial<T>): Promise<BaseDocument<T, S>> {
@@ -162,16 +159,14 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return this.record as T & IBaseModel;
     }
 
-    async save(): Promise<BaseDocument<T, S>> {
-        await this.validate();
-
+    async save(client: Client): Promise<BaseDocument<T, S>> {
+        const validatedPayload = await this.validate();
         Logger.debug("save()");
         await this.onPreSave();
         Logger.debug("saving...");
-        this.record = await this.client.create(this.collection(), this.record as object) as T & IBaseModel;
+        this.record = await client.create(BaseDocument.collection(), validatedPayload as object) as T & IBaseModel;
         await this.onPostSave();
-
-        return Promise.resolve(this);
+        return this;
     }
 }
 

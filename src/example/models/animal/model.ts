@@ -20,4 +20,8 @@ export class Animal extends BaseDocument<IAnimal, AnimalSchema> {
     joiSchema(): AnimalSchema {
         return new AnimalSchema();
     }
+
+    collection(): string {
+        return "animals";
+    }
 }

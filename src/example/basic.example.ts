@@ -13,9 +13,9 @@ const main = async () => {
 
     const client: MemoryClient = new MemoryClient(options);
 
-    const animal = await new Animal(client)
+    const animal = await new Animal()
         .build({name: 'Doggo', legs: 4})
-        .save();
+        .save(client);
 
     Logger.info("I've been saved");
     Logger.info(animal.toJson());

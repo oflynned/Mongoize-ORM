@@ -3,7 +3,7 @@ import Animal from "./models/animal";
 import MemoryClient, {ConnectionOptions} from "../persistence/memory.client";
 
 const main = async () => {
-    process.env.NODE_ENV = "development";
+    // process.env.NODE_ENV = "development";
 
     const options: ConnectionOptions = {
         host: 'localhost',
@@ -14,9 +14,9 @@ const main = async () => {
     const client: MemoryClient = new MemoryClient(options);
 
     // TODO move this to some global initialisation level as this is cumbersome to inject the client at every usage
-    const animal = await new Animal(client)
+    const animal = await new Animal()
         .build({name: 'Doggo', legs: 4})
-        .save();
+        .save(client);
 
     Logger.info("I've been created");
     Logger.info(animal.toJson());
@@ -24,9 +24,9 @@ const main = async () => {
     // TODO change this, overriding collectionName() as a static method messes with the parent value
     //      it changes the value to function -> functions instead of taking the actual override or constructor name value
     //      the user should not have to pass an instance of the class to the static method
-    const result = await Animal.findMany(animal, {});
+    const animals = await Animal.findMany(client);
     Logger.info("I've been read");
-    Logger.info(result);
+    Logger.info(animals);
 
     await animal.update({legs: 3});
     Logger.info("I've been updated");
