@@ -58,8 +58,12 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return undefined;
     }
 
-    static async findMany<T, S extends Schema<T>>(client: Client, collection: string, query: object = {}): Promise<BaseDocument<T, S>[]> {
-        const records = await client.read(collection, query);
+    static async findMany<T extends BaseDocument<any, any>, S extends Schema<T>>(
+        ChildModelClass: { new(...args: any[]): T },
+        client: Client,
+        query: object = {}
+    ): Promise<BaseDocument<T, S>[]> {
+        const records = await client.read(new ChildModelClass().collection(), query);
         return records.map((record: object) => record as BaseDocument<T, S>)
     }
 
@@ -157,13 +161,13 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return this.record as T & IBaseModel;
     }
 
-    async save(client: Client, collection: string): Promise<BaseDocument<T, S>> {
+    async save(client: Client): Promise<BaseDocument<T, S>> {
         const validatedPayload = await this.validate();
         Logger.debug("save()");
         await this.onPreSave();
         Logger.debug("saving...");
 
-        this.record = await client.create(collection, validatedPayload as object) as T & IBaseModel;
+        this.record = await client.create(this.collection(), validatedPayload as object) as T & IBaseModel;
         await this.onPostSave();
         return this;
     }
