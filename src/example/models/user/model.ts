@@ -27,4 +27,5 @@ export class User extends BaseDocument<IUser, UserSchema> {
     async onPreValidate(): Promise<void> {
         this.record.hash = "hashed_" + this.record.password;
     }
+
 }

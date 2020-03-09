@@ -19,7 +19,7 @@ const main = async () => {
     // contains plaintext password field, hash field is undefined
     console.log(user.toJson());
 
-    const record = await user.save(client, user.collection());
+    const record = await user.save(client);
     // pre-validation hook scrubs the password field and sets the hashed field
     console.log(record.toJson())
 };

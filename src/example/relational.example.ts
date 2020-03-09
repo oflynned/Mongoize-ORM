@@ -14,18 +14,18 @@ const main = async () => {
 
     const client: MemoryClient = new MemoryClient(options);
 
-    // await new Animal()
-    //     .build({name: 'Doggo', legs: 4})
-    //     .save(client);
+    await new Animal()
+        .build({name: 'Doggo', legs: 4})
+        .save(client);
 
-    // const animals = await Animal.findMany(client);
-    // Logger.info(animals);
+    const animals = await Animal.findMany(Animal, client);
+    Logger.info(animals);
 
     await new Person()
         .build({name: "John Smith"})
-        .save(client, new Person().collection());
+        .save(client);
 
-    const people = await Person.findMany(client);
+    const people = await Person.findMany(Person, client);
     Logger.info(people);
 };
 
