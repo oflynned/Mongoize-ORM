@@ -7,7 +7,7 @@ interface IClientOperation {
 
     read(collection: string, query: object): Promise<object[]>;
 
-    update(collection: string, payload: object): Promise<object>;
+    update(collection: string, _id: string, payload: object): Promise<object>;
 
     delete(collection: string, _id: string): Promise<void>;
 
@@ -52,7 +52,7 @@ abstract class DatabaseClient implements IClientOperation {
         return undefined;
     }
 
-    async update(collection: string, payload: object): Promise<object> {
+    async update(collection: string, _id: string, payload: object): Promise<object> {
         return undefined;
     }
 
