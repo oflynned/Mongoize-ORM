@@ -67,22 +67,22 @@ abstract class BaseDocument<T, S extends Schema<T>>
 
   async update(
     client: MongoClient,
-    newPayload: Partial<T>
+    payload: Partial<T>
   ): Promise<BaseDocument<T, S>> {
     Logger.debug("update()");
 
-    const oldPayload = { ...this.record };
+    const newPayload = { ...payload, updatedAt: new Date() };
+
     try {
-      this.record = { ...this.record, ...newPayload, updatedAt: new Date() };
       await this.joiSchema().validateOnUpdate(newPayload);
-      await Repository.updateOne(
+      this.record = await Repository.updateOne(
         <any>this.constructor,
         client,
         this.record._id,
         newPayload
       );
     } catch (e) {
-      this.record = { ...oldPayload };
+      Logger.error(e);
     }
 
     return this;
