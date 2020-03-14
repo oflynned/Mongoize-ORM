@@ -25,7 +25,7 @@ interface IClientOperation {
 abstract class DatabaseClient implements IClientOperation {
   validator: ConnectionValidator;
 
-  protected constructor(options: ConnectionOptions) {
+  constructor(options: ConnectionOptions) {
     this.validator = new ConnectionValidator();
     this.validator.validate(options);
   }
