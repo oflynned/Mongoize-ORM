@@ -12,13 +12,46 @@ type AuthConnectionOptions = {
 
 export type ConnectionOptions = Partial<UriConnectionOptions> & Partial<AuthConnectionOptions>;
 
-export class ConnectionValidator {
+const parseUriString = (uri: string): ConnectionOptions => {
+    const regex = new RegExp(/^(mongodb:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\w+?):(\d+)\/(\w+?)$/);
+    const fields = uri.split(regex);
 
+    if (fields.length < 8) {
+        throw new Error("bad connection string passed")
+    }
+
+    /**
+     * [ '',
+     'mongodb://',
+     'username:password@',
+     'username',
+     'password',
+     'host',
+     '1234',
+     'database',
+     '' ]
+     */
+    const [, protocol, , username, password, host, port, database] = fields;
+
+    // only supporting mongodb type
+    if (protocol !== "mongodb://") {
+        throw new Error("invalid protocol -- needs to be mongodb:// type")
+    }
+
+    // a connection string needs to have
+    if (!(host || port || database)) {
+        throw new Error("missing connection string field");
+    }
+
+    return {uri, username, password, host, port: parseInt(port), database}
+};
+
+export class ConnectionValidator {
     options: ConnectionOptions;
 
     validate(connection: ConnectionOptions): void {
         if (connection.uri) {
-            const {uri, username, password, host, port, database} = this.parseUriString(connection.uri);
+            const {uri, username, password, host, port, database} = parseUriString(connection.uri);
             this.options = {
                 uri, username, password, host, port, database
             };
@@ -38,39 +71,5 @@ export class ConnectionValidator {
             uri: `mongodb://${connection.host}:${connection.port}/${connection.database}`,
             ...connection
         }
-    }
-
-    private parseUriString(uri: string): ConnectionOptions {
-        const regex = new RegExp(/^(mongodb:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\w+?):(\d+)\/(\w+?)$/);
-        const fields = uri.split(regex);
-
-        if (fields.length < 8) {
-            throw new Error("bad connection string passed")
-        }
-
-        /**
-         * [ '',
-             'mongodb://',
-             'username:password@',
-             'username',
-             'password',
-             'host',
-             '1234',
-             'database',
-             '' ]
-         */
-        const [, protocol, , username, password, host, port, database] = fields;
-
-        // only supporting mongodb type
-        if (protocol !== "mongodb://") {
-            throw new Error("invalid protocol -- needs to be mongodb:// type")
-        }
-
-        // a connection string needs to have
-        if (!(host || port || database)) {
-            throw new Error("missing connection string field");
-        }
-
-        return {uri, username, password, host, port: parseInt(port), database}
     }
 }

@@ -1,5 +1,3 @@
-const { resolve } = require('path');
-
 module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
