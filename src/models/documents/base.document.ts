@@ -74,14 +74,14 @@ abstract class BaseDocument<T, S extends Schema<T>>
     const oldPayload = { ...this.record };
     try {
       this.record = { ...this.record, ...newPayload, updatedAt: new Date() };
-      await this.validate();
+      await this.joiSchema().validateOnUpdate(newPayload);
       await Repository.updateOne(
         <any>this.constructor,
         client,
         this.record._id,
         newPayload
       );
-    } catch {
+    } catch (e) {
       this.record = { ...oldPayload };
     }
 

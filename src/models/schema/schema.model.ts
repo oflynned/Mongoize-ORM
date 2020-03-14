@@ -33,11 +33,18 @@ abstract class Schema<T> {
   }
 
   validate(data: IBaseModel | T) {
-    const joiSchema = Joi.object({ ...baseJoiSchema, ...this.joiSchema() });
+    const joiSchema = Joi.object({ ...baseJoiSchema, ...this.joiBaseSchema() });
     return Joi.validate(data, joiSchema, { stripUnknown: true });
   }
 
-  abstract joiSchema(): object;
+  validateOnUpdate(data: IBaseModel | Partial<T>) {
+    const joiSchema = Joi.object({ ...this.joiUpdateSchema() });
+    return Joi.validate(data, joiSchema, { stripUnknown: true });
+  }
+
+  abstract joiBaseSchema(): object;
+
+  abstract joiUpdateSchema(): object;
 }
 
 export default Schema;

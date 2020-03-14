@@ -8,9 +8,16 @@ export type IPerson = {
 };
 
 export class PersonSchema extends Schema<IPerson> {
-  joiSchema(): object {
+  joiBaseSchema(): object {
     return {
       name: Joi.string().required(),
+      pets: Joi.array().items(Joi.string().uuid())
+    };
+  }
+
+  joiUpdateSchema(): object {
+    return {
+      name: Joi.string(),
       pets: Joi.array().items(Joi.string().uuid())
     };
   }

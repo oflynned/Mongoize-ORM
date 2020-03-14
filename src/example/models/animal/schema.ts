@@ -7,9 +7,16 @@ export type IAnimal = {
 };
 
 export class AnimalSchema extends Schema<IAnimal> {
-  joiSchema(): object {
+  joiBaseSchema(): object {
     return {
       name: Joi.string().required(),
+      legs: Joi.number().min(0)
+    };
+  }
+
+  joiUpdateSchema(): object {
+    return {
+      name: Joi.string(),
       legs: Joi.number().min(0)
     };
   }

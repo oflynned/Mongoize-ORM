@@ -7,18 +7,18 @@ export type ICredential = {
 };
 
 export abstract class CredentialSchema<T> extends Schema<T> {
-  private static credentialSchema(): object {
+  abstract schemaWithoutCredentials(): object;
+
+  joiBaseSchema(): object {
     return {
+      ...this.schemaWithoutCredentials(),
       passwordHash: Joi.string().required()
     };
   }
 
-  abstract schemaWithoutCredentials(): object;
-
-  joiSchema(): object {
+  joiUpdateSchema(): object {
     return {
-      ...this.schemaWithoutCredentials(),
-      ...CredentialSchema.credentialSchema()
+      passwordHash: Joi.string()
     };
   }
 }
