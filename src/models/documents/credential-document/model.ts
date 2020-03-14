@@ -29,11 +29,11 @@ abstract class CredentialDocument<
   }
 
   onPrePasswordHash() {
-    Logger.debug("onPreHashPreValidation()");
+    Logger.debug("onPreHash()");
   }
 
   onPostPasswordHash() {
-    Logger.debug("onPostHashPreValidation()");
+    Logger.debug("onPostHash()");
   }
 
   async onPreValidate(): Promise<void> {
