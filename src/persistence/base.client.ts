@@ -35,15 +35,11 @@ abstract class DatabaseClient implements IClientOperation {
 
     abstract async update(collection: string, _id: string, payload: object): Promise<object>;
 
-    uri: string;
-    database: string;
-    options: ConnectionOptions;
     validator: ConnectionValidator;
 
     protected constructor(options: ConnectionOptions) {
-        this.options = options;
         this.validator = new ConnectionValidator();
-        const {uri, database} = this.validator.validate(this.options);
+        this.validator.validate(options);
     }
 }
 

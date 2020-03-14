@@ -7,12 +7,11 @@ class MongoClient extends DatabaseClient {
 
     constructor(options: ConnectionOptions) {
         super(options);
-        console.log('cool');
     }
 
     async create(collection: string, payload: object): Promise<object> {
-        console.log(payload);
-        return undefined;
+        await this.client.db(this.database()).collection(collection).insertOne(payload);
+        return payload;
     }
 
     async delete(collection: string, _id: string): Promise<void> {
@@ -36,7 +35,7 @@ class MongoClient extends DatabaseClient {
     }
 
     async connect(): Promise<MongoClient> {
-        this.client = await Mongo.MongoClient.connect(this.uri, this.mongoOptions());
+        this.client = await Mongo.MongoClient.connect(this.validator.options.uri, this.mongoOptions());
         return this;
     }
 
@@ -50,6 +49,10 @@ class MongoClient extends DatabaseClient {
             useNewUrlParser: true,
             useUnifiedTopology: true
         }
+    }
+
+    database(): string {
+        return this.validator.options.database;
     }
 }
 
