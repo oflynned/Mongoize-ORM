@@ -1,6 +1,7 @@
 import Logger from "../logger";
 import Animal from "./models/animal";
 import MemoryClient, {ConnectionOptions} from "../persistence/memory.client";
+import {Repository} from "../models/documents/repository";
 
 const main = async () => {
     // process.env.NODE_ENV = "development";
@@ -21,16 +22,16 @@ const main = async () => {
     Logger.info("I've been created");
     Logger.info(animal.toJson());
 
-    const animals = await Animal.findMany(Animal, client);
+    const animals = await Repository.findMany(Animal, client, {});
     Logger.info("I've been read");
     Logger.info(animals);
 
-    await animal.update({legs: 3});
+    await animal.update(Animal, client, {legs: 3});
     Logger.info("I've been updated");
     Logger.info(animal.toJson());
 
     try {
-        await animal.update({legs: -1});
+        await animal.update(Animal, client, {legs: -1});
     } catch (e) {
         Logger.info("A bad update wasn't committed!");
         Logger.info(animal.toJson());

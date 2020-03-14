@@ -2,6 +2,7 @@ import Schema, {IBaseModel} from "../schema/schema.model";
 import Logger from "../../logger";
 import MongoClient from "../../persistence/mongo.client";
 import MemoryClient from "../../persistence/memory.client";
+import {Repository} from "./repository";
 
 interface IBaseDocument {
     onPreValidate(): void;
@@ -11,6 +12,10 @@ interface IBaseDocument {
     onPreSave(): void;
 
     onPostSave(): void;
+
+    onPreUpdate(): void;
+
+    onPostUpdate(): void;
 
     onPreDelete(): void;
 
@@ -32,97 +37,10 @@ type Client = MongoClient | MemoryClient;
 
 // TODO pseudo-relational data, ie type relations (1-n, n-1, n-n)
 
-abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, ISchema<T, S> {
+abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, ISchema<T, S>  {
     protected record: T | IBaseModel | any;
 
     constructor() {
-    }
-
-    static async count<T extends BaseDocument<any, any>, S extends Schema<T>>(
-        ChildModelClass: { new(...args: any[]): T },
-        client: Client,
-        query: object = {}
-    ): Promise<number> {
-        const records = await client.read(new ChildModelClass().collection(), query);
-        return records.length || 0;
-    }
-
-    static async deleteCollection<T extends BaseDocument<any, any>, S extends Schema<T>>(
-        ChildModelClass: { new(...args: any[]): T },
-        client: Client,
-    ): Promise<void> {
-        await client.dropCollection(new ChildModelClass().collection());
-    }
-
-    static async deleteMany<T extends BaseDocument<any, any>, S extends Schema<T>>(
-        ChildModelClass: { new(...args: any[]): T },
-        client: Client,
-        query: object = {}
-    ): Promise<void> {
-        const model = new ChildModelClass();
-        const recordsToBeDeleted = (await client.read(model.collection(), query)) as Array<T & IBaseModel>;
-        const idsToBeDeleted = recordsToBeDeleted.length > 0 ? recordsToBeDeleted.map((record) => record._id) : [];
-        await Promise.all(idsToBeDeleted.map((_id) => client.delete(model.collection(), _id)));
-    }
-
-    static async deleteOne<T extends BaseDocument<any, any>, S extends Schema<T>>(
-        ChildModelClass: { new(...args: any[]): T },
-        client: Client,
-        query: object = {}
-    ): Promise<void> {
-        const model = new ChildModelClass();
-        const recordsToBeDeleted = (await client.read(model.collection(), query)) as Array<T & IBaseModel>;
-        const idToBeDeleted = recordsToBeDeleted.length > 0 ? recordsToBeDeleted[0]._id : undefined;
-        await client.delete(model.collection(), idToBeDeleted);
-    }
-
-    static async findMany<T extends BaseDocument<any, any>, S extends Schema<T>>(
-        ChildModelClass: { new(...args: any[]): T },
-        client: Client,
-        query: object = {}
-    ): Promise<BaseDocument<T, S>[]> {
-        const records = await client.read(new ChildModelClass().collection(), query);
-        return records.map((record: object) => record as BaseDocument<T, S>)
-    }
-
-    static async findOne<T extends BaseDocument<T, S>, S extends Schema<T>>(
-        ChildModelClass: { new(...args: any[]): T },
-        client: Client,
-        query: object
-    ): Promise<T> {
-        const records = await client.read(new ChildModelClass().collection(), query);
-        if (records.length > 0) {
-            return records[0] as T;
-        }
-
-        return undefined;
-    }
-
-    static async findOneAndDelete<T extends BaseDocument<any, any>, S extends Schema<T>>(
-        ChildModelClass: { new(...args: any[]): T },
-        client: Client,
-        query: object
-    ): Promise<void> {
-        const records = await client.read(new ChildModelClass().collection(), query) as Array<T & IBaseModel>;
-        if (records.length > 0) {
-            await client.delete(new ChildModelClass().collection(), records[0]._id);
-        }
-
-        return undefined;
-    }
-
-    static async findOneAndUpdate<T extends BaseDocument<any, any>, S extends Schema<T>>(
-        ChildModelClass: { new(...args: any[]): T },
-        client: Client,
-        payload: object,
-        query: object
-    ): Promise<any> {
-        const records = await client.read(new ChildModelClass().collection(), query) as Array<T & IBaseModel>;
-        if (records.length > 0) {
-            await records[0].update(payload);
-        }
-
-        return undefined;
     }
 
     collection(): string {
@@ -131,7 +49,7 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
 
     abstract joiSchema(): S;
 
-    build(payload: T): BaseDocument<T, S> {
+    build(payload: T) {
         this.record = {...this.joiSchema().baseSchemaContent(), ...payload};
         return this;
     }
@@ -147,7 +65,7 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return v;
     }
 
-    async update(newPayload: Partial<T>): Promise<BaseDocument<T, S>> {
+    async update(Class: any, client: Client, newPayload: Partial<T>): Promise<BaseDocument<T, S>> {
         Logger.debug("update()");
 
         // FIXME this is really bad for consistency, we're updating prematurely and rolling back on fail
@@ -156,6 +74,7 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         try {
             this.record = {...this.record, ...newPayload, updatedAt: new Date()};
             await this.validate();
+            await Repository.findOneAndUpdate(Class, client, newPayload, {_id: this.record._id})
         } catch {
             this.record = {...oldPayload};
         }
@@ -196,6 +115,14 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
     }
 
     async onPreValidate(): Promise<void> {
+        Logger.debug("onPreValidate")
+    }
+
+    async onPostUpdate(): Promise<void> {
+        Logger.debug("onPostUpdate")
+    }
+
+    async onPreUpdate(): Promise<void> {
         Logger.debug("onPreValidate")
     }
 
