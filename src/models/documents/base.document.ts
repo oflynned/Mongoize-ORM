@@ -71,15 +71,13 @@ abstract class BaseDocument<T, S extends Schema<T>>
   ): Promise<BaseDocument<T, S>> {
     Logger.debug("update()");
 
-    const newPayload = { ...payload, updatedAt: new Date() };
-
     try {
-      await this.joiSchema().validateOnUpdate(newPayload);
+      await this.joiSchema().validateOnUpdate(payload);
       this.record = await Repository.updateOne(
         <any>this.constructor,
         client,
         this.record._id,
-        newPayload
+        { ...payload, updatedAt: new Date() }
       );
     } catch (e) {
       Logger.error(e);
