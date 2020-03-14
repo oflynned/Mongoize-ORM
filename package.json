@@ -12,12 +12,14 @@
   "dependencies": {
     "bcrypt": "^4.0.1",
     "joi": "^14.3.1",
+    "mongodb": "^3.5.5",
     "uuid": "latest"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
     "@types/jest": "^25.1.3",
     "@types/joi": "^14.3.4",
+    "@types/mongodb": "^3.5.2",
     "@types/node": "^13.9.0",
     "@types/uuid": "^3.4.7",
     "jest": "^25.1.0",
