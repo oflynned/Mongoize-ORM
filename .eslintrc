@@ -4,8 +4,6 @@
     "@typescript-eslint"
   ],
   "extends": [
-    "airbnb",
-    "airbnb-typescript",
     "plugin:jest/recommended",
     "plugin:@typescript-eslint/recommended",
     "prettier/@typescript-eslint",
@@ -31,6 +29,9 @@
     "@typescript-eslint/consistent-type-assertions": 0
   },
   "settings": {
+    "react": {
+      "version": "999.999.999"
+    },
     "import/parsers": {
       "@typescript-eslint/parser": [
         ".ts"
@@ -39,7 +40,6 @@
     "import/resolver": {
       "typescript": {},
       "@typescript-eslint/parser": [
-        ".js",
         ".ts"
       ]
     }

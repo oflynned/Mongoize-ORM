@@ -28,12 +28,17 @@ abstract class CredentialDocument<
     });
   }
 
+  onPrePasswordHash() {
+    Logger.debug("onPreHashPreValidation()");
+  }
+
   onPostPasswordHash() {
     Logger.debug("onPostHashPreValidation()");
   }
 
   async onPreValidate(): Promise<void> {
     return new Promise((resolve, reject) => {
+      this.onPrePasswordHash();
       hash(this.record.password, this.saltRounds, (error, passwordHash) => {
         if (error) {
           reject(error);
