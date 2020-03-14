@@ -1,8 +1,8 @@
-name: CI
+name: CI/CD
 
 on:
   push:
-    branches-ignore:
+    branches:
       - master
 
 jobs:
@@ -28,7 +28,6 @@ jobs:
             ${{ runner.OS }}-build-${{ env.cache-name }}-
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
-
       - name: Install dependencies
         run: yarn install
 
@@ -46,3 +45,12 @@ jobs:
 
       - name: Run integration tests
         run: yarn test:integration
+
+  publish:
+    runs-on: ubuntu-latest
+
+    needs: test
+
+    steps:
+      - name: Publish package to npm
+        run: yarn publish

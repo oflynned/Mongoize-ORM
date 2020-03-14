@@ -13,6 +13,7 @@
     "lint:fix": "eslint '*/**/*.{js,ts,tsx}' --ignore-path .gitignore --quiet --fix",
     "lint:package": "sort-package-json",
     "lint:staged": "pretty-quick --staged",
+    "publish": "echo \"todo publish semver\"",
     "test": "ts-jest -c jest.base.config.js",
     "test:integration": "jest -c jest.integration.config.js",
     "test:unit": "jest -c jest.unit.config.js",
