@@ -67,16 +67,14 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return this.record;
     }
 
-    async update(Class: any, client: MongoClient, newPayload: Partial<T>): Promise<BaseDocument<T, S>> {
+    async update(client: MongoClient, newPayload: Partial<T>): Promise<BaseDocument<T, S>> {
         Logger.debug("update()");
 
-        // FIXME this is really bad for consistency, we're updating prematurely and rolling back on fail
-        //       perhaps run a validation on a specific payload deep clone?
         const oldPayload = {...this.record};
         try {
             this.record = {...this.record, ...newPayload, updatedAt: new Date()};
             await this.validate();
-            // await Repository.findOneAndUpdate(Class, client, newPayload, {_id: this.record._id})
+            await Repository.updateOne(<any>this.constructor, client, this.record._id, newPayload)
         } catch {
             this.record = {...oldPayload};
         }
@@ -84,7 +82,7 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return this;
     }
 
-    async delete(params: Partial<IDeletionParams> = {hard: false, cascade: false}, client: MongoClient): Promise<void> {
+    async delete(client: MongoClient, params: Partial<IDeletionParams> = {hard: false, cascade: false}): Promise<void> {
         const {hard, cascade} = params;
         if (hard) {
             await Repository.deleteOne(<any>this.constructor, client, {_id: this.record._id});

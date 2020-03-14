@@ -1,18 +1,8 @@
 import Logger from "../logger";
 import Animal from "./models/animal";
-import MemoryClient, {ConnectionOptions} from "../persistence/memory.client";
+import MongoClient, {ConnectionOptions} from "../persistence/mongo.client";
 
-const main = async () => {
-    process.env.NODE_ENV = "development";
-
-    const options: ConnectionOptions = {
-        host: 'localhost',
-        port: 27017,
-        database: 'test'
-    };
-
-    const client: MemoryClient = new MemoryClient(options);
-
+const main = async (client: MongoClient) => {
     const animal = await new Animal()
         .build({name: 'Doggo', legs: 4})
         .save(client);
@@ -21,4 +11,19 @@ const main = async () => {
     Logger.info(animal.toJson());
 };
 
-(async () => await main())();
+(async () => {
+    const options: ConnectionOptions = {
+        host: 'localhost',
+        port: 27017,
+        database: 'mongoize'
+    };
+
+    const client = await new MongoClient(options).connect();
+    try {
+        await main(client);
+    } catch (e) {
+        console.log(e);
+    } finally {
+        await client.close();
+    }
+})();
