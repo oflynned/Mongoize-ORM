@@ -39,15 +39,3 @@ jobs:
 
       - name: Run unit tests
         run: yarn test:unit
-
-  #      - name: Run integration tests
-  #        run: yarn test:integration
-
-  publish:
-    runs-on: ubuntu-latest
-
-    needs: test
-
-    steps:
-      - name: Publish package to npm
-        run: yarn publish
