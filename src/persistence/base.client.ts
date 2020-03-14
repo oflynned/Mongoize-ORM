@@ -1,7 +1,7 @@
 import {ConnectionOptions, ConnectionValidator} from "./connection.validator";
 
 interface IClientOperation {
-    connect(): Promise<void>;
+    connect(): Promise<DatabaseClient>;
 
     create(collection: string, payload: object): Promise<object>;
 
@@ -15,49 +15,35 @@ interface IClientOperation {
 
     dropCollection(collection: string): Promise<void>;
 
-    close(): Promise<void>;
+    close(): Promise<DatabaseClient>;
 }
 
 abstract class DatabaseClient implements IClientOperation {
+    abstract async close(): Promise<DatabaseClient>;
+
+    abstract async connect(): Promise<DatabaseClient>;
+
+    abstract async create(collection: string, payload: object): Promise<object>;
+
+    abstract async delete(collection: string, _id: string): Promise<void>;
+
+    abstract async dropCollection(collection: string): Promise<void>;
+
+    abstract async dropDatabase(): Promise<void>;
+
+    abstract async read(collection: string, query: object): Promise<object[]>;
+
+    abstract async update(collection: string, _id: string, payload: object): Promise<object>;
+
+    uri: string;
+    database: string;
     options: ConnectionOptions;
     validator: ConnectionValidator;
 
     protected constructor(options: ConnectionOptions) {
         this.options = options;
         this.validator = new ConnectionValidator();
-    }
-
-    async connect(): Promise<void> {
-        const connectionUri = this.validator.validate(this.options);
-        console.log("connecting", connectionUri);
-    }
-
-    async close(): Promise<void> {
-        return undefined;
-    }
-
-    async dropDatabase(): Promise<void> {
-        return undefined;
-    }
-
-    async dropCollection(collection: string): Promise<void> {
-        return undefined;
-    }
-
-    async create(collection: string, payload: object): Promise<object> {
-        return undefined;
-    }
-
-    async read(collection: string, query: object): Promise<object[]> {
-        return undefined;
-    }
-
-    async update(collection: string, _id: string, payload: object): Promise<object> {
-        return undefined;
-    }
-
-    async delete(collection: string, _id: string): Promise<void> {
-        return undefined;
+        const {uri, database} = this.validator.validate(this.options);
     }
 }
 

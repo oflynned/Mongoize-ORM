@@ -82,11 +82,11 @@ export class Repository {
         payload: object,
         query: object
     ): Promise<any> {
-        const instance = new ChildModelClass().collection();
-        const records = await client.read(instance, query) as Array<T & IBaseModel>;
-        if (records.length > 0) {
-            await records[0].update(instance, client, payload);
-        }
+        // const instance = new ChildModelClass().collection();
+        // const records = await client.read(instance, query) as Array<T & IBaseModel>;
+        // if (records.length > 0) {
+        //     await records[0].update(instance, client, payload);
+        // }
 
         return undefined;
     }

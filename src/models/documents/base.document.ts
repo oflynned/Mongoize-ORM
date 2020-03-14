@@ -1,7 +1,7 @@
 import Schema, {IBaseModel} from "../schema/schema.model";
 import Logger from "../../logger";
 import MongoClient from "../../persistence/mongo.client";
-import MemoryClient from "../../persistence/memory.client";
+// import MemoryClient from "../../persistence/memory.client";
 import {Repository} from "./repository";
 
 interface IBaseDocument {
@@ -33,11 +33,11 @@ type IDeletionParams = {
     cascade: boolean;
 }
 
-type Client = MongoClient | MemoryClient;
+// type Client = MongoClient | MemoryClient;
 
 // TODO pseudo-relational data, ie type relations (1-n, n-1, n-n)
 
-abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, ISchema<T, S>  {
+abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, ISchema<T, S> {
     protected record: T | IBaseModel | any;
 
     constructor() {
@@ -58,14 +58,16 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         Logger.debug("validate()");
 
         await this.onPreValidate();
+
         Logger.debug("validating...");
-        const v = await this.joiSchema().validate(this.record);
+        this.record = await this.joiSchema().validate(this.record) as T & IBaseModel;
+
         await this.onPostValidate();
 
-        return v;
+        return this.record;
     }
 
-    async update(Class: any, client: Client, newPayload: Partial<T>): Promise<BaseDocument<T, S>> {
+    async update(Class: any, client: MongoClient, newPayload: Partial<T>): Promise<BaseDocument<T, S>> {
         Logger.debug("update()");
 
         // FIXME this is really bad for consistency, we're updating prematurely and rolling back on fail
@@ -130,7 +132,7 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return this.record as T & IBaseModel;
     }
 
-    async save(client: Client): Promise<BaseDocument<T, S>> {
+    async save(client: MongoClient): Promise<BaseDocument<T, S>> {
         const validatedPayload = await this.validate();
         Logger.debug("save()");
         await this.onPreSave();

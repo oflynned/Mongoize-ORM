@@ -19,6 +19,4 @@ export class User extends CredentialDocument<IUser, UserSchema> {
     joiSchema(): UserSchema {
         return new UserSchema();
     }
-
-
 }

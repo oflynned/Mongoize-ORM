@@ -28,6 +28,12 @@ export abstract class CredentialDocument<T extends ICredential, S extends Creden
 
     async passwordAttemptMatches(passwordAttempt: string): Promise<boolean> {
         return new Promise(((resolve, reject) => {
+            // record hasn't been validated & hashed yet
+            if (this.record.passwordHash === undefined) {
+                resolve(false);
+                return;
+            }
+
             compare(passwordAttempt, this.record.passwordHash, (error, result) => {
                 if (error) {
                     reject(error);
