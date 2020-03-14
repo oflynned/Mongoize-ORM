@@ -26,7 +26,7 @@ export abstract class CredentialSchema<T> extends Schema<T> {
 export abstract class CredentialDocument<T extends ICredential, S extends CredentialSchema<T>> extends BaseDocument<T, S> {
     saltRounds = 12;
 
-    async isMatchingPassword(passwordAttempt: string): Promise<boolean> {
+    async passwordAttemptMatches(passwordAttempt: string): Promise<boolean> {
         return new Promise(((resolve, reject) => {
             compare(passwordAttempt, this.record.passwordHash, (error, result) => {
                 if (error) {

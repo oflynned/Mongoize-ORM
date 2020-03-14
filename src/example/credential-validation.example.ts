@@ -28,8 +28,8 @@ const main = async () => {
     console.log(user.toJson().password, user.toJson().passwordHash);
 
     // we can also still compare credentials on the instance without direct password comparison
-    console.log('does this password attempt match?', await user.isMatchingPassword("not the password"));
-    console.log('does this password attempt match?', await user.isMatchingPassword("password"));
+    console.log('does this password attempt match?', await user.passwordAttemptMatches("not the password"));
+    console.log('does this password attempt match?', await user.passwordAttemptMatches("password"));
 };
 
 (async () => await main())();
