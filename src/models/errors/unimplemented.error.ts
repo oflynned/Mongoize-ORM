@@ -1,4 +1,3 @@
-class UnimplementedError extends Error {
-}
+class UnimplementedError extends Error {}
 
 export default UnimplementedError;

@@ -1,12 +1,11 @@
 export type Config = {
-    debug: boolean
-
-}
+  debug: boolean;
+};
 
 export const defaultConfig: Config = {
-    debug: false
+  debug: false
 };
 
 export const buildConfig = (config: Partial<Config>): Config => {
-    return {...defaultConfig, ...config}
+  return { ...defaultConfig, ...config };
 };

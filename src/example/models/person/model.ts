@@ -1,28 +1,14 @@
-import Joi from "joi";
 import BaseDocument from "../../../models/documents/base.document";
-import Schema from "../../../models/schema/schema.model";
-import Animal from "../animal";
+import { IPerson, PersonSchema } from "./schema";
 
-export type IPerson = {
-    name: string;
-    pets?: Animal[];
+class Person extends BaseDocument<IPerson, PersonSchema> {
+  joiSchema(): PersonSchema {
+    return new PersonSchema();
+  }
+
+  collection(): string {
+    return "people";
+  }
 }
 
-export class PersonSchema extends Schema<IPerson> {
-    joiSchema(): object {
-        return {
-            name: Joi.string().required(),
-            pets: Joi.array().items(Joi.string().uuid())
-        }
-    }
-}
-
-export class Person extends BaseDocument<IPerson, PersonSchema> {
-    joiSchema(): PersonSchema {
-        return new PersonSchema();
-    }
-
-    collection(): string {
-        return "people"
-    }
-}
+export default Person;

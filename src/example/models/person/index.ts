@@ -1,5 +1,3 @@
-import {Person, IPerson} from "./model";
-
-export {IPerson};
+import Person from "./model";
 
 export default Person;

@@ -1,22 +1,10 @@
-import Joi from "joi";
-import {CredentialDocument, CredentialSchema, ICredential} from "../../../models/documents/credential.document";
+import { CredentialDocument } from "../../../models/documents/credential-document/credential.document";
+import { IUser, UserSchema } from "./schema";
 
-export interface IUser extends ICredential {
-    name: string;
-    email: string;
+class User extends CredentialDocument<IUser, UserSchema> {
+  joiSchema(): UserSchema {
+    return new UserSchema();
+  }
 }
 
-export class UserSchema extends CredentialSchema<IUser> {
-    schemaWithoutCredentials(): object {
-        return {
-            name: Joi.string().required(),
-            email: Joi.string().required(),
-        }
-    }
-}
-
-export class User extends CredentialDocument<IUser, UserSchema> {
-    joiSchema(): UserSchema {
-        return new UserSchema();
-    }
-}
+export default User;

@@ -1,5 +1,3 @@
-import {Animal, IAnimal} from "./model";
-
-export {IAnimal};
+import Animal from "./model";
 
 export default Animal;

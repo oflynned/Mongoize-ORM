@@ -1,5 +1,3 @@
-import {User, IUser} from "./model";
-
-export {IUser};
+import User from "./model";
 
 export default User;
