@@ -1,4 +1,4 @@
-import Schema, {IBaseModel} from "../schema/schema.model";
+import Schema from "../schema/schema.model";
 import BaseDocument from "./base.document";
 import DatabaseClient from "../../persistence/base.client";
 
@@ -8,8 +8,7 @@ export class Repository {
         client: Client,
         query: object = {}
     ): Promise<number> {
-        const records = await client.read(new ChildModelClass().collection(), query);
-        return records.length || 0;
+        return client.count(new ChildModelClass().collection(), query);
     }
 
     static async deleteCollection<T extends BaseDocument<any, any>, S extends Schema<T>, Client extends DatabaseClient>(
@@ -25,20 +24,16 @@ export class Repository {
         query: object = {}
     ): Promise<void> {
         const model = new ChildModelClass();
-        const recordsToBeDeleted = (await client.read(model.collection(), query)) as Array<T & IBaseModel>;
-        const idsToBeDeleted = recordsToBeDeleted.length > 0 ? recordsToBeDeleted.map((record) => record._id) : [];
-        await Promise.all(idsToBeDeleted.map((_id) => client.delete(model.collection(), _id)));
+        await client.deleteMany(model.collection(), query)
     }
 
     static async deleteOne<T extends BaseDocument<any, any>, S extends Schema<T>, Client extends DatabaseClient>(
         ChildModelClass: { new(...args: any[]): T },
         client: Client,
-        query: object = {}
+        query: { _id: string }
     ): Promise<void> {
         const model = new ChildModelClass();
-        const recordsToBeDeleted = (await client.read(model.collection(), query)) as Array<T & IBaseModel>;
-        const idToBeDeleted = recordsToBeDeleted.length > 0 ? recordsToBeDeleted[0]._id : undefined;
-        await client.delete(model.collection(), idToBeDeleted);
+        await client.deleteOne(model.collection(), query._id);
     }
 
     static async findMany<T extends BaseDocument<any, any>, S extends Schema<T>, Client extends DatabaseClient>(
@@ -50,7 +45,7 @@ export class Repository {
         return records.map((record: object) => record as BaseDocument<T, S>)
     }
 
-    static async findOne<T extends BaseDocument<T, S>, S extends Schema<T>, Client extends DatabaseClient> (
+    static async findOne<T extends BaseDocument<T, S>, S extends Schema<T>, Client extends DatabaseClient>(
         ChildModelClass: { new(...args: any[]): T },
         client: Client,
         query: object
@@ -63,31 +58,41 @@ export class Repository {
         return undefined;
     }
 
-    static async findOneAndDelete<T extends BaseDocument<any, any>, S extends Schema<T>, Client extends DatabaseClient>(
+    static async updateOne<T extends BaseDocument<T, S>, S extends Schema<T>, Client extends DatabaseClient>(
         ChildModelClass: { new(...args: any[]): T },
         client: Client,
-        query: object
-    ): Promise<void> {
-        const records = await client.read(new ChildModelClass().collection(), query) as Array<T & IBaseModel>;
-        if (records.length > 0) {
-            await client.delete(new ChildModelClass().collection(), records[0]._id);
-        }
-
-        return undefined;
+        _id: string,
+        updatedFields: object
+    ): Promise<T> {
+        await client.updateOne(new ChildModelClass().collection(), _id, updatedFields);
+        return this.findOne(ChildModelClass, client, {_id})
     }
 
-    static async findOneAndUpdate<T extends BaseDocument<T, S>, S extends Schema<T>, Client extends DatabaseClient>(
-        ChildModelClass: { new(...args: any[]): T },
-        client: Client,
-        payload: object,
-        query: object
-    ): Promise<any> {
-        // const instance = new ChildModelClass().collection();
-        // const records = await client.read(instance, query) as Array<T & IBaseModel>;
-        // if (records.length > 0) {
-        //     await records[0].update(instance, client, payload);
-        // }
-
-        return undefined;
-    }
+    // static async findOneAndDelete<T extends BaseDocument<any, any>, S extends Schema<T>, Client extends DatabaseClient>(
+    //     ChildModelClass: { new(...args: any[]): T },
+    //     client: Client,
+    //     query: object
+    // ): Promise<void> {
+    //     const records = await client.read(new ChildModelClass().collection(), query) as Array<T & IBaseModel>;
+    //     if (records.length > 0) {
+    //         return client.deleteOne(new ChildModelClass().collection(), records[0]._id);
+    //     }
+    //
+    //     return undefined;
+    // }
+    //
+    // static async findOneAndUpdate<T extends BaseDocument<T, S>, S extends Schema<T>, Client extends DatabaseClient>(
+    //     ChildModelClass: { new(...args: any[]): T },
+    //     client: Client,
+    //     payload: object,
+    //     query: object
+    // ): Promise<any> {
+    //     // const instance = new ChildModelClass().collection();
+    //     // const records = await client.read(instance, query) as Array<T & IBaseModel>;
+    //     // if (records.length > 0) {
+    //     //     await records[0].update(instance, client, payload);
+    //     // }
+    //
+    //     return undefined;
+    // }
 }

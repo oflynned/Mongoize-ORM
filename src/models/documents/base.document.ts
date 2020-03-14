@@ -76,7 +76,7 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         try {
             this.record = {...this.record, ...newPayload, updatedAt: new Date()};
             await this.validate();
-            await Repository.findOneAndUpdate(Class, client, newPayload, {_id: this.record._id})
+            // await Repository.findOneAndUpdate(Class, client, newPayload, {_id: this.record._id})
         } catch {
             this.record = {...oldPayload};
         }
@@ -84,15 +84,15 @@ abstract class BaseDocument<T, S extends Schema<T>> implements IBaseDocument, IS
         return this;
     }
 
-    async delete(params: Partial<IDeletionParams> = {hard: false, cascade: false}): Promise<void> {
-        Logger.debug("delete()");
+    async delete(params: Partial<IDeletionParams> = {hard: false, cascade: false}, client: MongoClient): Promise<void> {
         const {hard, cascade} = params;
         if (hard) {
+            await Repository.deleteOne(<any>this.constructor, client, {_id: this.record._id});
             this.record = undefined
             // TODO if cascaded, then also ripple the deletion to relations
         } else {
             const deletionFields = {deleted: true, deletedAt: new Date()};
-            this.record = {...this.record, ...deletionFields} as T | IBaseModel
+            this.record = await Repository.updateOne(<any>this.constructor, client, this.record._id, deletionFields);
         }
     }
 

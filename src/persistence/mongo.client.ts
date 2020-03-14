@@ -1,6 +1,6 @@
 import DatabaseClient from "./base.client";
 import {ConnectionOptions} from "./connection.validator";
-import Mongo, {MongoClientOptions} from 'mongodb';
+import Mongo, {Collection, Db, MongoClientOptions} from 'mongodb';
 
 class MongoClient extends DatabaseClient {
     private client: Mongo.MongoClient;
@@ -10,28 +10,34 @@ class MongoClient extends DatabaseClient {
     }
 
     async create(collection: string, payload: object): Promise<object> {
-        await this.client.db(this.database()).collection(collection).insertOne(payload);
+        await this.withCollection(collection).insertOne(payload);
         return payload;
     }
 
-    async delete(collection: string, _id: string): Promise<void> {
-        return undefined;
+    async deleteOne(collection: string, _id: string): Promise<boolean> {
+        const {deletedCount} = await this.withCollection(collection).deleteOne({_id});
+        return deletedCount > 0;
+    }
+
+    async deleteMany(collection: string, query: object): Promise<number> {
+        const {deletedCount} = await this.withCollection(collection).deleteMany(query);
+        return deletedCount;
     }
 
     async dropCollection(collection: string): Promise<void> {
-        return undefined;
+        await this.withCollection(collection).drop();
     }
 
     async dropDatabase(): Promise<void> {
-        return undefined;
+        await this.withDb().dropDatabase();
     }
 
     async read(collection: string, query: object): Promise<object[]> {
-        return undefined;
+        return this.withCollection(collection).find(query).toArray();
     }
 
-    async update(collection: string, _id: string, payload: object): Promise<object> {
-        return undefined;
+    async updateOne(collection: string, _id: string, payload: object): Promise<object> {
+        return this.withCollection(collection).updateOne({_id}, {$set: {...payload}}, {upsert: true});
     }
 
     async connect(): Promise<MongoClient> {
@@ -44,6 +50,10 @@ class MongoClient extends DatabaseClient {
         return this;
     }
 
+    async count(collection: string, query: object): Promise<number> {
+        return this.withCollection(collection).count(query);
+    }
+
     mongoOptions(): MongoClientOptions {
         return {
             useNewUrlParser: true,
@@ -51,8 +61,12 @@ class MongoClient extends DatabaseClient {
         }
     }
 
-    database(): string {
-        return this.validator.options.database;
+    private withDb(): Db {
+        return this.client.db(this.validator.options.database);
+    }
+
+    private withCollection(collection: string): Collection {
+        return this.withDb().collection(collection);
     }
 }
 
