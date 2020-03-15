@@ -11,6 +11,10 @@
     "orm",
     "nosql"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oflynned/Mongoize-ORM.git"
+  },
   "license": "ISC",
   "author": "Edmond Ó Floinn",
   "main": "dist/index.js",
@@ -18,6 +22,7 @@
   "scripts": {
     "build": "yarn clean && tsc",
     "clean": "rimraf ./dist",
+    "deploy:npm": "yarn publish",
     "example:basic": "ts-node ./src/example/basic.example.ts",
     "example:credentials": "ts-node ./src/example/credential-validation.example.ts",
     "example:crud": "ts-node ./src/example/crud.example.ts",
@@ -28,7 +33,6 @@
     "lint:fix": "eslint '**/*.{js,ts}' --ignore-path .gitignore --quiet --fix",
     "lint:package": "sort-package-json",
     "lint:staged": "pretty-quick --staged",
-    "deploy:npm": "yarn publish",
     "test": "jest -c jest.base.config.js",
     "test:integration": "jest -c jest.integration.config.js",
     "test:unit": "jest -c jest.unit.config.js",
@@ -75,10 +79,6 @@
     "ts-node": "^8.6.2",
     "tslint": "^5.20.1",
     "typescript": "^3.8.2"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/oflynned/Mongoize-ORM.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/@oflynned"
