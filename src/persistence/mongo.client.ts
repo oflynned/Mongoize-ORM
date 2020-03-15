@@ -63,7 +63,7 @@ class MongoClient extends DatabaseClient {
   }
 
   async count(collection: string, query: object): Promise<number> {
-    return this.withCollection(collection).count(query);
+    return this.withCollection(collection).countDocuments(query);
   }
 
   mongoOptions(): MongoClientOptions {
