@@ -34,7 +34,6 @@ class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
 
   async findOne(client: DatabaseClient, query: object): Promise<T> {
     const records = await client.read(this.instanceType.collection(), query);
-    console.log(records);
     if (records.length > 0) {
       return Repository.newInstance(this.instanceType).from(records[0]);
     }
@@ -58,7 +57,8 @@ class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
   async findMany(client: DatabaseClient, query: object = {}): Promise<T[]> {
     const records = await client.read(this.instanceType.collection(), query);
     return records.map(
-      (record: T) => Repository.newInstance(this.instanceType).from(record) as T
+      (record: object) =>
+        Repository.newInstance(this.instanceType).from(record) as T
     );
   }
 

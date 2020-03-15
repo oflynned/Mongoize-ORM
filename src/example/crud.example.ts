@@ -36,7 +36,7 @@ const main = async (client: InMemoryClient): Promise<void> => {
   Logger.info("I've been hard deleted");
 
   // returns false as it's two separate deep clones of the same instance from the db
-  console.log("are a and animal different instances?", a === animal);
+  console.log("are a and animal the same instance?", a === animal);
 };
 
 (async (): Promise<void> => {
