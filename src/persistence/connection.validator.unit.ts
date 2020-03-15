@@ -79,6 +79,19 @@ describe("Connection Validator", () => {
           });
           expect(validator.options.database).toEqual("database-test");
         });
+
+        it("should not mutate database name", function() {
+          validator.validate({
+            ...baseOptions,
+            appendDatabaseEnvironment: false
+          });
+          expect(validator.options.database).toEqual("database");
+        });
+
+        it("should not mutate database by default", function() {
+          validator.validate({ ...baseOptions });
+          expect(validator.options.database).toEqual("database");
+        });
       });
 
       it("should validate without username and password", () => {
