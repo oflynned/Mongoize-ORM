@@ -1,8 +1,8 @@
 import Logger from "../logger";
 import Animal from "./models/animal";
-import { MongoClient, ConnectionOptions } from "../persistence";
+import { InMemoryClient } from "../persistence";
 
-const main = async (client: MongoClient): Promise<void> => {
+const main = async (client: InMemoryClient): Promise<void> => {
   const animal = await new Animal()
     .build({ name: "Doggo", legs: 4 })
     .save(client);
@@ -12,13 +12,7 @@ const main = async (client: MongoClient): Promise<void> => {
 };
 
 (async (): Promise<void> => {
-  const options: ConnectionOptions = {
-    host: "localhost",
-    port: 27017,
-    database: "mongoize"
-  };
-
-  const client = await new MongoClient(options).connect();
+  const client = await new InMemoryClient().connect();
   try {
     await main(client);
   } catch (e) {

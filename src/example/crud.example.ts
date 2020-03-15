@@ -1,20 +1,15 @@
 import Logger from "../logger";
 import Animal from "./models/animal";
 import Repository from "../models/documents/repository";
-import MongoClient, { ConnectionOptions } from "../persistence/mongo.client";
+import { InMemoryClient } from "../persistence";
 
-const main = async (client: MongoClient): Promise<void> => {
-  // TODO move this to some global initialisation level as this is cumbersome to inject the client at every usage
+const main = async (client: InMemoryClient): Promise<void> => {
   const animal = await new Animal()
     .build({ name: "Doggo", legs: 4 })
     .save(client);
 
   Logger.info("I've been created");
   Logger.info(animal.toJson());
-
-  const animals = await Repository.findMany(Animal, client, {});
-  Logger.info("I've been read");
-  Logger.info(animals);
 
   await animal.update(client, { legs: 3 });
   Logger.info("I've been updated");
@@ -31,19 +26,20 @@ const main = async (client: MongoClient): Promise<void> => {
   Logger.info("I've been soft deleted");
   Logger.info(animal.toJson());
 
-  await animal.delete(client, { hard: true });
+  const a: Animal = await Repository.with(Animal).findById(
+    client,
+    animal.toJson()._id
+  );
+  Logger.info("I've been read");
+  Logger.info(a);
+
+  await a.delete(client, { hard: true });
   Logger.info("I've been hard deleted");
-  Logger.info(animal.toJson());
+  Logger.info(a.toJson());
 };
 
 (async (): Promise<void> => {
-  const options: ConnectionOptions = {
-    host: "localhost",
-    port: 27017,
-    database: "mongoize"
-  };
-
-  const client = await new MongoClient(options).connect();
+  const client = await new InMemoryClient().connect();
   try {
     await main(client);
   } catch (e) {
