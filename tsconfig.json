@@ -2,34 +2,17 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
+    "declaration": true,
     "noImplicitAny": true,
-    "lib": [
-      "es5",
-      "es2015",
-      "es6",
-      "dom"
-    ],
+    "lib": ["es5", "es2015", "es6", "dom"],
     "rootDir": "./src",
     "outDir": "./dist",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "baseUrl": ".",
-    "paths": {
-      "@db/*": [
-        "./lib/db/*"
-      ],
-      "@models/*": [
-        "./lib/models/*"
-      ]
-    }
+    "baseUrl": "."
   },
-  "include": [
-    "./src/**/*.ts"
-  ],
-  "exclude": [
-    "./node_modules",
-    "./src/example"
-  ]
+  "include": ["./src/**/*.ts"],
+  "exclude": ["./node_modules", "./src/example"]
 }

@@ -1,6 +1,6 @@
 import { InMemoryClient } from "../persistence";
 import User from "./models/user";
-import { Repository } from "../lib";
+import { Repository } from "../index";
 
 const main = async (client: InMemoryClient): Promise<void> => {
   await Repository.with(User).deleteMany(client);
