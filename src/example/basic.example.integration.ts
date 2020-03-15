@@ -1,6 +1,7 @@
 import { ConnectionOptions } from "../persistence/connection.validator";
 import MongoClient from "../persistence/mongo.client";
 import Animal from "./models/animal";
+import Repository from "../models/documents/repository";
 
 describe("Basic example", () => {
   let client: MongoClient;
@@ -9,10 +10,15 @@ describe("Basic example", () => {
     const options: ConnectionOptions = {
       host: "localhost",
       port: 27017,
-      database: "mongoize"
+      database: "mongoize-test"
     };
 
     client = await new MongoClient(options).connect();
+    done();
+  });
+
+  afterEach(async done => {
+    await client.dropDatabase();
     done();
   });
 
