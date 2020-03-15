@@ -10,8 +10,17 @@ type AuthConnectionOptions = {
   database: string;
 };
 
+type EnvironmentOptions = {
+  appendDatabaseEnvironment?: boolean;
+};
+
 export type ConnectionOptions = Partial<UriConnectionOptions> &
-  Partial<AuthConnectionOptions>;
+  Partial<AuthConnectionOptions> &
+  Partial<EnvironmentOptions>;
+
+const defaultOptions: ConnectionOptions = {
+  appendDatabaseEnvironment: false
+};
 
 const parseUriString = (uri: string): ConnectionOptions => {
   const regex = new RegExp(
@@ -46,13 +55,20 @@ const parseUriString = (uri: string): ConnectionOptions => {
     throw new Error("missing connection string field");
   }
 
-  return { uri, username, password, host, port: parseInt(port, 10), database };
+  return {
+    uri,
+    username,
+    password,
+    host,
+    port: parseInt(port, 10),
+    database
+  };
 };
 
 export class ConnectionValidator {
   options: ConnectionOptions;
 
-  validate(connection: ConnectionOptions): void {
+  validate(connection: ConnectionOptions = defaultOptions): void {
     if (connection.uri) {
       const { uri, username, password, host, port, database } = parseUriString(
         connection.uri
@@ -68,18 +84,25 @@ export class ConnectionValidator {
       return;
     }
 
+    const environment = (process.env.NODE_ENV || "development").toLowerCase();
+    const database = connection.appendDatabaseEnvironment
+      ? `${connection.database}-${environment}`
+      : connection.database;
+
     if (connection.username && connection.password) {
       const safeEncodedPassword = encodeURIComponent(connection.password);
       this.options = {
-        uri: `mongodb://${connection.username}:${safeEncodedPassword}@${connection.host}:${connection.port}/${connection.database}`,
-        ...connection
+        ...connection,
+        uri: `mongodb://${connection.username}:${safeEncodedPassword}@${connection.host}:${connection.port}/${database}`,
+        database
       };
       return;
     }
 
     this.options = {
-      uri: `mongodb://${connection.host}:${connection.port}/${connection.database}`,
-      ...connection
+      ...connection,
+      uri: `mongodb://${connection.host}:${connection.port}/${database}`,
+      database
     };
   }
 }

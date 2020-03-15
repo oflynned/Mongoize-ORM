@@ -1,4 +1,5 @@
 import { ConnectionOptions, ConnectionValidator } from "./connection.validator";
+import exp from "constants";
 
 describe("Connection Validator", () => {
   const validator: ConnectionValidator = new ConnectionValidator();
@@ -70,6 +71,16 @@ describe("Connection Validator", () => {
     });
 
     describe("with auth", () => {
+      describe(".appendDatabaseEnvironment", () => {
+        it("should mutate database name", function() {
+          validator.validate({
+            ...baseOptions,
+            appendDatabaseEnvironment: true
+          });
+          expect(validator.options.database).toEqual("database-test");
+        });
+      });
+
       it("should validate without username and password", () => {
         validator.validate(baseOptions);
         expect(validator.options.uri).toEqual("mongodb://host:1234/database");

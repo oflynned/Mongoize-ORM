@@ -9,7 +9,8 @@ describe("Basic example", () => {
     const options: ConnectionOptions = {
       host: "localhost",
       port: 27017,
-      database: "mongoize-test"
+      database: "mongoize",
+      appendDatabaseEnvironment: true
     };
 
     client = await new MongoClient(options).connect();
