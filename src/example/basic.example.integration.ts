@@ -1,7 +1,6 @@
 import { ConnectionOptions } from "../persistence/connection.validator";
 import MongoClient from "../persistence/mongo.client";
 import Animal from "./models/animal";
-import Repository from "../models/documents/repository";
 
 describe("Basic example", () => {
   let client: MongoClient;
@@ -103,7 +102,7 @@ describe("Basic example", () => {
     });
   });
 
-  describe("read", () => {});
+  describe.skip("read", () => {});
 
   describe("#update", () => {
     let model: Animal;
