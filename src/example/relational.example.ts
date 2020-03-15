@@ -4,7 +4,7 @@ import Person from "./models/person";
 import MongoClient, { ConnectionOptions } from "../persistence/mongo.client";
 import Repository from "../models/documents/repository";
 
-const main = async (client: MongoClient) => {
+const main = async (client: MongoClient): Promise<void> => {
   await new Animal().build({ name: "Doggo", legs: 4 }).save(client);
 
   const animals = await Repository.findMany(Animal, client);
@@ -16,7 +16,7 @@ const main = async (client: MongoClient) => {
   Logger.info(people);
 };
 
-(async () => {
+(async (): Promise<void> => {
   const options: ConnectionOptions = {
     host: "localhost",
     port: 27017,

@@ -28,11 +28,11 @@ abstract class CredentialDocument<
     });
   }
 
-  onPrePasswordHash() {
+  onPrePasswordHash(): void {
     Logger.debug("onPreHash()");
   }
 
-  onPostPasswordHash() {
+  onPostPasswordHash(): void {
     Logger.debug("onPostHash()");
   }
 

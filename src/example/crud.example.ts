@@ -3,7 +3,7 @@ import Animal from "./models/animal";
 import Repository from "../models/documents/repository";
 import MongoClient, { ConnectionOptions } from "../persistence/mongo.client";
 
-const main = async (client: MongoClient) => {
+const main = async (client: MongoClient): Promise<void> => {
   // TODO move this to some global initialisation level as this is cumbersome to inject the client at every usage
   const animal = await new Animal()
     .build({ name: "Doggo", legs: 4 })
@@ -36,7 +36,7 @@ const main = async (client: MongoClient) => {
   Logger.info(animal.toJson());
 };
 
-(async () => {
+(async (): Promise<void> => {
   const options: ConnectionOptions = {
     host: "localhost",
     port: 27017,

@@ -2,7 +2,7 @@ import Logger from "../logger";
 import Animal from "./models/animal";
 import MongoClient, { ConnectionOptions } from "../persistence/mongo.client";
 
-const main = async (client: MongoClient) => {
+const main = async (client: MongoClient): Promise<void> => {
   const animal = await new Animal()
     .build({ name: "Doggo", legs: 4 })
     .save(client);
@@ -11,7 +11,7 @@ const main = async (client: MongoClient) => {
   Logger.info(animal.toJson());
 };
 
-(async () => {
+(async (): Promise<void> => {
   const options: ConnectionOptions = {
     host: "localhost",
     port: 27017,

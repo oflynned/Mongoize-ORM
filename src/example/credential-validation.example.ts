@@ -2,7 +2,7 @@ import MongoClient, { ConnectionOptions } from "../persistence/mongo.client";
 import User from "./models/user";
 import Repository from "../models/documents/repository";
 
-const main = async (client: MongoClient) => {
+const main = async (client: MongoClient): Promise<void> => {
   await Repository.deleteMany(User, client);
 
   const user: User = await new User().build({
@@ -32,7 +32,7 @@ const main = async (client: MongoClient) => {
   );
 };
 
-(async () => {
+(async (): Promise<void> => {
   const options: ConnectionOptions = {
     host: "localhost",
     port: 27017,

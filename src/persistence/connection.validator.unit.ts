@@ -1,5 +1,4 @@
 import { ConnectionOptions, ConnectionValidator } from "./connection.validator";
-import exp from "constants";
 
 describe("Connection Validator", () => {
   const validator: ConnectionValidator = new ConnectionValidator();
