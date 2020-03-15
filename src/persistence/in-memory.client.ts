@@ -2,7 +2,7 @@ import { MongoClient } from "./mongo.client";
 import { MongoMemoryServer } from "mongodb-memory-server";
 
 class InMemoryClient extends MongoClient {
-  mongoServer: MongoMemoryServer;
+  private mongoServer: MongoMemoryServer;
 
   async connect(): Promise<InMemoryClient> {
     const uri = await this.setupDbServer();
