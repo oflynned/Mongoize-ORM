@@ -1,4 +1,4 @@
-import Joi, { ValidationResult } from "joi";
+import Joi from "joi";
 import { v4 as uuid } from "uuid";
 
 export type IBaseModel = {
