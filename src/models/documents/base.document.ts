@@ -43,8 +43,13 @@ abstract class BaseDocument<T, S extends Schema<T>>
 
   abstract joiSchema(): S;
 
+  from(payload: T) {
+    this.record = { ...payload };
+    return this;
+  }
+
   build(payload: T) {
-    this.record = { ...this.joiSchema().baseSchemaContent(), ...payload };
+    this.record = { ...payload, ...this.joiSchema().baseSchemaContent() };
     return this;
   }
 
@@ -73,8 +78,7 @@ abstract class BaseDocument<T, S extends Schema<T>>
     }
 
     await this.joiSchema().validateOnUpdate(payload);
-    this.record = await Repository.updateOne(
-      <any>this.constructor,
+    this.record = await Repository.with(<any>this.constructor).updateOne(
       client,
       this.record._id,
       { ...payload, updatedAt: new Date() }
@@ -89,14 +93,14 @@ abstract class BaseDocument<T, S extends Schema<T>>
   ): Promise<void> {
     const { hard } = params;
     if (hard) {
-      await Repository.deleteOne(<any>this.constructor, client, {
-        _id: this.record._id
-      });
+      await Repository.with(<any>this.constructor).deleteOne(
+        client,
+        this.record._id
+      );
       this.record = undefined;
     } else {
       const deletionFields = { deleted: true, deletedAt: new Date() };
-      this.record = await Repository.updateOne(
-        <any>this.constructor,
+      this.record = await Repository.with(<any>this.constructor).updateOne(
         client,
         this.record._id,
         deletionFields
