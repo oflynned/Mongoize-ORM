@@ -1,12 +1,20 @@
 {
-  "name": "mongoize-orm",
-  "version": "1.0.0",
-  "description": "",
-  "keywords": [],
+  "name": "@oflynned/mongoize-orm",
+  "version": "0.9.0",
+  "description": "Simplify MongoDB model persistence with a smart layer in between you and your database",
+  "keywords": [
+    "mongodb",
+    "sql",
+    "relational",
+    "relation",
+    "database",
+    "orm",
+    "nosql"
+  ],
   "license": "ISC",
-  "author": "",
-  "main": "index.js",
-  "types": "",
+  "author": "Edmond Ó Floinn",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "yarn clean && tsc",
     "clean": "rimraf ./dist",
@@ -20,7 +28,7 @@
     "lint:fix": "eslint '**/*.{js,ts}' --ignore-path .gitignore --quiet --fix",
     "lint:package": "sort-package-json",
     "lint:staged": "pretty-quick --staged",
-    "publish": "echo \"todo publish to npm\"",
+    "deploy:npm": "yarn publish",
     "test": "jest -c jest.base.config.js",
     "test:integration": "jest -c jest.integration.config.js",
     "test:unit": "jest -c jest.unit.config.js",
@@ -28,7 +36,6 @@
   },
   "dependencies": {
     "bcrypt": "^4.0.1",
-    "faker": "^4.1.0",
     "joi": "^14.3.1",
     "mongodb": "^3.5.5",
     "mongodb-memory-server": "^6.3.3",
@@ -55,6 +62,7 @@
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-react": "^7.17.0",
+    "faker": "^4.1.0",
     "husky": "^3.1.0",
     "jest": "^25.1.0",
     "jest-config": "25.1.0",
@@ -67,5 +75,12 @@
     "ts-node": "^8.6.2",
     "tslint": "^5.20.1",
     "typescript": "^3.8.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oflynned/Mongoize-ORM.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/@oflynned"
   }
 }
