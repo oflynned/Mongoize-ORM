@@ -19,7 +19,7 @@ interface IClientOperation {
 
   dropCollection(collection: string): Promise<void>;
 
-  close(): Promise<DatabaseClient>;
+  close(): Promise<void>;
 }
 
 abstract class DatabaseClient implements IClientOperation {
@@ -30,7 +30,7 @@ abstract class DatabaseClient implements IClientOperation {
     this.validator.validate(options);
   }
 
-  abstract async close(): Promise<DatabaseClient>;
+  abstract async close(): Promise<void>;
 
   abstract async connect(options?: ConnectionOptions): Promise<DatabaseClient>;
 

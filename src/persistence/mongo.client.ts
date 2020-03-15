@@ -58,9 +58,8 @@ class MongoClient extends DatabaseClient {
     return this;
   }
 
-  async close(): Promise<MongoClient> {
+  async close(): Promise<void> {
     await this.client.close();
-    return this;
   }
 
   async count(collection: string, query: object): Promise<number> {

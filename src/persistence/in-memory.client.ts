@@ -10,10 +10,9 @@ class InMemoryClient extends MongoClient {
     return this;
   }
 
-  async close(): Promise<InMemoryClient> {
+  async close(): Promise<void> {
     await super.close();
     await this.tearDownDbServer();
-    return this;
   }
 
   private async setupDbServer(): Promise<string> {
