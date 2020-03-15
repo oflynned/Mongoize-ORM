@@ -1,6 +1,6 @@
 import Logger from "../logger";
 import Animal from "./models/animal";
-import MongoClient, { ConnectionOptions } from "../persistence/mongo.client";
+import { MongoClient, ConnectionOptions } from "../persistence";
 
 const main = async (client: MongoClient): Promise<void> => {
   const animal = await new Animal()

@@ -1,9 +1,7 @@
 import Schema, { IBaseModel } from "../schema/schema.model";
 import Logger from "../../logger";
-import { InMemoryClient } from "../../persistence/in-memory.client";
-import { MongoClient } from "../../persistence/mongo.client";
+import { InMemoryClient, MongoClient } from "../../persistence";
 import Repository from "./repository";
-import DatabaseClient from "../../persistence/base.client";
 
 interface IBaseDocument {
   onPreValidate(): void;
