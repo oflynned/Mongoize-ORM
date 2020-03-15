@@ -1,7 +1,6 @@
 import Logger from "../logger";
 import Animal from "./models/animal";
-import Repository from "../models/documents/repository";
-import { InMemoryClient } from "../persistence";
+import { InMemoryClient, Repository } from "../lib";
 
 const main = async (client: InMemoryClient): Promise<void> => {
   const animal = await new Animal()
@@ -13,7 +12,7 @@ const main = async (client: InMemoryClient): Promise<void> => {
 
   await animal.update(client, { legs: 3 });
   Logger.info("I've been updated");
-  Logger.info(animal.toJson());
+  Logger.info(animal);
 
   try {
     await animal.update(client, { legs: -1 });
@@ -31,11 +30,13 @@ const main = async (client: InMemoryClient): Promise<void> => {
     animal.toJson()._id
   );
   Logger.info("I've been read");
-  Logger.info(a);
+  console.log(a.toJson());
 
   await a.delete(client, { hard: true });
   Logger.info("I've been hard deleted");
-  Logger.info(a.toJson());
+
+  // returns false as it's two separate deep clones of the same instance from the db
+  console.log("are a and animal different instances?", a === animal);
 };
 
 (async (): Promise<void> => {

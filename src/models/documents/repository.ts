@@ -34,8 +34,9 @@ class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
 
   async findOne(client: DatabaseClient, query: object): Promise<T> {
     const records = await client.read(this.instanceType.collection(), query);
+    console.log(records);
     if (records.length > 0) {
-      return records[0] as T;
+      return Repository.newInstance(this.instanceType).from(records[0]);
     }
 
     return undefined;

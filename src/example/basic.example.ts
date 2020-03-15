@@ -1,6 +1,6 @@
 import Logger from "../logger";
 import Animal from "./models/animal";
-import { InMemoryClient } from "../persistence";
+import { InMemoryClient } from "../lib";
 
 const main = async (client: InMemoryClient): Promise<void> => {
   const animal = await new Animal()

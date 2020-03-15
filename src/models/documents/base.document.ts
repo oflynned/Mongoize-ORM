@@ -78,11 +78,11 @@ abstract class BaseDocument<T, S extends Schema<T>>
     }
 
     await this.joiSchema().validateOnUpdate(payload);
-    this.record = await Repository.with(<any>this.constructor).updateOne(
-      client,
-      this.record._id,
-      { ...payload, updatedAt: new Date() }
-    );
+    const newInstance = await Repository.with(
+      <any>this.constructor
+    ).updateOne(client, this.record._id, { ...payload, updatedAt: new Date() });
+
+    Object.assign(this, newInstance);
 
     return this;
   }
@@ -100,11 +100,11 @@ abstract class BaseDocument<T, S extends Schema<T>>
       this.record = undefined;
     } else {
       const deletionFields = { deleted: true, deletedAt: new Date() };
-      this.record = await Repository.with(<any>this.constructor).updateOne(
-        client,
-        this.record._id,
-        deletionFields
-      );
+      const newInstance = await Repository.with(
+        <any>this.constructor
+      ).updateOne(client, this.record._id, deletionFields);
+
+      Object.assign(this, newInstance);
     }
   }
 
