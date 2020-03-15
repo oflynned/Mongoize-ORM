@@ -1,19 +1,11 @@
-import { ConnectionOptions } from "../persistence/connection.validator";
-import MongoClient from "../persistence/mongo.client";
 import Animal from "./models/animal";
+import { InMemoryClient } from "../persistence/in-memory.client";
 
 describe("Basic example", () => {
-  let client: MongoClient;
+  let client: InMemoryClient;
 
   beforeAll(async done => {
-    const options: ConnectionOptions = {
-      host: "localhost",
-      port: 27017,
-      database: "mongoize",
-      appendDatabaseEnvironment: true
-    };
-
-    client = await new MongoClient(options).connect();
+    client = await new InMemoryClient().connect();
     done();
   });
 

@@ -1,7 +1,7 @@
 import { ConnectionOptions, ConnectionValidator } from "./connection.validator";
 
 interface IClientOperation {
-  connect(): Promise<DatabaseClient>;
+  connect(options?: ConnectionOptions): Promise<DatabaseClient>;
 
   count(collection: string, query: object): Promise<number>;
 
@@ -25,14 +25,14 @@ interface IClientOperation {
 abstract class DatabaseClient implements IClientOperation {
   validator: ConnectionValidator;
 
-  constructor(options: ConnectionOptions) {
+  constructor(options?: ConnectionOptions) {
     this.validator = new ConnectionValidator();
     this.validator.validate(options);
   }
 
   abstract async close(): Promise<DatabaseClient>;
 
-  abstract async connect(): Promise<DatabaseClient>;
+  abstract async connect(options?: ConnectionOptions): Promise<DatabaseClient>;
 
   abstract async create(collection: string, payload: object): Promise<object>;
 

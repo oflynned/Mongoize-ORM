@@ -50,9 +50,9 @@ class MongoClient extends DatabaseClient {
     );
   }
 
-  async connect(): Promise<MongoClient> {
+  async connect(options?: ConnectionOptions): Promise<MongoClient> {
     this.client = await Mongo.MongoClient.connect(
-      this.validator.options.uri,
+      options.uri ? options.uri : this.validator.options.uri,
       this.mongoOptions()
     );
     return this;
@@ -83,6 +83,4 @@ class MongoClient extends DatabaseClient {
   }
 }
 
-export { ConnectionOptions };
-
-export default MongoClient;
+export { MongoClient, ConnectionOptions };
