@@ -8,6 +8,6 @@ module.exports = {
   collectCoverageFrom: ["./src/"],
   moduleFileExtensions: ["ts", "js", "json"],
   coverageDirectory: "./coverage",
-  testMatch: ["**/*.unit.ts"],
+  testMatch: ["**/*.{unit,integration}.ts"],
   verbose: true
 };

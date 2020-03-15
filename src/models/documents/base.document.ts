@@ -34,8 +34,6 @@ type IDeletionParams = {
 
 // type Client = MongoClient | MemoryClient;
 
-// TODO pseudo-relational data, ie type relations (1-n, n-1, n-n)
-
 abstract class BaseDocument<T, S extends Schema<T>>
   implements IBaseDocument, ISchema<T, S> {
   protected record: T | IBaseModel | any;
@@ -71,17 +69,17 @@ abstract class BaseDocument<T, S extends Schema<T>>
   ): Promise<BaseDocument<T, S>> {
     Logger.debug("update()");
 
-    try {
-      await this.joiSchema().validateOnUpdate(payload);
-      this.record = await Repository.updateOne(
-        <any>this.constructor,
-        client,
-        this.record._id,
-        { ...payload, updatedAt: new Date() }
-      );
-    } catch (e) {
-      Logger.error(e);
+    if (Object.keys(payload).length === 0) {
+      throw new Error("requires defined payload");
     }
+
+    await this.joiSchema().validateOnUpdate(payload);
+    this.record = await Repository.updateOne(
+      <any>this.constructor,
+      client,
+      this.record._id,
+      { ...payload, updatedAt: new Date() }
+    );
 
     return this;
   }
@@ -96,7 +94,6 @@ abstract class BaseDocument<T, S extends Schema<T>>
         _id: this.record._id
       });
       this.record = undefined;
-      // TODO if cascaded, then also ripple the deletion to relations
     } else {
       const deletionFields = { deleted: true, deletedAt: new Date() };
       this.record = await Repository.updateOne(
