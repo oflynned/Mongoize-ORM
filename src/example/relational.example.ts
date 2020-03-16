@@ -7,12 +7,24 @@ const main = async (client: InMemoryClient): Promise<void> => {
   await new Animal().build({ name: "Doggo", legs: 4 }).save(client);
 
   const animals = await Repository.with(Animal).findMany(client);
-  Logger.info(animals);
+  // Logger.info(animals);
 
-  await new Person().build({ name: "John Smith" }).save(client);
+  const person = await new Person().build({
+    name: "John Smith",
+    pet: animals[0]
+  });
 
-  const people = await Repository.with(Person).findMany(client);
-  Logger.info(people);
+  Logger.info(
+    `${person.toJson().name} is the owner of ${
+      person.toJson().pet.toJson().name
+    }`
+  );
+
+  // const p2 = await p1.save(client);
+  // Logger.info(p2);
+
+  // const people = await Repository.with(Person).findMany(client);
+  // Logger.info(people);
 };
 
 (async (): Promise<void> => {

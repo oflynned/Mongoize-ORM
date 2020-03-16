@@ -29,7 +29,7 @@
     "example:basic": "node_modules/.bin/ts-node src/example/basic.example.ts",
     "example:credentials": "node_modules/.bin/ts-node src/example/credential-validation.example.ts",
     "example:crud": "node_modules/.bin/ts-node src/example/crud.example.ts",
-    "example:relations": "node_modules/.bin/ts-node src/example/relational.example.ts",
+    "example:relational": "node_modules/.bin/ts-node src/example/relational.example.ts",
     "lint": "node_modules/.bin/eslint '**/*.{js,ts}' --ignore-path .gitignore",
     "lint:dependencies": "node_modules/.bin/ncu -e 2 --semverLevel major",
     "lint:dependencies:fix": "node_modules/.bin/ncu -u --semverLevel major && yarn && git add yarn.lock package.json && git commit -m 'auto-update dependencies'",
