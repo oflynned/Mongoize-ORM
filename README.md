@@ -199,7 +199,7 @@ Returns an array of records by a query. Returns `[]` if nothing matches.
 
 ##### .exists
 
-Returns true if the query contains at least 1 record. Returns false if not.
+Returns `true` if the query contains at least 1 record. Returns `false` if not.
 
 ##### .updateOne
 
