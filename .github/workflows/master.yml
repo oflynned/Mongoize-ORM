@@ -42,3 +42,6 @@ jobs:
 
       - name: Run integration tests
         run: yarn test:integration
+
+      - name: Build the package
+        run: yarn build

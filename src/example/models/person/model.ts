@@ -1,4 +1,4 @@
-import BaseDocument from "../../../models/documents/base.document";
+import { BaseDocument } from "../../../../src";
 import { IPerson, PersonSchema } from "./schema";
 
 class Person extends BaseDocument<IPerson, PersonSchema> {

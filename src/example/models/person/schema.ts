@@ -1,6 +1,5 @@
-import Joi from "joi";
 import Animal from "../animal";
-import Schema from "../../../models/schema/schema.model";
+import { Schema, Joi } from "../../../../src";
 
 export type IPerson = {
   name: string;

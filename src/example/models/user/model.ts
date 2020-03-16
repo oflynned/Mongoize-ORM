@@ -1,4 +1,4 @@
-import CredentialDocument from "../../../models/documents/credential-document";
+import { CredentialDocument } from "../../../../src";
 import { IUser, UserSchema } from "./schema";
 
 class User extends CredentialDocument<IUser, UserSchema> {

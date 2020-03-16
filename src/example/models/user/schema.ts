@@ -1,8 +1,4 @@
-import Joi from "joi";
-import {
-  CredentialSchema,
-  ICredential
-} from "../../../models/documents/credential-document";
+import { CredentialSchema, ICredential, Joi } from "../../../../src";
 
 export interface IUser extends ICredential {
   name: string;

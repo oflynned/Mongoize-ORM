@@ -34,7 +34,7 @@ class MongoClient extends DatabaseClient {
 
   async read(collection: string, query: object): Promise<object[]> {
     return this.withCollection(collection)
-      .find(query)
+      .find(query, {})
       .toArray();
   }
 

@@ -11,7 +11,7 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "baseUrl": "."
+    "baseUrl": "./"
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["./node_modules", "./src/example"]

@@ -1,6 +1,18 @@
 ## Mongoize ORM
 
 ### Setup
+```
+$ npm install mongoize-orm -S
+$ yarn add mongoize-orm
+```
+
+### Quick start
+
+```
+import { Schema, BaseDocument } from 'mongoize-orm'
+
+
+```
 
 ### Models
 

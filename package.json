@@ -13,30 +13,33 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oflynned/Mongoize-ORM.git"
+    "url": "https://github.com/oflynned/Mongoize-ORM"
   },
   "license": "ISC",
-  "author": "Edmond Ó Floinn",
+  "author": "Edmond Ó Floinn <oflynned@gmail.com>",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "/dist"
+  ],
   "scripts": {
-    "build": "yarn clean && tsc",
-    "clean": "rimraf ./dist",
+    "build": "yarn clean && node_modules/.bin/tsc",
+    "clean": "node_modules/.bin/rimraf ./dist",
     "deploy:npm": "yarn publish",
-    "example:basic": "ts-node ./src/example/basic.example.ts",
-    "example:credentials": "ts-node ./src/example/credential-validation.example.ts",
-    "example:crud": "ts-node ./src/example/crud.example.ts",
-    "example:relations": "ts-node ./src/example/relational.example.ts",
-    "lint": "eslint '**/*.{js,ts}' --ignore-path .gitignore",
-    "lint:dependencies": "ncu -e 2 --semverLevel major",
-    "lint:dependencies:fix": "ncu -u --semverLevel major && yarn && git add yarn.lock package.json && git commit -m 'auto-update dependencies'",
-    "lint:fix": "eslint '**/*.{js,ts}' --ignore-path .gitignore --quiet --fix",
-    "lint:package": "sort-package-json",
-    "lint:staged": "pretty-quick --staged",
-    "test": "jest -c jest.base.config.js",
-    "test:integration": "jest -c jest.integration.config.js",
-    "test:unit": "jest -c jest.unit.config.js",
-    "test:watch": "jest -c jest.base.config.js --watch"
+    "example:basic": "node_modules/.bin/ts-node src/example/basic.example.ts",
+    "example:credentials": "node_modules/.bin/ts-node src/example/credential-validation.example.ts",
+    "example:crud": "node_modules/.bin/ts-node src/example/crud.example.ts",
+    "example:relations": "node_modules/.bin/ts-node src/example/relational.example.ts",
+    "lint": "node_modules/.bin/eslint '**/*.{js,ts}' --ignore-path .gitignore",
+    "lint:dependencies": "node_modules/.bin/ncu -e 2 --semverLevel major",
+    "lint:dependencies:fix": "node_modules/.bin/ncu -u --semverLevel major && yarn && git add yarn.lock package.json && git commit -m 'auto-update dependencies'",
+    "lint:fix": "node_modules/.bin/eslint '**/*.{js,ts}' --ignore-path .gitignore --quiet --fix",
+    "lint:package": "node_modules/.bin/sort-package-json",
+    "lint:staged": "node_modules/.bin/pretty-quick --staged",
+    "test": "node_modules/.bin/jest -c jest.base.config.js",
+    "test:integration": "node_modules/.bin/jest -c jest.integration.config.js",
+    "test:unit": "node_modules/.bin/jest -c jest.unit.config.js",
+    "test:watch": "node_modules/.bin/jest -c jest.base.config.js --watch"
   },
   "dependencies": {
     "bcrypt": "^4.0.1",
@@ -81,6 +84,6 @@
     "typescript": "^3.8.2"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@oflynned"
+    "registry": "https://npm.pkg.github.com/oflynned"
   }
 }

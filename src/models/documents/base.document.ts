@@ -27,7 +27,7 @@ interface ISchema<T, S extends Schema<T>> {
   toJson(): T | IBaseModel;
 }
 
-type IDeletionParams = {
+export type IDeletionParams = {
   hard: boolean;
 };
 
@@ -38,6 +38,7 @@ abstract class BaseDocument<T, S extends Schema<T>>
   protected record: T | IBaseModel | any;
 
   collection(): string {
+    // TODO what about removing special characters and spaces?
     return `${this.constructor.name.toLowerCase()}s`;
   }
 
@@ -89,23 +90,17 @@ abstract class BaseDocument<T, S extends Schema<T>>
 
   async delete(
     client: Client,
-    params: Partial<IDeletionParams> = { hard: false }
+    params: IDeletionParams = { hard: false }
   ): Promise<void> {
-    const { hard } = params;
-    if (hard) {
-      await Repository.with(<any>this.constructor).deleteOne(
-        client,
-        this.record._id
-      );
-      this.record = undefined;
-    } else {
-      const deletionFields = { deleted: true, deletedAt: new Date() };
-      const newInstance = await Repository.with(
-        <any>this.constructor
-      ).updateOne(client, this.record._id, deletionFields);
+    this.onPreDelete();
+    const newInstance = await Repository.with(<any>this.constructor).deleteOne(
+      client,
+      this.record._id,
+      params
+    );
 
-      Object.assign(this, newInstance);
-    }
+    this.onPostDelete();
+    Object.assign(this, newInstance);
   }
 
   async onPostDelete(): Promise<void> {

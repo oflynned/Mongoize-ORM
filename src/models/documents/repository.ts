@@ -1,5 +1,5 @@
 import Schema from "../schema/schema.model";
-import BaseDocument from "./base.document";
+import BaseDocument, { IDeletionParams } from "./base.document";
 import DatabaseClient from "../../persistence/base.client";
 
 class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
@@ -24,15 +24,44 @@ class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
     await client.dropCollection(this.instanceType.collection());
   }
 
-  async deleteMany(client: DatabaseClient, query: object = {}): Promise<void> {
-    await client.deleteMany(this.instanceType.collection(), query);
+  async deleteMany(
+    client: DatabaseClient,
+    query: object = {},
+    params: IDeletionParams = { hard: false }
+  ): Promise<T[]> {
+    if (params.hard) {
+      await client.deleteMany(this.instanceType.collection(), query);
+      return [];
+    }
+
+    const records = await this.findMany(client, query);
+    return await Promise.all(
+      records.map(async (record: T) =>
+        this.updateOne(client, record.toJson()._id, {
+          deletedAt: new Date(),
+          deleted: true
+        })
+      )
+    );
   }
 
-  async deleteOne(client: DatabaseClient, _id: string): Promise<void> {
-    await client.deleteOne(this.instanceType.collection(), _id);
+  async deleteOne(
+    client: DatabaseClient,
+    _id: string,
+    params: IDeletionParams = { hard: false }
+  ): Promise<T | undefined> {
+    if (params.hard) {
+      await client.deleteOne(this.instanceType.collection(), _id);
+      return undefined;
+    }
+
+    return this.updateOne(client, _id, {
+      deletedAt: new Date(),
+      deleted: true
+    });
   }
 
-  async findOne(client: DatabaseClient, query: object): Promise<T> {
+  async findOne(client: DatabaseClient, query: object): Promise<T | undefined> {
     const records = await client.read(this.instanceType.collection(), query);
     if (records.length > 0) {
       return Repository.newInstance(this.instanceType).from(records[0]);
@@ -45,13 +74,25 @@ class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
     return this.findOne(client, { _id });
   }
 
+  async exists(client: DatabaseClient, _id: string): Promise<boolean> {
+    return (await this.count(client, { _id })) > 0;
+  }
+
   async updateOne(
     client: DatabaseClient,
     _id: string,
     updatedFields: object
   ): Promise<T> {
-    await client.updateOne(this.instanceType.collection(), _id, updatedFields);
-    return this.findOne(client, { _id });
+    if (await this.exists(client, _id)) {
+      await client.updateOne(
+        this.instanceType.collection(),
+        _id,
+        updatedFields
+      );
+      return this.findOne(client, { _id });
+    }
+
+    return undefined;
   }
 
   async findMany(client: DatabaseClient, query: object = {}): Promise<T[]> {

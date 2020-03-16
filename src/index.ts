@@ -6,6 +6,7 @@ import CredentialDocument, {
   CredentialSchema,
   ICredential
 } from "./models/documents/credential-document";
+import Joi from "joi";
 
 export {
   Repository,
@@ -16,5 +17,6 @@ export {
   CredentialDocument,
   ICredential,
   Schema,
-  BaseDocument
+  BaseDocument,
+  Joi
 };

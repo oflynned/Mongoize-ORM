@@ -1,5 +1,4 @@
-import Joi from "joi";
-import Schema from "../../../models/schema/schema.model";
+import { Schema, Joi } from "../../../../src";
 
 export type IAnimal = {
   name: string;
