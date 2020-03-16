@@ -73,6 +73,7 @@ abstract class BaseDocument<T, S extends Schema<T>>
     payload: Partial<T>
   ): Promise<BaseDocument<T, S>> {
     Logger.debug("update()");
+    this.onPreUpdate();
 
     if (Object.keys(payload).length === 0) {
       throw new Error("requires defined payload");
@@ -84,6 +85,7 @@ abstract class BaseDocument<T, S extends Schema<T>>
     ).updateOne(client, this.record._id, { ...payload, updatedAt: new Date() });
 
     Object.assign(this, newInstance);
+    this.onPostUpdate();
 
     return this;
   }
