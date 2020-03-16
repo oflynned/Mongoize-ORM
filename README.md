@@ -139,7 +139,9 @@ When `await new User().build({...}).save()` is called:
 
 When `await user.update({...})` or `await Repository.with(User).updateOne(client, "id", {...})` is called:
 
+- onPreUpdate
 - validateOnUpdate\*
+- onPostUpdate
 - update\*
 
 ##### Delete
