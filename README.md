@@ -46,13 +46,18 @@ class Animal extends BaseDocument<IAnimal, AnimalSchema> {
 }
 ```
 
-With just the code above, you have a fully-usable model that you can perform actions on or commit to a database.
-
 You'll also need a client (either in-memory or mongodb) to connect to for use.
 
 ```
+import { InMemoryClient, MongoClient } from 'mongoize-orm';
+
 const client = await new InMemoryClient().connect();
-const animal: Animal = new Animal().build({name: "Doggo", legs: 4}).save(dbClient);
+```
+
+Now you have a fully-usable model that you can perform actions on or commit to a database.
+
+```
+const animal: Animal = new Animal().build({name: "Doggo", legs: 4}).save(client);
 console.log(animal.toJson());
 
 // don't forget to close the connection when you're done
