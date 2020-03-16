@@ -7,6 +7,12 @@ $ npm install mongoize-orm -S
 $ yarn add mongoize-orm
 ```
 
+### Show me some actual examples
+
+Have a look here
+
+https://github.com/oflynned/Mongoize-ORM/tree/master/src/example
+
 ### Quick start
 
 You just need to implement the two abstract classes `Schema` and `BaseDocument` to get started with using Mongoize-ORM.
