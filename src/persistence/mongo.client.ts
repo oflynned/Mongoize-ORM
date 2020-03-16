@@ -73,7 +73,7 @@ class MongoClient extends DatabaseClient {
     };
   }
 
-  private withDb(): Db {
+  withDb(): Db {
     return this.client.db(this.validator.options.database);
   }
 
