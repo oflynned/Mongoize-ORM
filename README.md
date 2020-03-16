@@ -109,9 +109,9 @@ collection(): string {
 
 ##### .from()\*
 
-Don't use this method unless you want to copy a record directly into another from the schema definition-level. This is used internally to cast database records into model instances. Use at `.build()` instead to obey schemas.
+Don't use this method unless you want to copy a record directly into another from the schema definition-level. This is used internally to cast database records into model instances. Use `.build()` instead to obey schemas.
 
-On a model instance however, the type is still inferred but no base record content is populated (\_id, createdAt, updatedAt, deletedAt, deleted)
+On a model instance however, the type is still inferred but no base record content will be populated (\_id, createdAt, updatedAt, deletedAt, deleted)
 
 ##### .save()
 
