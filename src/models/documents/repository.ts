@@ -50,15 +50,19 @@ class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
     _id: string,
     params: IDeletionParams = { hard: false }
   ): Promise<T | undefined> {
-    if (params.hard) {
-      await client.deleteOne(this.instanceType.collection(), _id);
-      return undefined;
+    if (await this.exists(client, _id)) {
+      if (params.hard) {
+        await client.deleteOne(this.instanceType.collection(), _id);
+        return undefined;
+      }
+
+      return this.updateOne(client, _id, {
+        deletedAt: new Date(),
+        deleted: true
+      });
     }
 
-    return this.updateOne(client, _id, {
-      deletedAt: new Date(),
-      deleted: true
-    });
+    return undefined;
   }
 
   async findOne(client: DatabaseClient, query: object): Promise<T | undefined> {

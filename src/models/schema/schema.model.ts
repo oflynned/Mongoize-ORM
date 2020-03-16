@@ -3,9 +3,9 @@ import { v4 as uuid } from "uuid";
 
 export type IBaseModel = {
   _id: string;
-  createdAt: number;
-  updatedAt: number | null;
-  deletedAt: number | null;
+  createdAt: Date;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
   deleted: boolean;
 };
 

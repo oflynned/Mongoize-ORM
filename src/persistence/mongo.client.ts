@@ -10,11 +10,11 @@ class MongoClient extends DatabaseClient {
     return payload;
   }
 
-  async deleteOne(collection: string, _id: string): Promise<boolean> {
+  async deleteOne(collection: string, _id: string): Promise<number> {
     const { deletedCount } = await this.withCollection(collection).deleteOne({
       _id
     });
-    return deletedCount > 0;
+    return deletedCount;
   }
 
   async deleteMany(collection: string, query: object): Promise<number> {

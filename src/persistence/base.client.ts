@@ -11,7 +11,7 @@ interface IClientOperation {
 
   updateOne(collection: string, _id: string, payload: object): Promise<object>;
 
-  deleteOne(collection: string, _id: string): Promise<boolean>;
+  deleteOne(collection: string, _id: string): Promise<number>;
 
   deleteMany(collection: string, query: object): Promise<number>;
 
@@ -36,7 +36,7 @@ abstract class DatabaseClient implements IClientOperation {
 
   abstract async create(collection: string, payload: object): Promise<object>;
 
-  abstract async deleteOne(collection: string, _id: string): Promise<boolean>;
+  abstract async deleteOne(collection: string, _id: string): Promise<number>;
 
   abstract async deleteMany(collection: string, query: object): Promise<number>;
 

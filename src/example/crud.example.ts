@@ -34,9 +34,7 @@ const main = async (client: InMemoryClient): Promise<void> => {
 
   await a.delete(client, { hard: true });
   Logger.info("I've been hard deleted");
-
-  // returns false as it's two separate deep clones of the same instance from the db
-  Logger.info("are a and animal the same instance?", a === animal);
+  Logger.info(a);
 };
 
 (async (): Promise<void> => {

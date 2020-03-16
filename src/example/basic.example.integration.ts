@@ -122,6 +122,10 @@ describe("Basic example", () => {
   });
 
   describe("#delete", () => {
+    it("should throw error on deleting a record that doesn't exist", () => {
+      expect(new Animal().delete(client)).rejects.toThrowError();
+    });
+
     describe("with hard delete", () => {
       let model: Animal;
 
@@ -146,6 +150,7 @@ describe("Basic example", () => {
       });
 
       it("should not hard delete", () => {
+        expect(model).toBeDefined();
         expect(model.toJson()).toBeDefined();
       });
 
