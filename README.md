@@ -46,11 +46,17 @@ class Animal extends BaseDocument<IAnimal, AnimalSchema> {
 }
 ```
 
-With just the code above, you have a fully-usable
+With just the code above, you have a fully-usable model that you can perform actions on or commit to a database.
+
+You'll also need a client (either in-memory or mongodb) to connect to for use.
 
 ```
+const client = await new InMemoryClient().connect();
 const animal: Animal = new Animal().build({name: "Doggo", legs: 4}).save(dbClient);
 console.log(animal.toJson());
+
+// don't forget to close the connection when you're done
+await client.close();
 
 {
   name: 'Doggo',
@@ -80,7 +86,7 @@ Models comprise of three distinct parts:
 
 ##### .build()
 
-Construct a new instance with
+Construct a new instance with the type and base type schema in mind.
 
 ##### .collection()
 
