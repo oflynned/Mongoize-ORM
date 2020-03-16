@@ -173,34 +173,34 @@ Fetch an instance of the repository with `Repository.with(User)`. You can use th
 
 Returns the count of records matching the query.
 
-##### deleteCollection
+##### .deleteCollection
 
 Purges the collection by name.
 
-##### deleteMany
+##### .deleteMany
 
 Deletes records (hard or soft) with a query.
 
-##### deleteOne
+##### .deleteOne
 
 Deletes a single record by id.
 
-##### findOne
+##### .findOne
 
 Returns a single record if it exists (first in the array). Returns `undefined` if not.
 
-##### findById
+##### .findById
 
 Returns a record if the id exists. Returns `undefined` if not.
 
-##### findMany
+##### .findMany
 
 Returns an array of records by a query. Returns `[]` if nothing matches.
 
-##### exists
+##### .exists
 
 Returns true if the query contains at least 1 record. Returns false if not.
 
-##### updateOne
+##### .updateOne
 
 Dispatches the update when validated to the db. Returns an updated record if successfully validated. Returns `undefined` if record doesn't exist.
