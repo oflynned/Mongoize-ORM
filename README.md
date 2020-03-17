@@ -3,8 +3,8 @@
 ### Setup
 
 ```
-$ npm install mongoize-orm -S
-$ yarn add mongoize-orm
+$ npm install -S @oflynned/mongoize-orm
+$ yarn add @oflynned/mongoize-orm
 ```
 
 ### Show me some actual examples

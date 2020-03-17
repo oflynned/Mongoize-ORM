@@ -101,8 +101,9 @@ abstract class BaseDocument<T, S extends Schema<T>>
       params
     );
 
-    this.onPostDelete();
     this.record = newInstance ? newInstance.record : undefined;
+
+    this.onPostDelete();
 
     // FIXME undefined not applied to `this` instance
     // Object.assign(this, newInstance);

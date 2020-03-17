@@ -1,6 +1,6 @@
 {
   "name": "@oflynned/mongoize-orm",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Simplify MongoDB model persistence with a smart layer in between you and your database",
   "keywords": [
     "mongodb",
