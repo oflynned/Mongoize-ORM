@@ -20,6 +20,19 @@ describe("Connection Validator", () => {
         );
       });
 
+      it("should validate in-memory uri", () => {
+        const options: ConnectionOptions = {
+          uri: "mongodb://127.0.0.1:44577/7fb25855-8d0c-448d-88d8-1cb341e7554c?"
+        };
+
+        validator.validate(options);
+        expect(validator.options.host).toEqual("127.0.0.1");
+        expect(validator.options.port).toEqual(44577);
+        expect(validator.options.database).toEqual(
+          "7fb25855-8d0c-448d-88d8-1cb341e7554c?"
+        );
+      });
+
       it("should throw error on invalid port", () => {
         const options: ConnectionOptions = {
           uri: "mongodb://username:password@host:port/database"

@@ -24,10 +24,10 @@ const defaultOptions: ConnectionOptions = {
 
 const parseUriString = (uri: string): ConnectionOptions => {
   const regex = new RegExp(
-    /^(mongodb:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\w+?):(\d+)\/(\w+?)$/
+    /^(mongodb:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\S+?):(\d+)\/(\S+?)(\?replicaSet=(\S+?))?$/
   );
-  const fields = uri.split(regex);
 
+  const fields = uri.split(regex);
   if (fields.length < 8) {
     throw new Error("bad connection string passed");
   }
@@ -69,6 +69,7 @@ export class ConnectionValidator {
   options: ConnectionOptions;
 
   validate(connection: ConnectionOptions = defaultOptions): void {
+    console.log(connection);
     if (connection.uri) {
       const { uri, username, password, host, port, database } = parseUriString(
         connection.uri

@@ -25,14 +25,16 @@ interface IClientOperation {
 abstract class DatabaseClient implements IClientOperation {
   validator: ConnectionValidator;
 
-  constructor(options?: ConnectionOptions) {
+  constructor() {
     this.validator = new ConnectionValidator();
-    this.validator.validate(options);
   }
 
   abstract async close(): Promise<void>;
 
-  abstract async connect(options?: ConnectionOptions): Promise<DatabaseClient>;
+  async connect(options?: ConnectionOptions): Promise<DatabaseClient> {
+    this.validator.validate(options);
+    return this;
+  }
 
   abstract async create(collection: string, payload: object): Promise<object>;
 

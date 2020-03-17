@@ -51,8 +51,9 @@ class MongoClient extends DatabaseClient {
   }
 
   async connect(options?: ConnectionOptions): Promise<MongoClient> {
+    await super.connect(options);
     this.client = await Mongo.MongoClient.connect(
-      options.uri ? options.uri : this.validator.options.uri,
+      this.validator.options.uri,
       this.mongoOptions()
     );
     return this;
