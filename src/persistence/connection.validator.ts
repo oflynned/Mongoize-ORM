@@ -69,7 +69,6 @@ export class ConnectionValidator {
   options: ConnectionOptions;
 
   validate(connection: ConnectionOptions = defaultOptions): void {
-    console.log(connection);
     if (connection.uri) {
       const { uri, username, password, host, port, database } = parseUriString(
         connection.uri
