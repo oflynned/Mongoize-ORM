@@ -93,7 +93,7 @@ class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
         _id,
         updatedFields
       );
-      return this.findOne(client, { _id });
+      return this.findById(client, _id);
     }
 
     return undefined;
