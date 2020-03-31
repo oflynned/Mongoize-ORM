@@ -60,8 +60,7 @@ abstract class BaseDocument<T, S extends Schema<T>>
     await this.onPreValidate();
 
     Logger.debug("validating...");
-    this.record = (await this.joiSchema().validate(this.record)) as T &
-      IBaseModel;
+    this.record = (await this.joiSchema().validate(this.record)).value;
 
     await this.onPostValidate();
 

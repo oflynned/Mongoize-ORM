@@ -6,7 +6,7 @@ import CredentialDocument, {
   CredentialSchema,
   ICredential
 } from "./models/documents/credential-document";
-import Joi from "joi";
+import Joi from "@hapi/joi";
 
 export {
   Repository,

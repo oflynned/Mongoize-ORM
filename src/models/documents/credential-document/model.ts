@@ -12,7 +12,7 @@ abstract class CredentialDocument<
   async passwordAttemptMatches(passwordAttempt: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       // record hasn't been validated & hashed yet
-      if (this.record.passwordHash === undefined) {
+      if (!this.record.passwordHash) {
         resolve(false);
         return;
       }
@@ -28,17 +28,17 @@ abstract class CredentialDocument<
     });
   }
 
-  onPrePasswordHash(): void {
+  async onPrePasswordHash(): Promise<void> {
     Logger.debug("onPreHash()");
   }
 
-  onPostPasswordHash(): void {
+  async onPostPasswordHash(): Promise<void> {
     Logger.debug("onPostHash()");
   }
 
   async onPreValidate(): Promise<void> {
+    await this.onPrePasswordHash();
     return new Promise((resolve, reject) => {
-      this.onPrePasswordHash();
       hash(this.record.password, this.saltRounds, (error, passwordHash) => {
         if (error) {
           reject(error);
@@ -47,8 +47,7 @@ abstract class CredentialDocument<
 
         delete this.record.password;
         this.record.passwordHash = passwordHash;
-        this.onPostPasswordHash();
-        resolve();
+        return this.onPostPasswordHash();
       });
     });
   }

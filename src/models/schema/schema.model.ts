@@ -1,4 +1,4 @@
-import Joi from "joi";
+import Joi from "@hapi/joi";
 import { v4 as uuid } from "uuid";
 
 export type IBaseModel = {
@@ -34,12 +34,12 @@ abstract class Schema<T> {
 
   validate(data: IBaseModel | T) {
     const joiSchema = Joi.object({ ...baseJoiSchema, ...this.joiBaseSchema() });
-    return Joi.validate(data, joiSchema, { stripUnknown: true });
+    return joiSchema.validate(data, { stripUnknown: true });
   }
 
   validateOnUpdate(data: IBaseModel | Partial<T>) {
     const joiSchema = Joi.object({ ...this.joiUpdateSchema() });
-    return Joi.validate(data, joiSchema, { stripUnknown: true });
+    return joiSchema.validate(data, { stripUnknown: true });
   }
 
   abstract joiBaseSchema(): object;

@@ -1,5 +1,5 @@
 import Schema from "../../schema/schema.model";
-import Joi from "joi";
+import Joi from "@hapi/joi";
 
 export type ICredential = {
   password?: string;
