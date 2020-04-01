@@ -3,7 +3,7 @@ import User from "../../../example/models/user";
 import { IUser } from "../../../example/models/user/schema";
 
 describe("credential document", () => {
-  let client: InMemoryClient = new InMemoryClient();
+  const client: InMemoryClient = new InMemoryClient();
   const userParams: IUser = { email: "", name: "", password: "a" };
 
   beforeAll(async () => {
