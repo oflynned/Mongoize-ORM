@@ -15,7 +15,7 @@ abstract class CredentialDocument<
   maxPlaintextPasswordLength = 128;
 
   // here is a base password regex to get started
-  // must contain
+  // must contain at least 1 lowercase letter, 1 uppercase letter, 1 number, 1 special character
   passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).+$/;
 
   async passwordAttemptMatches(passwordAttempt: string): Promise<boolean> {
