@@ -1,6 +1,6 @@
-import { InMemoryClient } from "../../../persistence";
-import User from "../../../example/models/user";
-import { IUser } from "../../../example/models/user/schema";
+import { InMemoryClient } from "../persistence";
+import User from "./models/user";
+import { IUser } from "./models/user/schema";
 
 describe("credential document", () => {
   const client: InMemoryClient = new InMemoryClient();
