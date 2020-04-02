@@ -2,10 +2,6 @@ import Logger from "../logger";
 import Animal from "./models/animal";
 import { InMemoryClient, Repository } from "../../src";
 
-async function something(client: InMemoryClient): Promise<Animal> {
-  return new Animal().build({ name: "doggo" }).save(client);
-}
-
 const main = async (client: InMemoryClient): Promise<void> => {
   const animal = await new Animal()
     .build({ name: "Doggo", legs: 4 })
