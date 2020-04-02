@@ -2,11 +2,11 @@ import Joi from "@hapi/joi";
 import { v4 as uuid } from "uuid";
 
 export type IBaseModel = {
-  _id: string;
-  createdAt: Date;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-  deleted: boolean;
+  readonly _id: string;
+  readonly createdAt: Date;
+  readonly updatedAt: Date | null;
+  readonly deletedAt: Date | null;
+  readonly deleted: boolean;
 };
 
 const baseJoiSchema = {
