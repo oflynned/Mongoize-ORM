@@ -50,7 +50,7 @@ class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
     _id: string,
     params: IDeletionParams = { hard: false }
   ): Promise<T | undefined> {
-    if (await this.exists(client, _id)) {
+    if (await this.existsById(client, _id)) {
       if (params.hard) {
         await client.deleteOne(this.instanceType.collection(), _id);
         return undefined;
@@ -78,8 +78,12 @@ class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
     return this.findOne(client, { _id });
   }
 
-  async exists(client: DatabaseClient, _id: string): Promise<boolean> {
+  async existsById(client: DatabaseClient, _id: string): Promise<boolean> {
     return (await this.count(client, { _id })) > 0;
+  }
+
+  async exists(client: DatabaseClient, query: object): Promise<boolean> {
+    return (await this.count(client, query)) > 0;
   }
 
   async updateOne(
@@ -87,7 +91,7 @@ class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
     _id: string,
     updatedFields: object
   ): Promise<T> {
-    if (await this.exists(client, _id)) {
+    if (await this.existsById(client, _id)) {
       await client.updateOne(
         this.instanceType.collection(),
         _id,
