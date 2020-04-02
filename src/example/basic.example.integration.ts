@@ -107,9 +107,7 @@ describe("Basic example", () => {
     });
 
     it("should require at least one field in payload", () => {
-      expect(model.update(client, {})).rejects.toThrowError(
-        "requires defined payload"
-      );
+      expect(model.update(client, {})).rejects.toThrowError("payload is empty");
     });
 
     it("should update field", () => {

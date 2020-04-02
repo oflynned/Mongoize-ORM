@@ -38,7 +38,6 @@ abstract class BaseDocument<T, S extends Schema<T>>
   protected record: T | IBaseModel | any;
 
   collection(): string {
-    // TODO what about removing special characters and spaces?
     return `${this.constructor.name.toLowerCase()}s`;
   }
 
@@ -75,7 +74,7 @@ abstract class BaseDocument<T, S extends Schema<T>>
     this.onPreUpdate();
 
     if (Object.keys(payload).length === 0) {
-      throw new Error("requires defined payload");
+      throw new Error("payload is empty");
     }
 
     await this.joiSchema().validateOnUpdate(payload);
