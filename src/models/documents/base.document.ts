@@ -144,7 +144,7 @@ abstract class BaseDocument<T, S extends Schema<T>>
     return this.record as T & IBaseModel;
   }
 
-  async save(client: Client): Promise<BaseDocument<T, S>> {
+  async save(client: Client): Promise<BaseDocument<T, S> | any> {
     const validatedPayload = await this.validate();
     Logger.debug("save()");
     await this.onPreSave();
