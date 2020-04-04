@@ -22,7 +22,7 @@ describe("credential-document", () => {
   });
 
   describe("default properties", () => {
-    let user: User = new User();
+    const user: User = new User();
 
     it("should default to 12 hash cost rounds", () => {
       expect(user.saltRounds).toEqual(12);
@@ -73,14 +73,10 @@ describe("credential-document", () => {
     });
 
     describe("with an un-persisted user", () => {
-      let user: User;
-
-      beforeAll(async () => {
-        user = new User().build({
-          password: "plaintextPassword1!",
-          name: "user",
-          email: "user@email.com"
-        });
+      const user: User = new User().build({
+        password: "plaintextPassword1!",
+        name: "user",
+        email: "user@email.com"
       });
 
       it("should have a defined password", () => {
@@ -156,7 +152,7 @@ describe("credential-document", () => {
       expect(onPrePasswordHashSpy.calledOnce).toBeTruthy();
     });
 
-    it("should call onPrePasswordHash", async () => {
+    it("should call onPostPasswordHash", async () => {
       expect(onPostPasswordHashSpy.calledOnce).toBeTruthy();
     });
   });

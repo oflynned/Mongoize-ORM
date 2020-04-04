@@ -86,15 +86,6 @@ describe("base-document", () => {
     });
   });
 
-  describe("#save", () => {
-    let model: Animal;
-
-    beforeAll(async done => {
-      model = await new Animal().build({ name: "Name" }).save(client);
-      done();
-    });
-  });
-
   describe("#collection", () => {
     let model: Animal;
 
