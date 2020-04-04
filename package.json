@@ -1,5 +1,5 @@
 {
-  "name": "@oflynned/mongoize-orm",
+  "name": "mongoize-orm",
   "version": "0.9.7",
   "description": "Simplify MongoDB model persistence with a smart layer in between you and your database",
   "keywords": [
