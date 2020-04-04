@@ -96,12 +96,7 @@ export abstract class BaseDocument<T, S extends Schema<T>>
     );
 
     this.record = newInstance ? newInstance.record : undefined;
-
     this.onPostDelete();
-
-    // FIXME undefined not applied to `this` instance
-    // Object.assign(this, newInstance);
-    // return this;
   }
 
   async onPostDelete(): Promise<void> {
