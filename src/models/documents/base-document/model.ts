@@ -1,7 +1,7 @@
 import Schema, { IBaseModel } from "../../schema/schema.model";
 import Logger from "../../../logger";
-import { InMemoryClient, MongoClient } from "../../../persistence";
-import Repository from "../repository/repository";
+import { MongoClient } from "../../../persistence/client";
+import Repository from "../../repository";
 
 interface IBaseDocument {
   onPreValidate(): void;
@@ -31,9 +31,7 @@ export type IDeletionParams = {
   hard: boolean;
 };
 
-type Client = InMemoryClient | MongoClient;
-
-abstract class BaseDocument<T, S extends Schema<T>>
+export abstract class BaseDocument<T, S extends Schema<T>>
   implements IBaseDocument, ISchema<T, S> {
   protected record: T | IBaseModel | any;
 
@@ -55,7 +53,6 @@ abstract class BaseDocument<T, S extends Schema<T>>
 
   async validate(): Promise<T | IBaseModel> {
     Logger.debug("validate()");
-
     await this.onPreValidate();
 
     Logger.debug("validating...");
@@ -67,7 +64,7 @@ abstract class BaseDocument<T, S extends Schema<T>>
   }
 
   async update(
-    client: Client,
+    client: MongoClient,
     payload: Partial<T>
   ): Promise<BaseDocument<T, S>> {
     Logger.debug("update()");
@@ -89,7 +86,7 @@ abstract class BaseDocument<T, S extends Schema<T>>
   }
 
   async delete(
-    client: Client,
+    client: MongoClient,
     params: IDeletionParams = { hard: false }
   ): Promise<void> {
     this.onPreDelete();
@@ -144,7 +141,7 @@ abstract class BaseDocument<T, S extends Schema<T>>
     return this.record as T & IBaseModel;
   }
 
-  async save(client: Client): Promise<BaseDocument<T, S> | any> {
+  async save(client: MongoClient): Promise<BaseDocument<T, S> | any> {
     const validatedPayload = await this.validate();
     Logger.debug("save()");
     await this.onPreSave();
@@ -158,5 +155,3 @@ abstract class BaseDocument<T, S extends Schema<T>>
     return this;
   }
 }
-
-export default BaseDocument;

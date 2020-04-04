@@ -1,55 +1,30 @@
 import Animal from "../../../example/models/animal";
-import { InMemoryClient } from "../../../persistence";
+import { InMemoryClient } from "../../../persistence/client";
 
-describe("Basic example", () => {
+describe("base-document", () => {
   let client: InMemoryClient;
 
-  beforeAll(async done => {
+  beforeAll(async () => {
     client = await new InMemoryClient().connect();
-    done();
   });
 
-  afterEach(async done => {
+  beforeEach(async () => {
     await client.dropDatabase();
-    done();
   });
 
-  afterAll(async done => {
+  afterEach(async () => {
+    await client.dropDatabase();
+  });
+
+  afterAll(async () => {
     await client.close();
-    done();
   });
 
-  describe("#build", () => {
+  describe("#toJSON", () => {
     let model: Animal;
 
-    beforeAll(async done => {
+    beforeAll(async () => {
       model = await new Animal().build({ name: "Name" }).save(client);
-      done();
-    });
-
-    it("should be undefined before #build", () => {
-      expect(new Animal().toJson()).toBeUndefined();
-    });
-
-    it("should build model", () => {
-      expect(model.toJson()).not.toBeUndefined();
-    });
-  });
-
-  describe("#save", () => {
-    let model: Animal;
-
-    beforeAll(async done => {
-      model = await new Animal().build({ name: "Name" }).save(client);
-      done();
-    });
-
-    describe("#collection", () => {
-      it("should default to appending s", () => {
-        expect(model.collection()).toEqual(
-          model.constructor.name.toLowerCase() + "s"
-        );
-      });
     });
 
     it("should contain default properties", () => {
@@ -95,7 +70,44 @@ describe("Basic example", () => {
     });
   });
 
-  describe.skip("read", () => {});
+  describe("#build", () => {
+    let model: Animal;
+
+    beforeAll(async () => {
+      model = await new Animal().build({ name: "Name" }).save(client);
+    });
+
+    it("should be undefined before #build", () => {
+      expect(new Animal().toJson()).toBeUndefined();
+    });
+
+    it("should build model", () => {
+      expect(model.toJson()).not.toBeUndefined();
+    });
+  });
+
+  describe("#save", () => {
+    let model: Animal;
+
+    beforeAll(async done => {
+      model = await new Animal().build({ name: "Name" }).save(client);
+      done();
+    });
+  });
+
+  describe("#collection", () => {
+    let model: Animal;
+
+    beforeAll(async () => {
+      model = await new Animal();
+    });
+
+    it("should default to appending s", () => {
+      expect(model.collection()).toEqual(
+        model.constructor.name.toLowerCase() + "s"
+      );
+    });
+  });
 
   describe("#update", () => {
     let model: Animal;

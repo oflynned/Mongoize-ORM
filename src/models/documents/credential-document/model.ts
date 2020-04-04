@@ -1,5 +1,5 @@
 import { compare, hash } from "bcrypt";
-import BaseDocument from "../base.document";
+import BaseDocument from "../base-document";
 import Logger from "../../../logger";
 import { CredentialSchema, ICredential } from "./schema";
 
@@ -72,9 +72,9 @@ abstract class CredentialDocument<
 
         delete this.record.password;
         this.record.passwordHash = passwordHash;
-        return this.onPostPasswordHash();
+        resolve();
       });
-    });
+    }).then(() => this.onPostPasswordHash());
   }
 }
 

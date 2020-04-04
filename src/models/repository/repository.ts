@@ -1,6 +1,6 @@
-import Schema from "../../schema/schema.model";
-import BaseDocument, { IDeletionParams } from "../base-document";
-import DatabaseClient from "../../../persistence/base.client";
+import Schema from "../schema/schema.model";
+import BaseDocument, { IDeletionParams } from "../documents/base-document";
+import DatabaseClient from "../../persistence/client/base.client";
 
 export class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
   private instanceType: T;

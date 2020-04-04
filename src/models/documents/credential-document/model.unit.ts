@@ -1,21 +1,44 @@
-import { InMemoryClient } from "../persistence";
-import User from "./models/user";
-import { IUser } from "./models/user/schema";
+import { InMemoryClient } from "../../../persistence/client";
+import User, { IUser } from "../../../example/models/user";
+import sinon, { SinonSpy } from "sinon";
 
-describe("credential document", () => {
-  const client: InMemoryClient = new InMemoryClient();
-  const userParams: IUser = { email: "", name: "", password: "a" };
+describe("credential-document", () => {
+  let client: InMemoryClient;
 
   beforeAll(async () => {
-    await client.connect();
+    client = await new InMemoryClient().connect();
+  });
+
+  beforeEach(async () => {
+    await client.dropDatabase();
+  });
+
+  afterEach(async () => {
+    await client.dropDatabase();
   });
 
   afterAll(async () => {
     await client.close();
   });
 
+  describe("default properties", () => {
+    let user: User = new User();
+
+    it("should default to 12 hash cost rounds", () => {
+      expect(user.saltRounds).toEqual(12);
+    });
+
+    it("should default to min password length of 6", () => {
+      expect(user.minPlaintextPasswordLength).toEqual(6);
+    });
+
+    it("should default to max password length of 128", () => {
+      expect(user.maxPlaintextPasswordLength).toEqual(128);
+    });
+  });
+
   describe("#passwordAttemptMatches", () => {
-    describe("with persisted user", () => {
+    describe("with a persisted user", () => {
       let user: User;
 
       beforeAll(async () => {
@@ -26,6 +49,14 @@ describe("credential document", () => {
             email: "user@email.com"
           })
           .save(client);
+      });
+
+      it("should not have a defined plaintext password", () => {
+        expect(user.toJson().password).toBeUndefined();
+      });
+
+      it("should have a defined hash", () => {
+        expect(user.toJson().passwordHash).toBeDefined();
       });
 
       it("should match password attempt", async () => {
@@ -41,7 +72,7 @@ describe("credential document", () => {
       });
     });
 
-    describe("with unpersisted user", () => {
+    describe("with an un-persisted user", () => {
       let user: User;
 
       beforeAll(async () => {
@@ -52,7 +83,15 @@ describe("credential document", () => {
         });
       });
 
-      it("should resolve with false", async () => {
+      it("should have a defined password", () => {
+        expect(user.toJson().password).toBeDefined();
+      });
+
+      it("should have an undefined hash", () => {
+        expect(user.toJson().passwordHash).toBeUndefined();
+      });
+
+      it("should resolve with false before persisting", async () => {
         await expect(
           user.passwordAttemptMatches("plaintextPassword1!")
         ).resolves.toBeFalsy();
@@ -61,6 +100,8 @@ describe("credential document", () => {
   });
 
   describe("#onPrePasswordHash", () => {
+    const userParams: IUser = { email: "", name: "", password: "a" };
+
     it("should require at least 6 characters", async () => {
       const user = new User().build({ ...userParams, password: "a".repeat(5) });
       await expect(user.onPrePasswordHash()).rejects.toThrowError(
@@ -94,5 +135,29 @@ describe("credential document", () => {
     });
   });
 
-  describe("#onPreValidate", () => {});
+  describe("#onPreValidate", () => {
+    let user: User;
+    let onPrePasswordHashSpy: SinonSpy, onPostPasswordHashSpy: SinonSpy;
+
+    beforeAll(async () => {
+      user = new User().build({
+        password: "plaintextPassword1!",
+        name: "user",
+        email: "user@email.com"
+      });
+
+      onPrePasswordHashSpy = sinon.spy(user, "onPrePasswordHash");
+      onPostPasswordHashSpy = sinon.spy(user, "onPostPasswordHash");
+
+      await user.save(client);
+    });
+
+    it("should call onPrePasswordHash", async () => {
+      expect(onPrePasswordHashSpy.calledOnce).toBeTruthy();
+    });
+
+    it("should call onPrePasswordHash", async () => {
+      expect(onPostPasswordHashSpy.calledOnce).toBeTruthy();
+    });
+  });
 });

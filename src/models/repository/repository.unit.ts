@@ -1,6 +1,6 @@
-import Animal from "../../../example/models/animal";
-import Repository from "./";
-import { InMemoryClient } from "../../../persistence";
+import Animal from "../../example/models/animal";
+import Repository from "./index";
+import { InMemoryClient } from "../../persistence/client";
 
 describe("repository", () => {
   const client: InMemoryClient = new InMemoryClient();
