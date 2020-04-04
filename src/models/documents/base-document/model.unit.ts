@@ -1,5 +1,5 @@
-import Animal from "./models/animal";
-import { InMemoryClient } from "../persistence";
+import Animal from "../../../example/models/animal";
+import { InMemoryClient } from "../../../persistence";
 
 describe("Basic example", () => {
   let client: InMemoryClient;

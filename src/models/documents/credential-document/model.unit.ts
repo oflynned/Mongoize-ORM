@@ -14,6 +14,52 @@ describe("credential document", () => {
     await client.close();
   });
 
+  describe("#passwordAttemptMatches", () => {
+    describe("with persisted user", () => {
+      let user: User;
+
+      beforeAll(async () => {
+        user = await new User()
+          .build({
+            password: "plaintextPassword1!",
+            name: "user",
+            email: "user@email.com"
+          })
+          .save(client);
+      });
+
+      it("should match password attempt", async () => {
+        await expect(
+          user.passwordAttemptMatches("plaintextPassword1!")
+        ).resolves.toBeTruthy();
+      });
+
+      it("should not match password attempt", async () => {
+        await expect(
+          user.passwordAttemptMatches("bad password attempt")
+        ).resolves.toBeFalsy();
+      });
+    });
+
+    describe("with unpersisted user", () => {
+      let user: User;
+
+      beforeAll(async () => {
+        user = new User().build({
+          password: "plaintextPassword1!",
+          name: "user",
+          email: "user@email.com"
+        });
+      });
+
+      it("should resolve with false", async () => {
+        await expect(
+          user.passwordAttemptMatches("plaintextPassword1!")
+        ).resolves.toBeFalsy();
+      });
+    });
+  });
+
   describe("#onPrePasswordHash", () => {
     it("should require at least 6 characters", async () => {
       const user = new User().build({ ...userParams, password: "a".repeat(5) });
@@ -47,4 +93,6 @@ describe("credential document", () => {
       await expect(user.onPrePasswordHash()).resolves.toBeUndefined();
     });
   });
+
+  describe("#onPreValidate", () => {});
 });

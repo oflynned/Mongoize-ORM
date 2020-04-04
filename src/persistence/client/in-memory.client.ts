@@ -17,7 +17,7 @@ class InMemoryClient extends MongoClient {
 
   private async setupDbServer(): Promise<string> {
     this.mongoServer = new MongoMemoryServer();
-    return await this.mongoServer.getUri();
+    return this.mongoServer.getUri();
   }
 
   private async tearDownDbServer(): Promise<void> {

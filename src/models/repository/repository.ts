@@ -1,8 +1,8 @@
-import Schema from "../schema/schema.model";
-import BaseDocument, { IDeletionParams } from "./base.document";
-import DatabaseClient from "../../persistence/base.client";
+import Schema from "../../schema/schema.model";
+import BaseDocument, { IDeletionParams } from "../base-document";
+import DatabaseClient from "../../../persistence/base.client";
 
-class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
+export class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
   private instanceType: T;
 
   private constructor(instance: T) {
@@ -117,5 +117,3 @@ class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
     return new (instance.constructor as { new (): T })();
   }
 }
-
-export default Repository;
