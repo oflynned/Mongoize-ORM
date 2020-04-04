@@ -107,7 +107,7 @@ export class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
     return this.findMany(client, {});
   }
 
-  async findMany(client: DatabaseClient, query: object = {}): Promise<T[]> {
+  async findMany(client: DatabaseClient, query: object): Promise<T[]> {
     const records = await client.read(this.instanceType.collection(), query);
     return records.map(
       (record: object) =>

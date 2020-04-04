@@ -6,7 +6,7 @@ import { InMemoryClient, Repository } from "../../src";
 const main = async (client: InMemoryClient): Promise<void> => {
   await new Animal().build({ name: "Doggo", legs: 4 }).save(client);
 
-  const animals = await Repository.with(Animal).findMany(client);
+  const animals = await Repository.with(Animal).findAll(client);
   // Logger.info(animals);
 
   const person = await new Person().build({
