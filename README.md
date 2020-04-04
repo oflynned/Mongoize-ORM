@@ -1,6 +1,6 @@
 ## Mongoize ORM
 
-![](https://img.shields.io/npm/v/mongoize-orm?style=plastic)
+![](https://img.shields.io/npm/v/mongoize-orm)
 ![](https://img.shields.io/github/workflow/status/oflynned/mongoize-orm/CI)
 
 ### Setup
