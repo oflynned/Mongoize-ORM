@@ -1,6 +1,6 @@
 {
   "name": "@oflynned/mongoize-orm",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "Simplify MongoDB model persistence with a smart layer in between you and your database",
   "keywords": [
     "mongodb",
@@ -84,8 +84,5 @@
     "ts-node": "^8.6.2",
     "tslint": "^5.20.1",
     "typescript": "^3.8.2"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/oflynned"
   }
 }

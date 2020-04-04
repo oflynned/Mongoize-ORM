@@ -13,7 +13,7 @@ Have a look here for some simple examples
 
 https://github.com/oflynned/Mongoize-ORM/tree/master/src/example
 
-Have a look here for a full TyepScript Express web server that gets transpiled to js
+Have a look here for a full TypeScript Express web server that gets transpiled to js
 
 https://github.com/oflynned/Mongoize-ORM-Example/
 
