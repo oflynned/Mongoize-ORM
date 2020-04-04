@@ -1,6 +1,10 @@
-import Repository from "./models/documents/repository";
-import { MongoClient, InMemoryClient, ConnectionOptions } from "./persistence";
-import BaseDocument from "./models/documents/base.document";
+import Repository from "./models/repository";
+import {
+  MongoClient,
+  InMemoryClient,
+  ConnectionOptions
+} from "./persistence/client";
+import BaseDocument from "./models/documents/base-document";
 import Schema from "./models/schema/schema.model";
 import CredentialDocument, {
   CredentialSchema,
