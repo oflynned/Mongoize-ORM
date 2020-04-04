@@ -168,30 +168,19 @@ describe("credential-document", () => {
           email: "user@email.com"
         })
         .save(client);
+      await user.updatePassword(client, "newPlaintextPassword1!");
     });
 
-    it("should match original password", async () => {
+    it("should not match original password after update", async () => {
       await expect(
         user.passwordAttemptMatches("plaintextPassword1!")
-      ).resolves.toBeTruthy();
+      ).resolves.toBeFalsy();
     });
 
-    describe("on password update", () => {
-      beforeAll(async () => {
-        await user.updatePassword(client, "newPlaintextPassword1!");
-      });
-
-      it("should not match original password after update", async () => {
-        await expect(
-          user.passwordAttemptMatches("plaintextPassword1!")
-        ).resolves.toBeFalsy();
-      });
-
-      it("should match new password after update", async () => {
-        await expect(
-          user.passwordAttemptMatches("newPlaintextPassword1!")
-        ).resolves.toBeTruthy();
-      });
+    it("should match new password after update", async () => {
+      await expect(
+        user.passwordAttemptMatches("newPlaintextPassword1!")
+      ).resolves.toBeTruthy();
     });
   });
 });

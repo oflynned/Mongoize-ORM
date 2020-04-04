@@ -78,10 +78,9 @@ export abstract class BaseDocument<T, S extends Schema<T>>
     const newInstance = await Repository.with(
       <any>this.constructor
     ).updateOne(client, this.record._id, { ...payload, updatedAt: new Date() });
+    this.record = newInstance.record;
 
-    Object.assign(this, newInstance);
     this.onPostUpdate();
-
     return this;
   }
 

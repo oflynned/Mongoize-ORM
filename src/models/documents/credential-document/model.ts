@@ -58,6 +58,7 @@ abstract class CredentialDocument<
   }
 
   async onPreValidate(): Promise<void> {
+    await super.onPreValidate();
     await this.onPrePasswordHash();
     await this.hashPassword();
     await this.onPostPasswordHash();
@@ -72,7 +73,9 @@ abstract class CredentialDocument<
     await this.onPrePasswordHash();
     await this.hashPassword();
     await this.onPostPasswordHash();
-    await this.update(client, this.record.passwordHash);
+    await this.update(client, {
+      passwordHash: this.record.passwordHash
+    } as Partial<T>);
   }
 
   async hashPassword(): Promise<void> {
