@@ -1,6 +1,6 @@
 import Mongo, { Collection, Db, MongoClientOptions } from "mongodb";
 import DatabaseClient from "./base.client";
-import { ConnectionOptions } from "./connection.validator";
+import { ConnectionOptions } from "../connection-validator";
 
 class MongoClient extends DatabaseClient {
   private client: Mongo.MongoClient;
@@ -60,7 +60,7 @@ class MongoClient extends DatabaseClient {
   }
 
   async close(): Promise<void> {
-    await this.client.close();
+    await this.client?.close();
   }
 
   async count(collection: string, query: object): Promise<number> {

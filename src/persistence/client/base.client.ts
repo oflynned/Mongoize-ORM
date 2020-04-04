@@ -1,4 +1,7 @@
-import { ConnectionOptions, ConnectionValidator } from "./connection.validator";
+import {
+  ConnectionOptions,
+  ConnectionValidator
+} from "../connection-validator";
 
 interface IClientOperation {
   connect(options?: ConnectionOptions): Promise<DatabaseClient>;
