@@ -134,7 +134,7 @@ export abstract class BaseDocument<T, S extends Schema<T>>
   }
 
   async onPreUpdate(): Promise<void> {
-    Logger.debug("onPreValidate");
+    Logger.debug("onPreUpdate");
   }
 
   toJson(): T & IBaseModel {

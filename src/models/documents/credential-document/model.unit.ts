@@ -156,4 +156,42 @@ describe("credential-document", () => {
       expect(onPostPasswordHashSpy.calledOnce).toBeTruthy();
     });
   });
+
+  describe("#updatePassword", () => {
+    let user: User;
+
+    beforeAll(async () => {
+      user = await new User()
+        .build({
+          password: "plaintextPassword1!",
+          name: "user",
+          email: "user@email.com"
+        })
+        .save(client);
+    });
+
+    it("should match original password", async () => {
+      await expect(
+        user.passwordAttemptMatches("plaintextPassword1!")
+      ).resolves.toBeTruthy();
+    });
+
+    describe("on password update", () => {
+      beforeAll(async () => {
+        await user.updatePassword(client, "newPlaintextPassword1!");
+      });
+
+      it("should not original password after update", async () => {
+        await expect(
+          user.passwordAttemptMatches("plaintextPassword1!")
+        ).resolves.toBeFalsy();
+      });
+
+      it("should not original password after update", async () => {
+        await expect(
+          user.passwordAttemptMatches("newPlaintextPassword1!")
+        ).resolves.toBeTruthy();
+      });
+    });
+  });
 });

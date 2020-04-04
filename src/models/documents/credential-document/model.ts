@@ -2,6 +2,7 @@ import { compare, hash } from "bcrypt";
 import BaseDocument from "../base-document";
 import Logger from "../../../logger";
 import { CredentialSchema, ICredential } from "./schema";
+import { MongoClient } from "../../../persistence/client";
 
 abstract class CredentialDocument<
   T extends ICredential,
@@ -56,13 +57,25 @@ abstract class CredentialDocument<
     }
   }
 
-  async onPostPasswordHash(): Promise<void> {
-    Logger.debug("onPostPasswordHash()");
-  }
-
   async onPreValidate(): Promise<void> {
     await this.onPrePasswordHash();
+    await this.hashPassword();
+    await this.onPostPasswordHash();
+  }
 
+  async updatePassword(
+    client: MongoClient,
+    newPassword: string
+  ): Promise<void> {
+    this.record.password = newPassword;
+
+    await this.onPrePasswordHash();
+    await this.hashPassword();
+    await this.onPostPasswordHash();
+    await this.update(client, this.record.passwordHash);
+  }
+
+  async hashPassword(): Promise<void> {
     return new Promise((resolve, reject) => {
       hash(this.record.password, this.saltRounds, (error, passwordHash) => {
         if (error) {
@@ -74,7 +87,11 @@ abstract class CredentialDocument<
         this.record.passwordHash = passwordHash;
         resolve();
       });
-    }).then(() => this.onPostPasswordHash());
+    });
+  }
+
+  async onPostPasswordHash(): Promise<void> {
+    Logger.debug("onPostPasswordHash()");
   }
 }
 
