@@ -2,6 +2,7 @@
 
 ![](https://img.shields.io/npm/v/mongoize-orm)
 ![](https://img.shields.io/github/workflow/status/oflynned/mongoize-orm/CI)
+[![codecov](https://codecov.io/gh/oflynned/mongoize-orm/branch/master/graph/badge.svg)](https://codecov.io/gh/oflynned/mongoize-orm)
 
 ### Setup
 
