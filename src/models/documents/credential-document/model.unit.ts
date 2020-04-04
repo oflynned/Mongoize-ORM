@@ -181,13 +181,13 @@ describe("credential-document", () => {
         await user.updatePassword(client, "newPlaintextPassword1!");
       });
 
-      it("should not original password after update", async () => {
+      it("should not match original password after update", async () => {
         await expect(
           user.passwordAttemptMatches("plaintextPassword1!")
         ).resolves.toBeFalsy();
       });
 
-      it("should not original password after update", async () => {
+      it("should match new password after update", async () => {
         await expect(
           user.passwordAttemptMatches("newPlaintextPassword1!")
         ).resolves.toBeTruthy();
