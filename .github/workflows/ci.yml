@@ -42,5 +42,4 @@ jobs:
         run: yarn test:integration
 
       - name: Send coverage to codecov
-        working-directory: .
-        run: CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }} yarn coverage:publish
+        run: yarn coverage:publish -t CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }}
