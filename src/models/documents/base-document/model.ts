@@ -3,36 +3,11 @@ import Logger from "../../../logger";
 import { MongoClient } from "../../../persistence/client";
 import Repository from "../../repository";
 
-interface IBaseDocument {
-  onPreValidate(): void;
-
-  onPostValidate(): void;
-
-  onPreSave(): void;
-
-  onPostSave(): void;
-
-  onPreUpdate(): void;
-
-  onPostUpdate(): void;
-
-  onPreDelete(): void;
-
-  onPostDelete(): void;
-}
-
-interface ISchema<T, S extends Schema<T>> {
-  joiSchema(): S;
-
-  toJson(): T | IBaseModel;
-}
-
 export type IDeletionParams = {
   hard: boolean;
 };
 
-export abstract class BaseDocument<T, S extends Schema<T>>
-  implements IBaseDocument, ISchema<T, S> {
+export abstract class BaseDocument<T, S extends Schema<T>> {
   protected record: T | IBaseModel | any;
 
   collection(): string {
@@ -68,11 +43,12 @@ export abstract class BaseDocument<T, S extends Schema<T>>
     payload: Partial<T>
   ): Promise<BaseDocument<T, S>> {
     Logger.debug("update()");
-    this.onPreUpdate();
 
     if (Object.keys(payload).length === 0) {
       throw new Error("payload is empty");
     }
+
+    this.onPreUpdate();
 
     await this.joiSchema().validateOnUpdate(payload);
     const newInstance = await Repository.with(
