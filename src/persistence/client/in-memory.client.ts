@@ -21,7 +21,9 @@ class InMemoryClient extends MongoClient {
   }
 
   private async tearDownDbServer(): Promise<void> {
-    await this.mongoServer?.stop();
+    if (this.mongoServer) {
+      await this.mongoServer.stop();
+    }
   }
 }
 

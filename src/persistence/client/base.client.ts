@@ -3,29 +3,7 @@ import {
   ConnectionValidator
 } from "../connection-validator";
 
-interface IClientOperation {
-  connect(options?: ConnectionOptions): Promise<DatabaseClient>;
-
-  count(collection: string, query: object): Promise<number>;
-
-  create(collection: string, payload: object): Promise<object>;
-
-  read(collection: string, query: object): Promise<object[]>;
-
-  updateOne(collection: string, _id: string, payload: object): Promise<object>;
-
-  deleteOne(collection: string, _id: string): Promise<number>;
-
-  deleteMany(collection: string, query: object): Promise<number>;
-
-  dropDatabase(): Promise<void>;
-
-  dropCollection(collection: string): Promise<void>;
-
-  close(): Promise<void>;
-}
-
-abstract class DatabaseClient implements IClientOperation {
+abstract class DatabaseClient {
   validator: ConnectionValidator;
 
   constructor() {
