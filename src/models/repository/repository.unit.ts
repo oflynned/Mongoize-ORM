@@ -13,6 +13,65 @@ describe("repository", () => {
     await client.close();
   });
 
+  describe("#with", () => {
+    it("should return new repository instance", () => {
+      const repo1 = Repository.with(Animal);
+      const repo2 = Repository.with(Animal);
+      expect(repo1 !== repo2).toBeTruthy();
+    });
+  });
+
+  describe("#count", () => {
+    beforeEach(async () => {
+      await client.dropDatabase();
+    });
+
+    afterEach(async () => {
+      await client.dropDatabase();
+    });
+
+    it("should return count 0 with no records", async () => {
+      await expect(Repository.with(Animal).count(client)).resolves.toEqual(0);
+    });
+
+    it("should return count with populated records", async () => {
+      await new Animal().build({ name: "Doggo", legs: 4 }).save(client);
+
+      await expect(Repository.with(Animal).count(client)).resolves.toEqual(1);
+    });
+
+    it("should return count with record query", async () => {
+      await new Animal().build({ name: "Doggo", legs: 4 }).save(client);
+
+      await expect(
+        Repository.with(Animal).count(client, { name: "Doggo" })
+      ).resolves.toEqual(1);
+    });
+  });
+
+  describe("#deleteCollection", () => {
+    beforeEach(async () => {
+      await client.dropDatabase();
+    });
+
+    afterEach(async () => {
+      await client.dropDatabase();
+    });
+
+    it("should require collection to exist", async () => {
+      await expect(
+        Repository.with(Animal).deleteCollection(client)
+      ).rejects.toBeDefined();
+    });
+
+    it("should drop collection", async () => {
+      await new Animal().build({ name: "aaa" }).save(client);
+      await expect(
+        Repository.with(Animal).deleteCollection(client)
+      ).resolves.toBeUndefined();
+    });
+  });
+
   describe("#existsById", () => {
     let animal: Animal;
 
