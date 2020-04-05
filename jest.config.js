@@ -7,7 +7,7 @@ module.exports = {
     "^.+\\.ts?$": "ts-jest"
   },
   collectCoverage: true,
-  collectCoverageFrom: ["./src/**/*.ts"],
+  collectCoverageFrom: ["src/**/*.ts", "!src/example/**/*"],
   moduleFileExtensions: ["ts", "js", "json"],
   coverageDirectory: "./coverage",
   testMatch: ["**/*.{unit,integration}.ts"],
