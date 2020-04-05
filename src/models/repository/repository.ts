@@ -78,12 +78,24 @@ export class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
     return this.findOne(client, { _id });
   }
 
-  async existsById(client: DatabaseClient, _id: string): Promise<boolean> {
-    return (await this.count(client, { _id })) > 0;
+  async existsByQuery(client: DatabaseClient, query: object): Promise<boolean> {
+    return (await this.count(client, query)) > 0;
   }
 
-  async exists(client: DatabaseClient, query: object): Promise<boolean> {
-    return (await this.count(client, query)) > 0;
+  async existsById(client: DatabaseClient, _id: string): Promise<boolean> {
+    return this.existsByQuery(client, { _id });
+  }
+
+  async exists<T extends BaseDocument<any, any>>(
+    client: DatabaseClient,
+    instance: T
+  ): Promise<boolean> {
+    // if record was already hard deleted in another scope
+    if (!instance.toJson()) {
+      return false;
+    }
+
+    return this.existsById(client, instance.toJson()._id);
   }
 
   async updateOne(

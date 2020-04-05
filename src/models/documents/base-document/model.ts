@@ -26,6 +26,8 @@ export abstract class BaseDocument<T, S extends Schema<T>> {
     return this;
   }
 
+  async populate(): Promise<void> {}
+
   async validate(): Promise<T | IBaseModel> {
     Logger.debug("validate()");
     await this.onPreValidate();
