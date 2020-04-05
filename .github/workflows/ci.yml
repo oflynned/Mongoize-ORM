@@ -35,11 +35,8 @@ jobs:
       - name: Lint package.json dependency versions
         run: yarn lint:dependencies
 
-      - name: Run unit tests
-        run: yarn test:unit
-
-      - name: Run integration tests
-        run: yarn test:integration
+      - name: Run tests
+        run: yarn test
 
       - name: Send coverage to codecov
         run: yarn coverage:publish -t CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }}
