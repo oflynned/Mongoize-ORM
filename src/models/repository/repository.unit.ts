@@ -1,5 +1,5 @@
 import Animal from "../../example/models/animal";
-import Repository from "./index";
+import { Repository } from "./repository";
 import { InMemoryClient } from "../../persistence/client";
 
 describe("repository", () => {
@@ -71,6 +71,8 @@ describe("repository", () => {
       ).resolves.toBeUndefined();
     });
   });
+
+  describe("#deleteMany", () => {});
 
   describe("#existsById", () => {
     let animal: Animal;
