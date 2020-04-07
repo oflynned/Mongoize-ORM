@@ -1,8 +1,9 @@
 import Schema from "../schema/schema.model";
 import BaseDocument, { IDeletionParams } from "../documents/base-document";
 import DatabaseClient from "../../persistence/client/base.client";
+import { IUpdatableFields } from "../documents/base-document/model";
 
-export class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
+export class Repository<T extends BaseDocument<T, S>, S extends Schema<T>> {
   private instanceType: T;
 
   private constructor(instance: T) {
@@ -40,7 +41,7 @@ export class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
         this.updateOne(client, record.toJson()._id, {
           deletedAt: new Date(),
           deleted: true
-        })
+        } as object)
       )
     );
   }
@@ -59,7 +60,7 @@ export class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
       return this.updateOne(client, _id, {
         deletedAt: new Date(),
         deleted: true
-      });
+      } as object);
     }
 
     return undefined;
@@ -68,7 +69,7 @@ export class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
   async findOne(client: DatabaseClient, query: object): Promise<T | undefined> {
     const records = await client.read(this.instanceType.collection(), query);
     if (records.length > 0) {
-      return Repository.newInstance(this.instanceType).from(records[0]);
+      return Repository.newInstance(this.instanceType).from(records[0]) as T;
     }
 
     return undefined;
@@ -86,22 +87,23 @@ export class Repository<T extends BaseDocument<any, any>, S extends Schema<T>> {
     return this.existsByQuery(client, { _id });
   }
 
-  async exists<T extends BaseDocument<any, any>>(
+  async exists<I extends BaseDocument<T, S>>(
     client: DatabaseClient,
-    instance: T
+    instance: I
   ): Promise<boolean> {
-    // if record was already hard deleted in another scope
+    // if record was already hard deleted in another scope ... edge-case.
     if (!instance.toJson()) {
       return false;
     }
 
+    // schrödinger's instance? is this method even needed?
     return this.existsById(client, instance.toJson()._id);
   }
 
   async updateOne(
     client: DatabaseClient,
     _id: string,
-    updatedFields: object
+    updatedFields: IUpdatableFields<T>
   ): Promise<T> {
     if (await this.existsById(client, _id)) {
       await client.updateOne(

@@ -7,6 +7,8 @@ export type IDeletionParams = {
   hard: boolean;
 };
 
+export type IUpdatableFields<T> = Partial<T>;
+
 export abstract class BaseDocument<T, S extends Schema<T>> {
   protected record: T | IBaseModel | any;
 
@@ -16,12 +18,12 @@ export abstract class BaseDocument<T, S extends Schema<T>> {
 
   abstract joiSchema(): S;
 
-  from(payload: T) {
+  from(payload: T | object): BaseDocument<T, S> {
     this.record = { ...payload };
     return this;
   }
 
-  build(payload: T) {
+  build(payload: T): BaseDocument<T, S> {
     this.record = { ...payload, ...this.joiSchema().baseSchemaContent() };
     return this;
   }
@@ -51,14 +53,18 @@ export abstract class BaseDocument<T, S extends Schema<T>> {
     }
 
     this.onPreUpdate();
-
     await this.joiSchema().validateOnUpdate(payload);
-    const newInstance = await Repository.with(
-      <any>this.constructor
-    ).updateOne(client, this.record._id, { ...payload, updatedAt: new Date() });
-    this.record = newInstance.record;
 
+    const newInstance = await Repository.with(
+      this.constructor as any
+    ).updateOne(client, this.record._id, {
+      ...payload,
+      updatedAt: new Date()
+    } as object);
+
+    this.record = newInstance.record;
     this.onPostUpdate();
+
     return this;
   }
 
@@ -67,11 +73,9 @@ export abstract class BaseDocument<T, S extends Schema<T>> {
     params: IDeletionParams = { hard: false }
   ): Promise<void> {
     this.onPreDelete();
-    const newInstance = await Repository.with(<any>this.constructor).deleteOne(
-      client,
-      this.record._id,
-      params
-    );
+    const newInstance = await Repository.with(
+      this.constructor as any
+    ).deleteOne(client, this.record._id, params);
 
     this.record = newInstance ? newInstance.record : undefined;
     this.onPostDelete();

@@ -10,7 +10,7 @@ const main = async (client: InMemoryClient): Promise<void> => {
   Logger.info("I've been created");
   Logger.info(animal);
 
-  await animal.update(client, { legs: 3 });
+  await animal.update(client, { legs: -1 });
   Logger.info("I've been updated");
   Logger.info(animal);
 
