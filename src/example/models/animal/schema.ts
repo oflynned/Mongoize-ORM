@@ -1,5 +1,4 @@
-import { Schema, Joi } from "../../../../src";
-import { BaseModelType } from "../../../models/documents/base-document/schema";
+import { Schema, Joi, BaseModelType } from "../../../../src";
 
 export interface AnimalType extends BaseModelType {
   name: string;

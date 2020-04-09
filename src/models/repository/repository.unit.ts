@@ -1,6 +1,7 @@
 import Animal from "../../example/models/animal";
 import { Repository } from "./repository";
 import { InMemoryClient } from "../../persistence/client";
+import { AnimalSchema, AnimalType } from "../../example/models/animal/schema";
 
 describe("repository", () => {
   const client: InMemoryClient = new InMemoryClient();
@@ -72,7 +73,70 @@ describe("repository", () => {
     });
   });
 
-  describe("#deleteMany", () => {});
+  describe("#updateOne", () => {
+    let animal: Animal;
+
+    beforeAll(async () => {
+      await client.dropDatabase();
+      animal = await new Animal()
+        .build({ name: "Doggo", legs: 4 })
+        .save(client);
+      animal = await Repository.with<AnimalType, Animal, AnimalSchema>(
+        Animal
+      ).updateOne(client, animal.toJson()._id, { legs: 0 });
+    });
+
+    afterAll(async () => {
+      await client.dropDatabase();
+    });
+
+    it("should not overwrite other keys", () => {
+      expect(Object.keys(animal.toJson()).length).toBeGreaterThan(1);
+    });
+
+    it("should still contain property", function() {
+      expect(animal.toJson()).toHaveProperty("legs");
+    });
+
+    it("should update record property value", async () => {
+      expect(animal.toJson().legs).toEqual(0);
+    });
+
+    it("should obey joi schema", async () => {
+      await expect(
+        Repository.with(Animal).updateOne(client, animal.toJson()._id, {
+          legs: -1
+        })
+      ).rejects.toThrowError();
+    });
+
+    describe("with untyped update", () => {
+      let animal: Animal;
+
+      beforeAll(async () => {
+        await client.dropDatabase();
+        animal = await new Animal()
+          .build({ name: "Doggo", legs: 4 })
+          .save(client);
+
+        animal = await Repository.with(Animal).updateOne(
+          client,
+          animal.toJson()._id,
+          {
+            cool: "cool"
+          }
+        );
+      });
+
+      afterAll(async () => {
+        await client.dropDatabase();
+      });
+
+      it("should apply migration property", () => {
+        expect(animal.toJson()).toHaveProperty("cool");
+      });
+    });
+  });
 
   describe("#existsById", () => {
     let animal: Animal;

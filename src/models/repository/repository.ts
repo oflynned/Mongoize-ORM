@@ -119,11 +119,21 @@ export class Repository<
     updatedFields: Partial<Type>
   ): Promise<DocumentClass> {
     if (await this.existsById(client, _id)) {
+      // validate the new payload as the repo should still respect db restraints
+      // unless the `Type` generic is passed, the `updatedFields` param will not respect the instance type properties
+      // this could be beneficial or a drawback? tbd
+      const instance = await this.findById(client, _id);
+      await instance
+        .from({ ...instance.toJson(), ...updatedFields })
+        .validate();
+
+      // dispatch an update to the db once validations pass
       await client.updateOne(
         this.instanceType.collection(),
         _id,
         updatedFields
       );
+
       return this.findById(client, _id);
     }
 

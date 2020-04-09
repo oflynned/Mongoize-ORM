@@ -37,8 +37,15 @@ export abstract class BaseDocument<
     await this.onPreValidate();
 
     Logger.debug("validating...");
-    this.record = (await this.joiSchema().validate(this.record)).value;
+    const { value, error, errors } = await this.joiSchema().validate(
+      this.record
+    );
 
+    if (error) {
+      throw error;
+    }
+
+    this.record = value;
     await this.onPostValidate();
 
     return this.record;
