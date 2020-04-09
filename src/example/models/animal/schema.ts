@@ -1,9 +1,10 @@
 import { Schema, Joi } from "../../../../src";
+import { IBaseModel } from "../../../models/documents/base-document/schema";
 
-export type IAnimal = {
+export interface IAnimal extends IBaseModel {
   name: string;
   legs?: number;
-};
+}
 
 export class AnimalSchema extends Schema<IAnimal> {
   joiBaseSchema(): object {

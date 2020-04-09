@@ -5,7 +5,7 @@ import {
   ConnectionOptions
 } from "./persistence/client";
 import BaseDocument from "./models/documents/base-document";
-import Schema from "./models/schema/schema.model";
+import Schema from "./models/documents/base-document/schema";
 import CredentialDocument, {
   CredentialSchema,
   ICredential

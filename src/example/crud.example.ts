@@ -29,6 +29,7 @@ const main = async (client: InMemoryClient): Promise<void> => {
     client,
     animal.toJson()._id
   );
+
   Logger.info("I've been read");
   Logger.info(a);
 
