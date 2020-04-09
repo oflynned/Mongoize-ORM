@@ -1,7 +1,7 @@
 import { compare, hash } from "bcrypt";
 import BaseDocument from "../base-document";
 import Logger from "../../../logger";
-import { CredentialSchema, ICredential } from "./schema";
+import CredentialSchema, { ICredential } from "./schema";
 import { MongoClient } from "../../../persistence/client";
 
 abstract class CredentialDocument<

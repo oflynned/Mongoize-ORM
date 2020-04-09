@@ -1,12 +1,14 @@
-import Schema from "../../schema/schema.model";
+import Schema, { IBaseModel } from "../../base-document/schema";
 import Joi from "@hapi/joi";
 
-export type ICredential = {
+export interface ICredential extends IBaseModel {
   password?: string;
   passwordHash?: string;
-};
+}
 
-export abstract class CredentialSchema<T> extends Schema<T> {
+export abstract class CredentialSchema<T extends ICredential> extends Schema<
+  T
+> {
   abstract schemaWithoutCredentials(): object;
 
   joiBaseSchema(): object {

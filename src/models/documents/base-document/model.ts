@@ -1,4 +1,4 @@
-import Schema, { IBaseModel } from "../../schema/schema.model";
+import Schema, { IBaseModel } from "./schema";
 import Logger from "../../../logger";
 import { MongoClient } from "../../../persistence/client";
 import Repository from "../../repository";
@@ -7,10 +7,8 @@ export type IDeletionParams = {
   hard: boolean;
 };
 
-export type IUpdatableFields<T> = Partial<T>;
-
-export abstract class BaseDocument<T, S extends Schema<T>> {
-  protected record: T | IBaseModel | any;
+export abstract class BaseDocument<T extends IBaseModel, S extends Schema<T>> {
+  protected record: T | any;
 
   collection(): string {
     return `${this.constructor.name.toLowerCase()}s`;
@@ -23,7 +21,7 @@ export abstract class BaseDocument<T, S extends Schema<T>> {
     return this;
   }
 
-  build(payload: T): BaseDocument<T, S> {
+  build(payload: Omit<T, keyof IBaseModel>): BaseDocument<T, S> {
     this.record = { ...payload, ...this.joiSchema().baseSchemaContent() };
     return this;
   }
@@ -44,7 +42,7 @@ export abstract class BaseDocument<T, S extends Schema<T>> {
 
   async update(
     client: MongoClient,
-    payload: Partial<T>
+    payload: Partial<Omit<T, keyof IBaseModel>>
   ): Promise<BaseDocument<T, S>> {
     Logger.debug("update()");
 

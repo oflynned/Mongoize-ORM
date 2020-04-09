@@ -1,20 +1,26 @@
-import Schema from "../schema/schema.model";
+import Schema, { IBaseModel } from "../documents/base-document/schema";
 import BaseDocument, { IDeletionParams } from "../documents/base-document";
 import DatabaseClient from "../../persistence/client/base.client";
-import { IUpdatableFields } from "../documents/base-document/model";
 
-export class Repository<T extends BaseDocument<T, S>, S extends Schema<T>> {
-  private instanceType: T;
+export class Repository<
+  Type extends IBaseModel,
+  Instance extends BaseDocument<Type, JoiSchema>,
+  JoiSchema extends Schema<Type>
+> {
+  private instanceType: Instance;
 
-  private constructor(instance: T) {
+  private constructor(instance: Instance) {
     this.instanceType = instance;
   }
 
   static with<
-    T extends BaseDocument<any, any>,
-    S extends Schema<T>
-  >(ChildModelClass: { new (...args: any[]): T }): Repository<T, S> {
-    return new Repository<T, S>(new ChildModelClass());
+    Type extends IBaseModel,
+    Instance extends BaseDocument<Type, JoiSchema>,
+    JoiSchema extends Schema<Type>
+  >(ChildModelClass: {
+    new (...args: any[]): Instance;
+  }): Repository<Type, Instance, JoiSchema> {
+    return new Repository<Type, Instance, JoiSchema>(new ChildModelClass());
   }
 
   async count(client: DatabaseClient, query: object = {}): Promise<number> {
@@ -29,7 +35,7 @@ export class Repository<T extends BaseDocument<T, S>, S extends Schema<T>> {
     client: DatabaseClient,
     query: object = {},
     params: IDeletionParams = { hard: false }
-  ): Promise<T[]> {
+  ): Promise<Instance[]> {
     if (params.hard) {
       await client.deleteMany(this.instanceType.collection(), query);
       return [];
@@ -37,7 +43,7 @@ export class Repository<T extends BaseDocument<T, S>, S extends Schema<T>> {
 
     const records = await this.findMany(client, query);
     return await Promise.all(
-      records.map(async (record: T) =>
+      records.map(async (record: Instance) =>
         this.updateOne(client, record.toJson()._id, {
           deletedAt: new Date(),
           deleted: true
@@ -50,7 +56,7 @@ export class Repository<T extends BaseDocument<T, S>, S extends Schema<T>> {
     client: DatabaseClient,
     _id: string,
     params: IDeletionParams = { hard: false }
-  ): Promise<T | undefined> {
+  ): Promise<Instance | undefined> {
     if (await this.existsById(client, _id)) {
       if (params.hard) {
         await client.deleteOne(this.instanceType.collection(), _id);
@@ -66,16 +72,21 @@ export class Repository<T extends BaseDocument<T, S>, S extends Schema<T>> {
     return undefined;
   }
 
-  async findOne(client: DatabaseClient, query: object): Promise<T | undefined> {
+  async findOne(
+    client: DatabaseClient,
+    query: object
+  ): Promise<Instance | undefined> {
     const records = await client.read(this.instanceType.collection(), query);
     if (records.length > 0) {
-      return Repository.newInstance(this.instanceType).from(records[0]) as T;
+      return Repository.newInstance(this.instanceType).from(
+        records[0]
+      ) as Instance;
     }
 
     return undefined;
   }
 
-  async findById(client: DatabaseClient, _id: string): Promise<T> {
+  async findById(client: DatabaseClient, _id: string): Promise<Instance> {
     return this.findOne(client, { _id });
   }
 
@@ -87,7 +98,7 @@ export class Repository<T extends BaseDocument<T, S>, S extends Schema<T>> {
     return this.existsByQuery(client, { _id });
   }
 
-  async exists<I extends BaseDocument<T, S>>(
+  async exists<I extends BaseDocument<Type, JoiSchema>>(
     client: DatabaseClient,
     instance: I
   ): Promise<boolean> {
@@ -103,8 +114,8 @@ export class Repository<T extends BaseDocument<T, S>, S extends Schema<T>> {
   async updateOne(
     client: DatabaseClient,
     _id: string,
-    updatedFields: IUpdatableFields<T>
-  ): Promise<T> {
+    updatedFields: Partial<Type>
+  ): Promise<Instance> {
     if (await this.existsById(client, _id)) {
       await client.updateOne(
         this.instanceType.collection(),
@@ -117,21 +128,23 @@ export class Repository<T extends BaseDocument<T, S>, S extends Schema<T>> {
     return undefined;
   }
 
-  async findAll(client: DatabaseClient): Promise<T[]> {
+  async findAll(client: DatabaseClient): Promise<Instance[]> {
     return this.findMany(client, {});
   }
 
-  async findMany(client: DatabaseClient, query: object): Promise<T[]> {
+  async findMany(client: DatabaseClient, query: object): Promise<Instance[]> {
     const records = await client.read(this.instanceType.collection(), query);
     return records.map(
       (record: object) =>
-        Repository.newInstance(this.instanceType).from(record) as T
+        Repository.newInstance(this.instanceType).from(record) as Instance
     );
   }
 
-  private static newInstance<T extends BaseDocument<T, S>, S extends Schema<T>>(
-    instance: T
-  ): T {
-    return new (instance.constructor as { new (): T })();
+  private static newInstance<
+    Type extends IBaseModel,
+    Instance extends BaseDocument<Type, JoiSchema>,
+    JoiSchema extends Schema<Type>
+  >(instance: Instance): Instance {
+    return new (instance.constructor as { new (): Instance })();
   }
 }

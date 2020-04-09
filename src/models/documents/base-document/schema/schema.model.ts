@@ -21,7 +21,7 @@ const baseJoiSchema = {
   deleted: Joi.boolean().required()
 };
 
-abstract class Schema<T> {
+export abstract class Schema<T extends IBaseModel> {
   baseSchemaContent(): object {
     return {
       _id: uuid(),
@@ -32,12 +32,12 @@ abstract class Schema<T> {
     };
   }
 
-  validate(data: IBaseModel | T) {
+  validate(data: T) {
     const joiSchema = Joi.object({ ...baseJoiSchema, ...this.joiBaseSchema() });
     return joiSchema.validate(data, { stripUnknown: true });
   }
 
-  validateOnUpdate(data: IBaseModel | Partial<T>) {
+  validateOnUpdate(data: Partial<Omit<T, keyof IBaseModel>>) {
     const joiSchema = Joi.object({ ...this.joiUpdateSchema() });
     return joiSchema.validate(data, { stripUnknown: true });
   }
@@ -46,5 +46,3 @@ abstract class Schema<T> {
 
   abstract joiUpdateSchema(): object;
 }
-
-export default Schema;
