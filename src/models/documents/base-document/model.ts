@@ -1,14 +1,17 @@
-import Schema, { IBaseModel, IInternalModel } from "./schema";
+import Schema, { BaseModelType, InternalModelType } from "./schema";
 import Logger from "../../../logger";
 import { MongoClient } from "../../../persistence/client";
 import Repository from "../../repository";
 
-export type IDeletionParams = {
+export type DeletionParams = Partial<{
   hard: boolean;
-};
+}>;
 
-export abstract class BaseDocument<T extends IBaseModel, S extends Schema<T>> {
-  protected record: T | IInternalModel | any;
+export abstract class BaseDocument<
+  T extends BaseModelType,
+  S extends Schema<T>
+> {
+  protected record: T | InternalModelType | any;
 
   collection(): string {
     return `${this.constructor.name.toLowerCase()}s`;
@@ -16,12 +19,12 @@ export abstract class BaseDocument<T extends IBaseModel, S extends Schema<T>> {
 
   abstract joiSchema(): S;
 
-  from(payload: T | IInternalModel | object): BaseDocument<T, S> {
+  from(payload: T | InternalModelType | object): BaseDocument<T, S> {
     this.record = { ...payload };
     return this;
   }
 
-  build(payload: Omit<T, keyof IInternalModel>): BaseDocument<T, S> {
+  build(payload: Omit<T, keyof InternalModelType>): BaseDocument<T, S> {
     this.record = { ...payload, ...this.joiSchema().baseSchemaContent() };
     return this;
   }
@@ -29,7 +32,7 @@ export abstract class BaseDocument<T extends IBaseModel, S extends Schema<T>> {
   // TODO should be used to populate related documents after find/save/update/delete
   async populate(): Promise<void> {}
 
-  async validate(): Promise<T | IInternalModel> {
+  async validate(): Promise<T | InternalModelType> {
     Logger.debug("validate()");
     await this.onPreValidate();
 
@@ -43,7 +46,7 @@ export abstract class BaseDocument<T extends IBaseModel, S extends Schema<T>> {
 
   async update(
     client: MongoClient,
-    payload: Partial<Omit<T, keyof IInternalModel>>
+    payload: Partial<Omit<T, keyof InternalModelType>>
   ): Promise<BaseDocument<T, S>> {
     Logger.debug("update()");
 
@@ -69,7 +72,7 @@ export abstract class BaseDocument<T extends IBaseModel, S extends Schema<T>> {
 
   async delete(
     client: MongoClient,
-    params: IDeletionParams = { hard: false }
+    params: DeletionParams = { hard: false }
   ): Promise<void> {
     this.onPreDelete();
     const newInstance = await Repository.with(
@@ -112,8 +115,8 @@ export abstract class BaseDocument<T extends IBaseModel, S extends Schema<T>> {
     Logger.debug("onPreUpdate");
   }
 
-  toJson(): T & IInternalModel {
-    return this.record as T & IInternalModel;
+  toJson(): T & InternalModelType {
+    return this.record as T & InternalModelType;
   }
 
   async save(client: MongoClient): Promise<BaseDocument<T, S> | any> {
@@ -125,7 +128,7 @@ export abstract class BaseDocument<T extends IBaseModel, S extends Schema<T>> {
     this.record = (await client.create(
       this.collection(),
       validatedPayload as object
-    )) as T & IInternalModel;
+    )) as T & InternalModelType;
     await this.onPostSave();
     return this;
   }

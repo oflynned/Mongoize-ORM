@@ -1,12 +1,12 @@
 import { compare, hash } from "bcrypt";
 import BaseDocument from "../base-document";
 import Logger from "../../../logger";
-import CredentialSchema, { ICredential } from "./schema";
+import CredentialSchema, { CredentialType } from "./schema";
 import { MongoClient } from "../../../persistence/client";
-import { IInternalModel } from "../base-document/schema";
+import { InternalModelType } from "../base-document/schema";
 
 abstract class CredentialDocument<
-  T extends ICredential,
+  T extends CredentialType,
   S extends CredentialSchema<T>
 > extends BaseDocument<T, S> {
   // recommended cost factor
@@ -20,7 +20,7 @@ abstract class CredentialDocument<
   // must contain at least 1 lowercase letter, 1 uppercase letter, 1 number, 1 special character
   passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).+$/;
 
-  build(payload: Omit<T, keyof IInternalModel>): CredentialDocument<T, S> {
+  build(payload: Omit<T, keyof InternalModelType>): CredentialDocument<T, S> {
     return super.build(payload) as CredentialDocument<T, S>;
   }
 

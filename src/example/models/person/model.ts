@@ -1,7 +1,7 @@
 import { BaseDocument } from "../../../../src";
-import { IPerson, PersonSchema } from "./schema";
+import { PersonType, PersonSchema } from "./schema";
 
-class Person extends BaseDocument<IPerson, PersonSchema> {
+class Person extends BaseDocument<PersonType, PersonSchema> {
   joiSchema(): PersonSchema {
     return new PersonSchema();
   }

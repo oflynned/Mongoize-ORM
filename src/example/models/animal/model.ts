@@ -1,7 +1,7 @@
 import { BaseDocument } from "../../../../src";
-import { IAnimal, AnimalSchema } from "./schema";
+import { AnimalType, AnimalSchema } from "./schema";
 
-class Animal extends BaseDocument<IAnimal, AnimalSchema> {
+class Animal extends BaseDocument<AnimalType, AnimalSchema> {
   joiSchema(): AnimalSchema {
     return new AnimalSchema();
   }

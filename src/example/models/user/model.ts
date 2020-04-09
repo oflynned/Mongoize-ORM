@@ -1,7 +1,7 @@
 import { CredentialDocument } from "../../../../src";
-import { IUser, UserSchema } from "./schema";
+import { UserType, UserSchema } from "./schema";
 
-class User extends CredentialDocument<IUser, UserSchema> {
+class User extends CredentialDocument<UserType, UserSchema> {
   joiSchema(): UserSchema {
     return new UserSchema();
   }

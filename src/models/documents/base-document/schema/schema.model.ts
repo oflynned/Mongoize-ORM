@@ -1,9 +1,9 @@
 import Joi from "@hapi/joi";
 import { v4 as uuid } from "uuid";
 
-export type IBaseModel = {};
+export type BaseModelType = {};
 
-export type IInternalModel = {
+export type InternalModelType = {
   readonly _id: string;
   readonly createdAt: Date;
   readonly updatedAt: Date | null;
@@ -23,7 +23,7 @@ const baseJoiSchema = {
   deleted: Joi.boolean().required()
 };
 
-export abstract class Schema<T extends IBaseModel> {
+export abstract class Schema<T extends BaseModelType> {
   baseSchemaContent(): object {
     return {
       _id: uuid(),
@@ -34,12 +34,12 @@ export abstract class Schema<T extends IBaseModel> {
     };
   }
 
-  validate(data: Omit<T, keyof IInternalModel>) {
+  validate(data: Omit<T, keyof InternalModelType>) {
     const joiSchema = Joi.object({ ...baseJoiSchema, ...this.joiBaseSchema() });
     return joiSchema.validate(data, { stripUnknown: true });
   }
 
-  validateOnUpdate(data: Partial<Omit<T, keyof IInternalModel>>) {
+  validateOnUpdate(data: Partial<Omit<T, keyof InternalModelType>>) {
     const joiSchema = Joi.object({ ...this.joiUpdateSchema() });
     return joiSchema.validate(data, { stripUnknown: true });
   }

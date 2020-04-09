@@ -1,4 +1,4 @@
-import { Schema, IBaseModel, IInternalModel } from "./schema.model";
+import { Schema, BaseModelType, InternalModelType } from "./schema.model";
 
-export { Schema, IBaseModel, IInternalModel };
+export { Schema, BaseModelType, InternalModelType };
 export default Schema;

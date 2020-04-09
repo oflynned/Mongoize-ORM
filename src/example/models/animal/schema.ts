@@ -1,12 +1,12 @@
 import { Schema, Joi } from "../../../../src";
-import { IBaseModel } from "../../../models/documents/base-document/schema";
+import { BaseModelType } from "../../../models/documents/base-document/schema";
 
-export interface IAnimal extends IBaseModel {
+export interface AnimalType extends BaseModelType {
   name: string;
   legs?: number;
 }
 
-export class AnimalSchema extends Schema<IAnimal> {
+export class AnimalSchema extends Schema<AnimalType> {
   joiBaseSchema(): object {
     return {
       name: Joi.string().required(),

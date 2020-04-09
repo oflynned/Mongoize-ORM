@@ -6,11 +6,11 @@ import {
 } from "./persistence/client";
 import BaseDocument, {
   Schema,
-  IDeletionParams
+  DeletionParams
 } from "./models/documents/base-document";
 import CredentialDocument, {
   CredentialSchema,
-  ICredential
+  CredentialType
 } from "./models/documents/credential-document";
 import Joi from "@hapi/joi";
 
@@ -21,7 +21,7 @@ export {
   ConnectionOptions,
   CredentialSchema,
   CredentialDocument,
-  ICredential,
+  CredentialType,
   Schema,
   BaseDocument,
   Joi

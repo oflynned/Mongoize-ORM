@@ -1,12 +1,12 @@
 import Animal from "../animal";
 import { Schema, Joi } from "../../../../src";
 
-export type IPerson = {
+export type PersonType = {
   name: string;
   pet?: Animal;
 };
 
-export class PersonSchema extends Schema<IPerson> {
+export class PersonSchema extends Schema<PersonType> {
   joiBaseSchema(): object {
     return {
       name: Joi.string().required(),

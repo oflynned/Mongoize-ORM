@@ -1,5 +1,5 @@
 import { InMemoryClient } from "../../../persistence/client";
-import User, { IUser } from "../../../example/models/user";
+import User, { UserType } from "../../../example/models/user";
 import sinon, { SinonSpy } from "sinon";
 
 describe("credential-document", () => {
@@ -96,7 +96,7 @@ describe("credential-document", () => {
   });
 
   describe("#onPrePasswordHash", () => {
-    const userParams: IUser = { email: "", name: "", password: "a" };
+    const userParams: UserType = { email: "", name: "", password: "a" };
 
     it("should require at least 6 characters", async () => {
       const user: User = new User().build({

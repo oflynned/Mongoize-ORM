@@ -1,6 +1,6 @@
 import User from "./model";
-import { IUser } from "./schema";
+import { UserType } from "./schema";
 
-export { User, IUser };
+export { User, UserType };
 
 export default User;

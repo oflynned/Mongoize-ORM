@@ -1,26 +1,28 @@
-import Schema, { IBaseModel } from "../documents/base-document/schema";
-import BaseDocument, { IDeletionParams } from "../documents/base-document";
+import Schema, { BaseModelType } from "../documents/base-document/schema";
+import BaseDocument, { DeletionParams } from "../documents/base-document";
 import DatabaseClient from "../../persistence/client/base.client";
 
 export class Repository<
-  Type extends IBaseModel,
-  Instance extends BaseDocument<Type, JoiSchema>,
+  Type extends BaseModelType,
+  DocumentClass extends BaseDocument<Type, JoiSchema>,
   JoiSchema extends Schema<Type>
 > {
-  private instanceType: Instance;
+  private instanceType: DocumentClass;
 
-  private constructor(instance: Instance) {
+  private constructor(instance: DocumentClass) {
     this.instanceType = instance;
   }
 
   static with<
-    Type extends IBaseModel,
-    Instance extends BaseDocument<Type, JoiSchema>,
+    Type extends BaseModelType,
+    DocumentClass extends BaseDocument<Type, JoiSchema>,
     JoiSchema extends Schema<Type>
   >(ChildModelClass: {
-    new (...args: any[]): Instance;
-  }): Repository<Type, Instance, JoiSchema> {
-    return new Repository<Type, Instance, JoiSchema>(new ChildModelClass());
+    new (...args: any[]): DocumentClass;
+  }): Repository<Type, DocumentClass, JoiSchema> {
+    return new Repository<Type, DocumentClass, JoiSchema>(
+      new ChildModelClass()
+    );
   }
 
   async count(client: DatabaseClient, query: object = {}): Promise<number> {
@@ -34,8 +36,8 @@ export class Repository<
   async deleteMany(
     client: DatabaseClient,
     query: object = {},
-    params: IDeletionParams = { hard: false }
-  ): Promise<Instance[]> {
+    params: DeletionParams = { hard: false }
+  ): Promise<DocumentClass[]> {
     if (params.hard) {
       await client.deleteMany(this.instanceType.collection(), query);
       return [];
@@ -43,7 +45,7 @@ export class Repository<
 
     const records = await this.findMany(client, query);
     return await Promise.all(
-      records.map(async (record: Instance) =>
+      records.map(async (record: DocumentClass) =>
         this.updateOne(client, record.toJson()._id, {
           deletedAt: new Date(),
           deleted: true
@@ -55,8 +57,8 @@ export class Repository<
   async deleteOne(
     client: DatabaseClient,
     _id: string,
-    params: IDeletionParams = { hard: false }
-  ): Promise<Instance | undefined> {
+    params: DeletionParams = { hard: false }
+  ): Promise<DocumentClass | undefined> {
     if (await this.existsById(client, _id)) {
       if (params.hard) {
         await client.deleteOne(this.instanceType.collection(), _id);
@@ -75,18 +77,18 @@ export class Repository<
   async findOne(
     client: DatabaseClient,
     query: object
-  ): Promise<Instance | undefined> {
+  ): Promise<DocumentClass | undefined> {
     const records = await client.read(this.instanceType.collection(), query);
     if (records.length > 0) {
       return Repository.newInstance(this.instanceType).from(
         records[0]
-      ) as Instance;
+      ) as DocumentClass;
     }
 
     return undefined;
   }
 
-  async findById(client: DatabaseClient, _id: string): Promise<Instance> {
+  async findById(client: DatabaseClient, _id: string): Promise<DocumentClass> {
     return this.findOne(client, { _id });
   }
 
@@ -115,7 +117,7 @@ export class Repository<
     client: DatabaseClient,
     _id: string,
     updatedFields: Partial<Type>
-  ): Promise<Instance> {
+  ): Promise<DocumentClass> {
     if (await this.existsById(client, _id)) {
       await client.updateOne(
         this.instanceType.collection(),
@@ -128,23 +130,27 @@ export class Repository<
     return undefined;
   }
 
-  async findAll(client: DatabaseClient): Promise<Instance[]> {
+  async findAll(client: DatabaseClient): Promise<DocumentClass[]> {
     return this.findMany(client, {});
   }
 
-  async findMany(client: DatabaseClient, query: object): Promise<Instance[]> {
+  async findMany(
+    client: DatabaseClient,
+    query: object
+  ): Promise<DocumentClass[]> {
     const records = await client.read(this.instanceType.collection(), query);
     return records.map(
       (record: object) =>
-        Repository.newInstance(this.instanceType).from(record) as Instance
+        Repository.newInstance(this.instanceType).from(record) as DocumentClass
     );
   }
 
+  // TODO should a validator be called at some point to ensure the instance was actually populated correctly?
   private static newInstance<
-    Type extends IBaseModel,
-    Instance extends BaseDocument<Type, JoiSchema>,
+    Type extends BaseModelType,
+    DocumentClass extends BaseDocument<Type, JoiSchema>,
     JoiSchema extends Schema<Type>
-  >(instance: Instance): Instance {
-    return new (instance.constructor as { new (): Instance })();
+  >(instance: DocumentClass): DocumentClass {
+    return new (instance.constructor as { new (): DocumentClass })();
   }
 }

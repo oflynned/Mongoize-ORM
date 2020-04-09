@@ -1,6 +1,6 @@
 import CredentialDocument from "./model";
-import { ICredential, CredentialSchema } from "./schema/schema";
+import { CredentialType, CredentialSchema } from "./schema/schema";
 
-export { ICredential, CredentialSchema };
+export { CredentialType, CredentialSchema };
 
 export default CredentialDocument;

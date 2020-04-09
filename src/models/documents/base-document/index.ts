@@ -1,6 +1,6 @@
-import { IDeletionParams, BaseDocument } from "./model";
+import { DeletionParams, BaseDocument } from "./model";
 import { Schema } from "./schema";
 
-export { IDeletionParams, BaseDocument, Schema };
+export { DeletionParams, BaseDocument, Schema };
 
 export default BaseDocument;

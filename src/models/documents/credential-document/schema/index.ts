@@ -1,5 +1,5 @@
-import { CredentialSchema, ICredential } from "./schema";
+import { CredentialSchema, CredentialType } from "./schema";
 
-export { CredentialSchema, ICredential };
+export { CredentialSchema, CredentialType };
 
 export default CredentialSchema;
