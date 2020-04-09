@@ -3,6 +3,7 @@ import BaseDocument from "../base-document";
 import Logger from "../../../logger";
 import CredentialSchema, { ICredential } from "./schema";
 import { MongoClient } from "../../../persistence/client";
+import { IInternalModel } from "../base-document/schema";
 
 abstract class CredentialDocument<
   T extends ICredential,
@@ -18,6 +19,10 @@ abstract class CredentialDocument<
   // here is a base password regex to get started
   // must contain at least 1 lowercase letter, 1 uppercase letter, 1 number, 1 special character
   passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).+$/;
+
+  build(payload: Omit<T, keyof IInternalModel>): CredentialDocument<T, S> {
+    return super.build(payload) as CredentialDocument<T, S>;
+  }
 
   async passwordAttemptMatches(passwordAttempt: string): Promise<boolean> {
     return new Promise((resolve, reject) => {

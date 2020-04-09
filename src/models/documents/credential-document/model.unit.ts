@@ -99,7 +99,11 @@ describe("credential-document", () => {
     const userParams: IUser = { email: "", name: "", password: "a" };
 
     it("should require at least 6 characters", async () => {
-      const user = new User().build({ ...userParams, password: "a".repeat(5) });
+      const user: User = new User().build({
+        ...userParams,
+        password: "a".repeat(5)
+      });
+
       await expect(user.onPrePasswordHash()).rejects.toThrowError(
         "password is too short"
       );

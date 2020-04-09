@@ -4,8 +4,10 @@ import {
   InMemoryClient,
   ConnectionOptions
 } from "./persistence/client";
-import BaseDocument from "./models/documents/base-document";
-import Schema from "./models/documents/base-document/schema";
+import BaseDocument, {
+  Schema,
+  IDeletionParams
+} from "./models/documents/base-document";
 import CredentialDocument, {
   CredentialSchema,
   ICredential

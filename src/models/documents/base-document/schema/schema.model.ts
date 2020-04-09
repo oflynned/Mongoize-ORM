@@ -1,7 +1,9 @@
 import Joi from "@hapi/joi";
 import { v4 as uuid } from "uuid";
 
-export type IBaseModel = {
+export type IBaseModel = {};
+
+export type IInternalModel = {
   readonly _id: string;
   readonly createdAt: Date;
   readonly updatedAt: Date | null;
@@ -32,12 +34,12 @@ export abstract class Schema<T extends IBaseModel> {
     };
   }
 
-  validate(data: T) {
+  validate(data: Omit<T, keyof IInternalModel>) {
     const joiSchema = Joi.object({ ...baseJoiSchema, ...this.joiBaseSchema() });
     return joiSchema.validate(data, { stripUnknown: true });
   }
 
-  validateOnUpdate(data: Partial<Omit<T, keyof IBaseModel>>) {
+  validateOnUpdate(data: Partial<Omit<T, keyof IInternalModel>>) {
     const joiSchema = Joi.object({ ...this.joiUpdateSchema() });
     return joiSchema.validate(data, { stripUnknown: true });
   }

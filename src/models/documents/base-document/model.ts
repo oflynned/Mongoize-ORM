@@ -1,4 +1,4 @@
-import Schema, { IBaseModel } from "./schema";
+import Schema, { IBaseModel, IInternalModel } from "./schema";
 import Logger from "../../../logger";
 import { MongoClient } from "../../../persistence/client";
 import Repository from "../../repository";
@@ -8,7 +8,7 @@ export type IDeletionParams = {
 };
 
 export abstract class BaseDocument<T extends IBaseModel, S extends Schema<T>> {
-  protected record: T | any;
+  protected record: T | IInternalModel | any;
 
   collection(): string {
     return `${this.constructor.name.toLowerCase()}s`;
@@ -16,19 +16,20 @@ export abstract class BaseDocument<T extends IBaseModel, S extends Schema<T>> {
 
   abstract joiSchema(): S;
 
-  from(payload: T | object): BaseDocument<T, S> {
+  from(payload: T | IInternalModel | object): BaseDocument<T, S> {
     this.record = { ...payload };
     return this;
   }
 
-  build(payload: Omit<T, keyof IBaseModel>): BaseDocument<T, S> {
+  build(payload: Omit<T, keyof IInternalModel>): BaseDocument<T, S> {
     this.record = { ...payload, ...this.joiSchema().baseSchemaContent() };
     return this;
   }
 
+  // TODO should be used to populate related documents after find/save/update/delete
   async populate(): Promise<void> {}
 
-  async validate(): Promise<T | IBaseModel> {
+  async validate(): Promise<T | IInternalModel> {
     Logger.debug("validate()");
     await this.onPreValidate();
 
@@ -42,7 +43,7 @@ export abstract class BaseDocument<T extends IBaseModel, S extends Schema<T>> {
 
   async update(
     client: MongoClient,
-    payload: Partial<Omit<T, keyof IBaseModel>>
+    payload: Partial<Omit<T, keyof IInternalModel>>
   ): Promise<BaseDocument<T, S>> {
     Logger.debug("update()");
 
@@ -111,8 +112,8 @@ export abstract class BaseDocument<T extends IBaseModel, S extends Schema<T>> {
     Logger.debug("onPreUpdate");
   }
 
-  toJson(): T & IBaseModel {
-    return this.record as T & IBaseModel;
+  toJson(): T & IInternalModel {
+    return this.record as T & IInternalModel;
   }
 
   async save(client: MongoClient): Promise<BaseDocument<T, S> | any> {
@@ -124,7 +125,7 @@ export abstract class BaseDocument<T extends IBaseModel, S extends Schema<T>> {
     this.record = (await client.create(
       this.collection(),
       validatedPayload as object
-    )) as T & IBaseModel;
+    )) as T & IInternalModel;
     await this.onPostSave();
     return this;
   }
