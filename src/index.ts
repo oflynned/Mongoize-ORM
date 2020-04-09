@@ -6,7 +6,8 @@ import {
 } from "./persistence/client";
 import BaseDocument, {
   Schema,
-  DeletionParams
+  DeletionParams,
+  BaseModelType
 } from "./models/documents/base-document";
 import CredentialDocument, {
   CredentialSchema,
@@ -15,6 +16,8 @@ import CredentialDocument, {
 import Joi from "@hapi/joi";
 
 export {
+  BaseModelType,
+  DeletionParams,
   Repository,
   MongoClient,
   InMemoryClient,
