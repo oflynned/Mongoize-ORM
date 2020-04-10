@@ -67,7 +67,8 @@ abstract class CredentialDocument<
   async onPreValidate(): Promise<void> {
     await super.onPreValidate();
     await this.onPrePasswordHash();
-    await this.hashPassword();
+    this.record.passwordHash = await this.hashPassword();
+    delete this.record.password;
     await this.onPostPasswordHash();
   }
 
@@ -78,14 +79,16 @@ abstract class CredentialDocument<
     this.record.password = newPassword;
 
     await this.onPrePasswordHash();
-    await this.hashPassword();
+    this.record.passwordHash = await this.hashPassword();
+    delete this.record.password;
+
     await this.onPostPasswordHash();
     await this.update(client, {
       passwordHash: this.record.passwordHash
     } as Type);
   }
 
-  async hashPassword(): Promise<void> {
+  async hashPassword(): Promise<string> {
     return new Promise((resolve, reject) => {
       hash(this.record.password, this.saltRounds, (error, passwordHash) => {
         if (error) {
@@ -93,9 +96,7 @@ abstract class CredentialDocument<
           return;
         }
 
-        delete this.record.password;
-        this.record.passwordHash = passwordHash;
-        resolve();
+        resolve(passwordHash);
       });
     });
   }
