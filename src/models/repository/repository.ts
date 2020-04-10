@@ -15,10 +15,10 @@ export class Repository<
   DocumentClass extends BaseDocument<Type, JoiSchema>,
   JoiSchema extends Schema<Type>
 > {
-  private instanceType: DocumentClass;
+  private documentInstance: DocumentClass;
 
-  private constructor(instance: DocumentClass) {
-    this.instanceType = instance;
+  private constructor(documentInstance: DocumentClass) {
+    this.documentInstance = documentInstance;
   }
 
   static with<
@@ -42,11 +42,11 @@ export class Repository<
   }
 
   async count(client: DatabaseClient, query: object = {}): Promise<number> {
-    return client.count(this.instanceType.collection(), query);
+    return client.count(this.documentInstance.collection(), query);
   }
 
   async deleteCollection(client: DatabaseClient): Promise<void> {
-    await client.dropCollection(this.instanceType.collection());
+    await client.dropCollection(this.documentInstance.collection());
   }
 
   async deleteMany(
@@ -55,7 +55,7 @@ export class Repository<
     params: DeletionParams = { hard: false }
   ): Promise<DocumentClass[]> {
     if (params.hard) {
-      await client.deleteMany(this.instanceType.collection(), query);
+      await client.deleteMany(this.documentInstance.collection(), query);
       return this.findMany(client, query);
     }
 
@@ -78,7 +78,7 @@ export class Repository<
   ): Promise<DocumentClass | undefined> {
     if (await this.existsById(client, _id)) {
       if (params.hard) {
-        await client.deleteOne(this.instanceType.collection(), _id);
+        await client.deleteOne(this.documentInstance.collection(), _id);
         return this.findById(client, _id);
       }
 
@@ -98,9 +98,12 @@ export class Repository<
     client: DatabaseClient,
     query: object
   ): Promise<DocumentClass | undefined> {
-    const records = await client.read(this.instanceType.collection(), query);
+    const records = await client.read(
+      this.documentInstance.collection(),
+      query
+    );
     if (records.length > 0) {
-      return Repository.newInstance(this.instanceType).from(
+      return Repository.newInstance(this.documentInstance).from(
         records[0]
       ) as DocumentClass;
     }
@@ -162,7 +165,11 @@ export class Repository<
       updatedFields = value;
     }
 
-    await client.updateOne(this.instanceType.collection(), _id, updatedFields);
+    await client.updateOne(
+      this.documentInstance.collection(),
+      _id,
+      updatedFields
+    );
     return this.findById(client, _id);
   }
 
@@ -174,10 +181,15 @@ export class Repository<
     client: DatabaseClient,
     query: object
   ): Promise<DocumentClass[]> {
-    const records = await client.read(this.instanceType.collection(), query);
+    const records = await client.read(
+      this.documentInstance.collection(),
+      query
+    );
     return records.map(
       record =>
-        Repository.newInstance(this.instanceType).from(record) as DocumentClass
+        Repository.newInstance(this.documentInstance).from(
+          record
+        ) as DocumentClass
     );
   }
 }
