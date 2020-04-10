@@ -36,6 +36,7 @@
     "lint:dependencies:fix": "node_modules/.bin/ncu -u --semverLevel major && yarn && git add yarn.lock package.json && git commit -m 'auto-update dependencies'",
     "lint:package": "node_modules/.bin/sort-package-json",
     "lint:staged": "node_modules/.bin/pretty-quick --staged",
+    "publish:npm": "yarn build && npm publish",
     "test": "node_modules/.bin/jest -c jest.config.js",
     "test:integration": "node_modules/.bin/jest -c jest.integration.config.js",
     "test:unit": "node_modules/.bin/jest -c jest.unit.config.js",
