@@ -1,8 +1,8 @@
-import { BaseDocument, MongoClient, Repository } from "../../../../src";
+import { MongoClient, RelationalDocument, Repository } from "../../../../src";
 import { PersonType, PersonSchema, PersonRelationships } from "./schema";
 import Animal from "../animal";
 
-class Person extends BaseDocument<
+class Person extends RelationalDocument<
   PersonType,
   PersonSchema,
   PersonRelationships
@@ -18,8 +18,7 @@ class Person extends BaseDocument<
   async relationalFields(client: MongoClient): Promise<PersonRelationships> {
     return {
       pets: await Repository.with(Animal).findMany(client, {
-        // ownerId: this.record._id
-        ownerId: ".populate() overflows this right now"
+        ownerId: this.record._id
       })
     };
   }

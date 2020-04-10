@@ -14,10 +14,22 @@ const main = async (client: InMemoryClient): Promise<void> => {
     .build({ name: "Doggo", legs: 4, ownerId: person._id })
     .save(client);
 
-  const a: Animal = await Repository.with(Animal).findById(client, animal._id);
+  await animal.populate(client);
+  Logger.info(
+    `${animal.toJson().name} is owned by ${animal.toJson().owner.toJson().name}`
+  );
+
+  // should probably be automatically called on calling a relational descendent
+  await person.populate(client);
+  Logger.info(
+    `${person.toJson().name} owns ${person.toJson().pets.length} pet(s)`
+  );
 
   Logger.info(
-    `${a.toJson().name} is owned by ${a.toPopulatedJson().owner.toJson().name}`
+    person
+      .toJson()
+      .pets.map((animal: Animal) => animal.toJson().name)
+      .join(", ")
   );
 };
 

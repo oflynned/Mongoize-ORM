@@ -1,8 +1,8 @@
-import { BaseDocument, MongoClient, Repository } from "../../../../src";
+import { MongoClient, RelationalDocument, Repository } from "../../../../src";
 import { AnimalType, AnimalSchema, AnimalRelationships } from "./schema";
 import Person from "../person";
 
-class Animal extends BaseDocument<
+class Animal extends RelationalDocument<
   AnimalType,
   AnimalSchema,
   AnimalRelationships
