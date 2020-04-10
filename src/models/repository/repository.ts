@@ -105,9 +105,9 @@ export class Repository<
     return this.existsByQuery(client, { _id });
   }
 
-  async exists<I extends BaseDocument<Type, JoiSchema>>(
+  async exists<Instance extends BaseDocument<Type, JoiSchema>>(
     client: DatabaseClient,
-    instance: I
+    instance: Instance
   ): Promise<boolean> {
     // if record was already hard deleted in another scope ... edge-case.
     if (!instance.toJson()) {
