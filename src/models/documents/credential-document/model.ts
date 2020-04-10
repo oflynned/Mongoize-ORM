@@ -80,7 +80,7 @@ abstract class CredentialDocument<
     await this.onPostPasswordHash();
     await this.update(client, {
       passwordHash: this.record.passwordHash
-    } as Partial<T>);
+    } as T);
   }
 
   async hashPassword(): Promise<void> {

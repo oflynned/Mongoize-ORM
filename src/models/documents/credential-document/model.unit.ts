@@ -135,6 +135,34 @@ describe("credential-document", () => {
     });
   });
 
+  describe("#updatePassword", () => {
+    let user: User;
+
+    beforeAll(async () => {
+      user = await new User()
+        .build({
+          password: "plaintextPassword1!",
+          name: "user",
+          email: "user@email.com"
+        })
+        .save(client);
+
+      await user.updatePassword(client, "newPlaintextPassword1!");
+    });
+
+    it("should not match original password after update", async () => {
+      await expect(
+        user.passwordAttemptMatches("plaintextPassword1!")
+      ).resolves.toBeFalsy();
+    });
+
+    it("should match new password after update", async () => {
+      await expect(
+        user.passwordAttemptMatches("newPlaintextPassword1!")
+      ).resolves.toBeTruthy();
+    });
+  });
+
   describe("#onPreValidate", () => {
     let user: User;
     let onPrePasswordHashSpy: SinonSpy, onPostPasswordHashSpy: SinonSpy;
@@ -158,33 +186,6 @@ describe("credential-document", () => {
 
     it("should call onPostPasswordHash", async () => {
       expect(onPostPasswordHashSpy.calledOnce).toBeTruthy();
-    });
-  });
-
-  describe("#updatePassword", () => {
-    let user: User;
-
-    beforeAll(async () => {
-      user = await new User()
-        .build({
-          password: "plaintextPassword1!",
-          name: "user",
-          email: "user@email.com"
-        })
-        .save(client);
-      await user.updatePassword(client, "newPlaintextPassword1!");
-    });
-
-    it("should not match original password after update", async () => {
-      await expect(
-        user.passwordAttemptMatches("plaintextPassword1!")
-      ).resolves.toBeFalsy();
-    });
-
-    it("should match new password after update", async () => {
-      await expect(
-        user.passwordAttemptMatches("newPlaintextPassword1!")
-      ).resolves.toBeTruthy();
     });
   });
 });

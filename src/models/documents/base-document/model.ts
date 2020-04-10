@@ -7,6 +7,10 @@ export type DeletionParams = Partial<{
   hard: boolean;
 }>;
 
+type PropertyField = {
+  [key: string]: string | number | boolean | object;
+};
+
 export abstract class BaseDocument<
   T extends BaseModelType,
   S extends Schema<T>
@@ -32,14 +36,31 @@ export abstract class BaseDocument<
   // TODO should be used to populate related documents after find/save/update/delete
   async populate(): Promise<void> {}
 
+  pruneUpdateFields(fields: PropertyField): object {
+    const updatableKeys = Object.keys(this.joiSchema().joiUpdateSchema());
+    const relevantKeys = Object.keys(fields).filter(
+      (key: string) => updatableKeys.includes(key),
+      []
+    );
+
+    const output: PropertyField = {};
+    relevantKeys.map((key: string) => {
+      output[key] = fields[key];
+    });
+
+    if (Object.keys(output).length === 0) {
+      throw new Error("invalid update, all keys were pruned");
+    }
+
+    return output as object;
+  }
+
   async validate(): Promise<T | InternalModelType> {
     Logger.debug("validate()");
     await this.onPreValidate();
 
     Logger.debug("validating...");
-    const { value, error, errors } = await this.joiSchema().validate(
-      this.record
-    );
+    const { value, error } = await this.joiSchema().validate(this.record);
 
     if (error) {
       throw error;

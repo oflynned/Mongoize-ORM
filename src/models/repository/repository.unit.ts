@@ -110,7 +110,7 @@ describe("repository", () => {
       ).rejects.toThrowError();
     });
 
-    describe("with untyped update", () => {
+    describe("with no validation on update", () => {
       let animal: Animal;
 
       beforeAll(async () => {
@@ -124,7 +124,8 @@ describe("repository", () => {
           animal.toJson()._id,
           {
             cool: "cool"
-          }
+          },
+          false
         );
       });
 
