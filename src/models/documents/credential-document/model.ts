@@ -1,5 +1,4 @@
 import { compare, hash } from "bcrypt";
-import BaseDocument from "../base-document";
 import Logger from "../../../logger";
 import CredentialSchema, { CredentialType } from "./schema";
 import { MongoClient } from "../../../persistence/client";
@@ -7,12 +6,13 @@ import {
   BaseRelationshipType,
   InternalModelType
 } from "../base-document/schema";
+import RelationalDocument from "../relational-document";
 
 abstract class CredentialDocument<
   Type extends CredentialType,
   JoiSchema extends CredentialSchema<Type>,
   RelationalFields extends BaseRelationshipType
-> extends BaseDocument<Type, JoiSchema, RelationalFields> {
+> extends RelationalDocument<Type, JoiSchema, RelationalFields> {
   // recommended cost factor
   saltRounds = 12;
 

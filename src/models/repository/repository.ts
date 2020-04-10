@@ -16,9 +16,8 @@ const defaultUpdateOptions: UpdateOptions = {
 
 export class Repository<
   Type extends BaseModelType,
-  DocumentClass extends BaseDocument<Type, JoiSchema, RelationalFields>,
-  JoiSchema extends Schema<Type>,
-  RelationalFields extends BaseRelationshipType
+  DocumentClass extends BaseDocument<Type, JoiSchema>,
+  JoiSchema extends Schema<Type>
 > {
   private documentInstance: DocumentClass;
 
@@ -28,20 +27,19 @@ export class Repository<
 
   static with<
     Type extends BaseModelType,
-    DocumentClass extends BaseDocument<Type, JoiSchema, RelationalFields>,
-    JoiSchema extends Schema<Type>,
-    RelationalFields extends BaseRelationshipType
+    DocumentClass extends BaseDocument<Type, JoiSchema>,
+    JoiSchema extends Schema<Type>
   >(ChildModelClass: {
     new (...args: any[]): DocumentClass;
-  }): Repository<Type, DocumentClass, JoiSchema, RelationalFields> {
-    return new Repository<Type, DocumentClass, JoiSchema, RelationalFields>(
+  }): Repository<Type, DocumentClass, JoiSchema> {
+    return new Repository<Type, DocumentClass, JoiSchema>(
       new ChildModelClass()
     );
   }
 
   private static newInstance<
     Type extends BaseModelType,
-    DocumentClass extends BaseDocument<Type, JoiSchema, RelationalFields>,
+    DocumentClass extends BaseDocument<Type, JoiSchema>,
     JoiSchema extends Schema<Type>,
     RelationalFields extends BaseRelationshipType
   >(instance: DocumentClass): DocumentClass {
@@ -110,15 +108,9 @@ export class Repository<
       query
     );
     if (records.length > 0) {
-      const instance = (await Repository.newInstance(
-        this.documentInstance
-      ).from(records[0])) as DocumentClass;
-
-      // TODO urgently needs to be restricted to loading the next one layer ____on load____
-      //      otherwise the callstack is going to be exceeded by running infinite loops
-      await instance.populate(client);
-
-      return instance;
+      return Repository.newInstance(this.documentInstance).from(
+        records[0]
+      ) as DocumentClass;
     }
 
     return undefined;
@@ -136,9 +128,10 @@ export class Repository<
     return this.existsByQuery(client, { _id });
   }
 
-  async exists<
-    Instance extends BaseDocument<Type, JoiSchema, RelationalFields>
-  >(client: DatabaseClient, instance: Instance): Promise<boolean> {
+  async exists<Instance extends BaseDocument<Type, JoiSchema>>(
+    client: DatabaseClient,
+    instance: Instance
+  ): Promise<boolean> {
     // if record was already hard deleted in another scope ... edge-case.
     if (!instance.toJson()) {
       return false;
@@ -197,15 +190,9 @@ export class Repository<
 
     return Promise.all(
       records.map(async (record: object) => {
-        const instance = (await Repository.newInstance(
-          this.documentInstance
-        ).from(record)) as DocumentClass;
-
-        // TODO urgently needs to be restricted to loading the next one layer ____on load____
-        //      otherwise the callstack is going to be exceeded by running infinite loops
-        await instance.populate(client);
-
-        return instance;
+        return Repository.newInstance(this.documentInstance).from(
+          record
+        ) as DocumentClass;
       })
     );
   }

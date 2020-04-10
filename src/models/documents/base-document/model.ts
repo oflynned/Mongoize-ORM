@@ -1,11 +1,8 @@
-import Schema, {
-  BaseModelType,
-  BaseRelationshipType,
-  InternalModelType
-} from "./schema";
+import Schema, { BaseModelType, InternalModelType } from "./schema";
 import Logger from "../../../logger";
 import { MongoClient } from "../../../persistence/client";
 import Repository from "../../repository";
+import Lifecycle from "../lifecycle";
 
 export type DeletionParams = Partial<{
   hard: boolean;
@@ -13,11 +10,9 @@ export type DeletionParams = Partial<{
 
 export abstract class BaseDocument<
   Type extends BaseModelType,
-  JoiSchema extends Schema<Type>,
-  RelationshipSchema extends BaseRelationshipType
-> {
+  JoiSchema extends Schema<Type>
+> extends Lifecycle {
   protected record: Type | InternalModelType | any;
-  protected relationships: RelationshipSchema | any;
 
   collection(): string {
     return `${this.constructor.name.toLowerCase()}s`;
@@ -47,38 +42,20 @@ export abstract class BaseDocument<
 
   from(
     payload: (Type & InternalModelType) | object
-  ): BaseDocument<Type, JoiSchema, RelationshipSchema> {
+  ): BaseDocument<Type, JoiSchema> {
     this.record = { ...payload };
     return this;
   }
 
   build(
     payload: Omit<Type, keyof InternalModelType>
-  ): BaseDocument<Type, JoiSchema, RelationshipSchema> {
+  ): BaseDocument<Type, JoiSchema> {
     this.record = { ...payload, ...this.joiSchema().baseSchemaContent() };
     return this;
   }
 
-  async relationalFields(
-    /* eslint-disable */
-    client: MongoClient
-    /* eslint-enable */
-  ): Promise<RelationshipSchema | any> {
-    return {};
-  }
-
-  async populate(
-    client: MongoClient
-  ): Promise<BaseDocument<Type, JoiSchema, RelationshipSchema>> {
-    this.relationships = { ...(await this.relationalFields(client)) };
-    return this;
-  }
-
   async validate(): Promise<Type | InternalModelType> {
-    Logger.debug("validate()");
     await this.onPreValidate();
-
-    Logger.debug("validating...");
     const { value, error } = await this.joiSchema().validate(this.record);
 
     if (error) {
@@ -94,7 +71,7 @@ export abstract class BaseDocument<
   async update(
     client: MongoClient,
     payload: Partial<Omit<Type, keyof InternalModelType>>
-  ): Promise<BaseDocument<Type, JoiSchema, RelationshipSchema>> {
+  ): Promise<BaseDocument<Type, JoiSchema>> {
     Logger.debug("update()");
 
     if (Object.keys(payload).length === 0) {
@@ -119,7 +96,7 @@ export abstract class BaseDocument<
 
     this.record = newInstance.record;
     this.onPostUpdate();
-    return this.populate(client);
+    return this;
   }
 
   async delete(
@@ -135,55 +112,15 @@ export abstract class BaseDocument<
     this.onPostDelete();
   }
 
-  async onPostDelete(): Promise<void> {
-    Logger.debug("onPostDelete");
-  }
-
-  async onPostSave(): Promise<void> {
-    Logger.debug("onPostSave");
-  }
-
-  async onPostValidate(): Promise<void> {
-    Logger.debug("onPostValidate");
-  }
-
-  async onPreDelete(): Promise<void> {
-    Logger.debug("onPreDelete");
-  }
-
-  async onPreSave(): Promise<void> {
-    Logger.debug("onPreSave");
-  }
-
-  async onPreValidate(): Promise<void> {
-    Logger.debug("onPreValidate");
-  }
-
-  async onPostUpdate(): Promise<void> {
-    Logger.debug("onPostUpdate");
-  }
-
-  async onPreUpdate(): Promise<void> {
-    Logger.debug("onPreUpdate");
-  }
-
   toJson(): Type & InternalModelType {
     return { ...this.record };
   }
 
-  // TODO rename this or combine it with .toJson outright
-  toPopulatedJson(): Type & InternalModelType & RelationshipSchema {
-    return { ...this.record, ...this.relationships };
-  }
-
   async save(
     client: MongoClient
-  ): Promise<BaseDocument<Type, JoiSchema, RelationshipSchema> | any> {
+  ): Promise<BaseDocument<Type, JoiSchema> | any> {
     const validatedPayload = await this.validate();
-    Logger.debug("save()");
-
     await this.onPreSave();
-    Logger.debug("saving...");
 
     this.record = (await client.create(
       this.collection(),
@@ -191,6 +128,6 @@ export abstract class BaseDocument<
     )) as Type & InternalModelType;
 
     await this.onPostSave();
-    return this.populate(client);
+    return this;
   }
 }
