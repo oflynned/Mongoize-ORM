@@ -1,14 +1,18 @@
 import { compare, hash } from "bcrypt";
-import BaseDocument from "../base-document";
+import BaseDocument, { BaseModelType } from "../base-document";
 import Logger from "../../../logger";
 import CredentialSchema, { CredentialType } from "./schema";
 import { MongoClient } from "../../../persistence/client";
-import { InternalModelType } from "../base-document/schema";
+import {
+  BaseRelationshipType,
+  InternalModelType
+} from "../base-document/schema";
 
 abstract class CredentialDocument<
   Type extends CredentialType,
-  JoiSchema extends CredentialSchema<Type>
-> extends BaseDocument<Type, JoiSchema> {
+  JoiSchema extends CredentialSchema<Type>,
+  RelationalFields extends BaseRelationshipType
+> extends BaseDocument<Type, JoiSchema, RelationalFields> {
   // recommended cost factor
   saltRounds = 12;
 
@@ -22,8 +26,12 @@ abstract class CredentialDocument<
 
   build(
     payload: Omit<Type, keyof InternalModelType>
-  ): CredentialDocument<Type, JoiSchema> {
-    return super.build(payload) as CredentialDocument<Type, JoiSchema>;
+  ): CredentialDocument<Type, JoiSchema, RelationalFields> {
+    return super.build(payload) as CredentialDocument<
+      Type,
+      JoiSchema,
+      RelationalFields
+    >;
   }
 
   async passwordAttemptMatches(passwordAttempt: string): Promise<boolean> {

@@ -1,6 +1,10 @@
-import Schema, { BaseModelType } from "../documents/base-document/schema";
+import Schema, {
+  BaseModelType,
+  BaseRelationshipType
+} from "../documents/base-document/schema";
 import BaseDocument, { DeletionParams } from "../documents/base-document";
 import DatabaseClient from "../../persistence/client/base.client";
+import { MongoClient } from "../../index";
 
 type UpdateOptions = Partial<{
   validateUpdate: boolean;
@@ -12,8 +16,9 @@ const defaultUpdateOptions: UpdateOptions = {
 
 export class Repository<
   Type extends BaseModelType,
-  DocumentClass extends BaseDocument<Type, JoiSchema>,
-  JoiSchema extends Schema<Type>
+  DocumentClass extends BaseDocument<Type, JoiSchema, RelationalFields>,
+  JoiSchema extends Schema<Type>,
+  RelationalFields extends BaseRelationshipType
 > {
   private documentInstance: DocumentClass;
 
@@ -23,20 +28,22 @@ export class Repository<
 
   static with<
     Type extends BaseModelType,
-    DocumentClass extends BaseDocument<Type, JoiSchema>,
-    JoiSchema extends Schema<Type>
+    DocumentClass extends BaseDocument<Type, JoiSchema, RelationalFields>,
+    JoiSchema extends Schema<Type>,
+    RelationalFields extends BaseRelationshipType
   >(ChildModelClass: {
     new (...args: any[]): DocumentClass;
-  }): Repository<Type, DocumentClass, JoiSchema> {
-    return new Repository<Type, DocumentClass, JoiSchema>(
+  }): Repository<Type, DocumentClass, JoiSchema, RelationalFields> {
+    return new Repository<Type, DocumentClass, JoiSchema, RelationalFields>(
       new ChildModelClass()
     );
   }
 
   private static newInstance<
     Type extends BaseModelType,
-    DocumentClass extends BaseDocument<Type, JoiSchema>,
-    JoiSchema extends Schema<Type>
+    DocumentClass extends BaseDocument<Type, JoiSchema, RelationalFields>,
+    JoiSchema extends Schema<Type>,
+    RelationalFields extends BaseRelationshipType
   >(instance: DocumentClass): DocumentClass {
     return new (instance.constructor as { new (): DocumentClass })();
   }
@@ -50,7 +57,7 @@ export class Repository<
   }
 
   async deleteMany(
-    client: DatabaseClient,
+    client: MongoClient,
     query: object = {},
     params: DeletionParams = { hard: false }
   ): Promise<DocumentClass[]> {
@@ -72,7 +79,7 @@ export class Repository<
   }
 
   async deleteOne(
-    client: DatabaseClient,
+    client: MongoClient,
     _id: string,
     params: DeletionParams = { hard: false }
   ): Promise<DocumentClass | undefined> {
@@ -85,7 +92,7 @@ export class Repository<
       return this.updateOne(
         client,
         _id,
-        // should probably try to abstract out typing internal properties instead of just using `as object`
+        // TODO should probably try to abstract out typing internal properties instead of just using `as object`
         { deletedAt: new Date(), deleted: true } as object,
         { validateUpdate: false }
       );
@@ -95,7 +102,7 @@ export class Repository<
   }
 
   async findOne(
-    client: DatabaseClient,
+    client: MongoClient,
     query: object
   ): Promise<DocumentClass | undefined> {
     const records = await client.read(
@@ -103,15 +110,21 @@ export class Repository<
       query
     );
     if (records.length > 0) {
-      return Repository.newInstance(this.documentInstance).from(
-        records[0]
-      ) as DocumentClass;
+      const instance = (await Repository.newInstance(
+        this.documentInstance
+      ).from(records[0])) as DocumentClass;
+
+      // TODO urgently needs to be restricted to loading the next one layer ____on load____
+      //      otherwise the callstack is going to be exceeded by running infinite loops
+      await instance.populate(client);
+
+      return instance;
     }
 
     return undefined;
   }
 
-  async findById(client: DatabaseClient, _id: string): Promise<DocumentClass> {
+  async findById(client: MongoClient, _id: string): Promise<DocumentClass> {
     return this.findOne(client, { _id });
   }
 
@@ -123,10 +136,9 @@ export class Repository<
     return this.existsByQuery(client, { _id });
   }
 
-  async exists<Instance extends BaseDocument<Type, JoiSchema>>(
-    client: DatabaseClient,
-    instance: Instance
-  ): Promise<boolean> {
+  async exists<
+    Instance extends BaseDocument<Type, JoiSchema, RelationalFields>
+  >(client: DatabaseClient, instance: Instance): Promise<boolean> {
     // if record was already hard deleted in another scope ... edge-case.
     if (!instance.toJson()) {
       return false;
@@ -137,7 +149,7 @@ export class Repository<
   }
 
   async updateOne(
-    client: DatabaseClient,
+    client: MongoClient,
     _id: string,
     updatedFields: Partial<Type>,
     options: UpdateOptions = defaultUpdateOptions
@@ -173,23 +185,28 @@ export class Repository<
     return this.findById(client, _id);
   }
 
-  async findAll(client: DatabaseClient): Promise<DocumentClass[]> {
+  async findAll(client: MongoClient): Promise<DocumentClass[]> {
     return this.findMany(client, {});
   }
 
-  async findMany(
-    client: DatabaseClient,
-    query: object
-  ): Promise<DocumentClass[]> {
+  async findMany(client: MongoClient, query: object): Promise<DocumentClass[]> {
     const records = await client.read(
       this.documentInstance.collection(),
       query
     );
-    return records.map(
-      record =>
-        Repository.newInstance(this.documentInstance).from(
-          record
-        ) as DocumentClass
+
+    return Promise.all(
+      records.map(async (record: object) => {
+        const instance = (await Repository.newInstance(
+          this.documentInstance
+        ).from(record)) as DocumentClass;
+
+        // TODO urgently needs to be restricted to loading the next one layer ____on load____
+        //      otherwise the callstack is going to be exceeded by running infinite loops
+        await instance.populate(client);
+
+        return instance;
+      })
     );
   }
 }

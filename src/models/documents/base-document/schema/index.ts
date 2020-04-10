@@ -1,4 +1,9 @@
-import { Schema, BaseModelType, InternalModelType } from "./schema.model";
+import {
+  Schema,
+  BaseModelType,
+  InternalModelType,
+  BaseRelationshipType
+} from "./schema.model";
 
-export { Schema, BaseModelType, InternalModelType };
+export { Schema, BaseModelType, InternalModelType, BaseRelationshipType };
 export default Schema;

@@ -1,42 +1,83 @@
-import Schema, { BaseModelType, InternalModelType } from "./schema";
+import Schema, {
+  BaseModelType,
+  BaseRelationshipType,
+  InternalModelType
+} from "./schema";
 import Logger from "../../../logger";
 import { MongoClient } from "../../../persistence/client";
 import Repository from "../../repository";
+import DatabaseClient from "../../../persistence/client/base.client";
 
 export type DeletionParams = Partial<{
   hard: boolean;
 }>;
 
-type PropertyField = {
-  [key: string]: string | number | boolean | object;
-};
-
 export abstract class BaseDocument<
-  T extends BaseModelType,
-  S extends Schema<T>
+  Type extends BaseModelType,
+  JoiSchema extends Schema<Type>,
+  RelationshipSchema extends BaseRelationshipType
 > {
-  protected record: T | InternalModelType | any;
+  protected record: (Type & InternalModelType) | any;
+  protected relationships: RelationshipSchema;
 
   collection(): string {
     return `${this.constructor.name.toLowerCase()}s`;
   }
 
-  abstract joiSchema(): S;
+  abstract joiSchema(): JoiSchema;
 
-  from(payload: T | InternalModelType | object): BaseDocument<T, S> {
+  get _id(): string {
+    return this.toJson()._id;
+  }
+
+  get createdAt(): Date {
+    return this.toJson().createdAt;
+  }
+
+  get updatedAt(): Date | undefined {
+    return this.toJson().updatedAt;
+  }
+
+  get deletedAt(): Date | undefined {
+    return this.toJson().deletedAt;
+  }
+
+  get deleted(): boolean {
+    return this.toJson().deleted;
+  }
+
+  from(
+    payload: (Type & InternalModelType) | object
+  ): BaseDocument<Type, JoiSchema, RelationshipSchema> {
     this.record = { ...payload };
     return this;
   }
 
-  build(payload: Omit<T, keyof InternalModelType>): BaseDocument<T, S> {
+  build(
+    payload: Omit<Type, keyof InternalModelType>
+  ): BaseDocument<Type, JoiSchema, RelationshipSchema> {
+    // TODO parse keys extending BaseDocument to set the record using parseRelationalKey
+    //      what about splitting db & document? record needs to be populated after that is dispatched to the db
+
     this.record = { ...payload, ...this.joiSchema().baseSchemaContent() };
     return this;
   }
 
-  // TODO should be used to populate related documents after find/save/update/delete
-  async populate(): Promise<void> {}
+  async relationalFields(
+    client: MongoClient
+  ): Promise<RelationshipSchema | any> {
+    return undefined;
+  }
 
-  async validate(): Promise<T | InternalModelType> {
+  async populate(
+    client: MongoClient
+  ): Promise<BaseDocument<Type, JoiSchema, RelationshipSchema>> {
+    const fields = await this.relationalFields(client);
+    this.relationships = { ...(fields || {}) };
+    return this;
+  }
+
+  async validate(): Promise<Type | InternalModelType> {
     Logger.debug("validate()");
     await this.onPreValidate();
 
@@ -55,8 +96,8 @@ export abstract class BaseDocument<
 
   async update(
     client: MongoClient,
-    payload: Partial<Omit<T, keyof InternalModelType>>
-  ): Promise<BaseDocument<T, S>> {
+    payload: Partial<Omit<Type, keyof InternalModelType>>
+  ): Promise<BaseDocument<Type, JoiSchema, RelationshipSchema>> {
     Logger.debug("update()");
 
     if (Object.keys(payload).length === 0) {
@@ -81,8 +122,7 @@ export abstract class BaseDocument<
 
     this.record = newInstance.record;
     this.onPostUpdate();
-
-    return this;
+    return this.populate(client);
   }
 
   async delete(
@@ -130,21 +170,29 @@ export abstract class BaseDocument<
     Logger.debug("onPreUpdate");
   }
 
-  toJson(): T & InternalModelType {
-    return this.record as T & InternalModelType;
+  toJson(): Type & InternalModelType {
+    return { ...this.record };
   }
 
-  async save(client: MongoClient): Promise<BaseDocument<T, S> | any> {
+  toPopulatedJson(): Type & InternalModelType & RelationshipSchema {
+    return { ...this.record, ...this.relationships };
+  }
+
+  async save(
+    client: MongoClient
+  ): Promise<BaseDocument<Type, JoiSchema, RelationshipSchema> | any> {
     const validatedPayload = await this.validate();
     Logger.debug("save()");
+
     await this.onPreSave();
     Logger.debug("saving...");
 
     this.record = (await client.create(
       this.collection(),
       validatedPayload as object
-    )) as T & InternalModelType;
+    )) as Type & InternalModelType;
+
     await this.onPostSave();
-    return this;
+    return this.populate(client);
   }
 }
