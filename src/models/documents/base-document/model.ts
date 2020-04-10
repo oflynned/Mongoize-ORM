@@ -63,16 +63,17 @@ export abstract class BaseDocument<
   }
 
   async relationalFields(
+    /*eslint-disable */
     client: MongoClient
+    /*eslint-enable */
   ): Promise<RelationshipSchema | any> {
-    return undefined;
+    return {};
   }
 
   async populate(
     client: MongoClient
   ): Promise<BaseDocument<Type, JoiSchema, RelationshipSchema>> {
-    const fields = await this.relationalFields(client);
-    this.relationships = { ...(fields || {}) };
+    this.relationships = { ...(await this.relationalFields(client)) };
     return this;
   }
 
