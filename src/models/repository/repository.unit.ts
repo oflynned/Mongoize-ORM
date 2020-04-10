@@ -107,7 +107,13 @@ describe("repository", () => {
         Repository.with(Animal).updateOne(client, animal.toJson()._id, {
           legs: -1
         })
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(/must be larger than or equal to 0/);
+    });
+
+    it("should not update non-existent record", async () => {
+      await expect(
+        Repository.with(Animal).updateOne(client, "doesn't exist", { legs: 0 })
+      ).rejects.toThrowError("instance does not exist");
     });
 
     describe("with no validation on update", () => {

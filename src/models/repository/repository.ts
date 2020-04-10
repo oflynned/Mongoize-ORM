@@ -124,6 +124,10 @@ export class Repository<
     updatedFields: Partial<Type>,
     validateUpdate: boolean = true
   ): Promise<DocumentClass> {
+    if (!(await this.existsById(client, _id))) {
+      throw new Error("instance does not exist");
+    }
+
     if (validateUpdate) {
       // validate the new payload as the repo should still respect db restraints
       // unless the `Type` generic is passed, the `updatedFields` param will not respect the instance type properties
@@ -144,18 +148,10 @@ export class Repository<
       updatedFields = value;
     }
 
-    if (await this.existsById(client, _id)) {
-      // dispatch an update to the db once validations pass
-      await client.updateOne(
-        this.instanceType.collection(),
-        _id,
-        updatedFields
-      );
+    // dispatch an update to the db once validations pass
+    await client.updateOne(this.instanceType.collection(), _id, updatedFields);
 
-      return this.findById(client, _id);
-    }
-
-    return undefined;
+    return this.findById(client, _id);
   }
 
   async findAll(client: DatabaseClient): Promise<DocumentClass[]> {
