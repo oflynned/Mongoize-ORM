@@ -19,12 +19,28 @@ const main = async (client: InMemoryClient): Promise<void> => {
     `${animal.toJson().name} is owned by ${animal.toJson().owner.toJson().name}`
   );
 
-  // should probably be automatically called on calling a relational descendent
+  // it updates internal references to fetch relationships
+  // without calling this, the relationships are ___not___ refreshed
+  // should probably be automatically called on calling a relational descendent in the first place
   await person.populate(client);
   Logger.info(
     `${person.toJson().name} owns ${person.toJson().pets.length} pet(s)`
   );
+  Logger.info(
+    person
+      .toJson()
+      .pets.map((animal: Animal) => animal.toJson().name)
+      .join(", ")
+  );
 
+  await new Animal()
+    .build({ name: "Spot", legs: 4, ownerId: person._id })
+    .save(client);
+  await person.populate(client);
+
+  Logger.info(
+    `${person.toJson().name} owns ${person.toJson().pets.length} pet(s)`
+  );
   Logger.info(
     person
       .toJson()
