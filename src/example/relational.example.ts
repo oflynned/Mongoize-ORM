@@ -4,27 +4,21 @@ import Person from "./models/person";
 import { InMemoryClient, Repository } from "../../src";
 
 const main = async (client: InMemoryClient): Promise<void> => {
-  await new Animal().build({ name: "Doggo", legs: 4 }).save(client);
+  const person: Person = await new Person()
+    .build({
+      name: "John Smith"
+    })
+    .save(client);
 
-  const animals = await Repository.with(Animal).findAll(client);
-  // Logger.info(animals);
+  const animal: Animal = await new Animal()
+    .build({ name: "Doggo", legs: 4, ownerId: person._id })
+    .save(client);
 
-  const person = await new Person().build({
-    name: "John Smith",
-    pet: animals[0]
-  });
+  const a: Animal = await Repository.with(Animal).findById(client, animal._id);
 
   Logger.info(
-    `${person.toJson().name} is the owner of ${
-      person.toJson().pet.toJson().name
-    }`
+    `${a.toJson().name} is owned by ${a.toPopulatedJson().owner.toJson().name}`
   );
-
-  // const p2 = await p1.save(client);
-  // Logger.info(p2);
-
-  // const people = await Repository.with(Person).findMany(client);
-  // Logger.info(people);
 };
 
 (async (): Promise<void> => {

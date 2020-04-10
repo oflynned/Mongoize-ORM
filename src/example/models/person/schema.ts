@@ -1,23 +1,25 @@
 import Animal from "../animal";
-import { Schema, Joi } from "../../../../src";
+import { Schema, Joi, BaseModelType } from "../../../../src";
+import { BaseRelationshipType } from "../../../models/documents/base-document/schema";
 
-export type PersonType = {
+export interface PersonType extends BaseModelType {
   name: string;
-  pet?: Animal;
-};
+}
+
+export interface PersonRelationships extends BaseRelationshipType {
+  pets: Animal[];
+}
 
 export class PersonSchema extends Schema<PersonType> {
   joiBaseSchema(): object {
     return {
-      name: Joi.string().required(),
-      pet: Joi.string().uuid()
+      name: Joi.string().required()
     };
   }
 
   joiUpdateSchema(): object {
     return {
-      name: Joi.string(),
-      pet: Joi.string().uuid()
+      name: Joi.string()
     };
   }
 }
