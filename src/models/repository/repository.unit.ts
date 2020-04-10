@@ -1,7 +1,11 @@
 import Animal from "../../example/models/animal";
 import { Repository } from "./repository";
 import { InMemoryClient } from "../../persistence/client";
-import { AnimalSchema, AnimalType } from "../../example/models/animal/schema";
+import {
+  AnimalRelationships,
+  AnimalSchema,
+  AnimalType
+} from "../../example/models/animal/schema";
 
 describe("repository", () => {
   const client: InMemoryClient = new InMemoryClient();
@@ -81,9 +85,12 @@ describe("repository", () => {
       animal = await new Animal()
         .build({ name: "Doggo", legs: 4 })
         .save(client);
-      animal = await Repository.with<AnimalType, Animal, AnimalSchema>(
-        Animal
-      ).updateOne(client, animal.toJson()._id, { legs: 0 });
+      animal = await Repository.with<
+        AnimalType,
+        Animal,
+        AnimalSchema,
+        AnimalRelationships
+      >(Animal).updateOne(client, animal.toJson()._id, { legs: 0 });
     });
 
     afterAll(async () => {
@@ -227,7 +234,7 @@ describe("repository", () => {
 
     describe("with empty db", () => {
       it("should return false", async () => {
-        const instance: Animal = new Animal().build({ name: "Doggo" });
+        const instance = new Animal().build({ name: "Doggo" });
         await expect(
           Repository.with(Animal).exists(client, instance)
         ).resolves.toBeFalsy();
