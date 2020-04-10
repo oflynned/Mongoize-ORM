@@ -16,7 +16,7 @@ export abstract class BaseDocument<
   JoiSchema extends Schema<Type>,
   RelationshipSchema extends BaseRelationshipType
 > {
-  protected record: (Type & InternalModelType) | any;
+  protected record: Type | InternalModelType | any;
   protected relationships: RelationshipSchema | any;
 
   collection(): string {
@@ -171,6 +171,7 @@ export abstract class BaseDocument<
     return { ...this.record };
   }
 
+  // TODO rename this or combine it with .toJson outright
   toPopulatedJson(): Type & InternalModelType & RelationshipSchema {
     return { ...this.record, ...this.relationships };
   }
