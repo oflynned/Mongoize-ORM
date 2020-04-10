@@ -118,6 +118,7 @@ export class Repository<
     return this.existsById(client, instance.toJson()._id);
   }
 
+  // TODO pass options instead of a boolean for .validateUpdate
   async updateOne(
     client: DatabaseClient,
     _id: string,
