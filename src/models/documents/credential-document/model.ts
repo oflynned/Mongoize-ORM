@@ -1,5 +1,5 @@
 import { compare, hash } from "bcrypt";
-import BaseDocument, { BaseModelType } from "../base-document";
+import BaseDocument from "../base-document";
 import Logger from "../../../logger";
 import CredentialSchema, { CredentialType } from "./schema";
 import { MongoClient } from "../../../persistence/client";
