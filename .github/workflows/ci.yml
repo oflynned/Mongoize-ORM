@@ -30,7 +30,7 @@ jobs:
         run: yarn install
 
       - name: Lint code for errors
-        run: yarn lint
+        run: yarn lint:code:check
 
       - name: Lint package.json dependency versions
         run: yarn lint:dependencies
