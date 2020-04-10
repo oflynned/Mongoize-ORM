@@ -170,7 +170,6 @@ export class Repository<
     );
   }
 
-  // TODO should a validator be called at some point to ensure the instance was actually populated correctly?
   private static newInstance<
     Type extends BaseModelType,
     DocumentClass extends BaseDocument<Type, JoiSchema>,
