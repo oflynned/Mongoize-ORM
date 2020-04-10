@@ -26,16 +26,16 @@ https://github.com/oflynned/Mongoize-ORM-Example/
 You just need to implement the two abstract classes `Schema` and `BaseDocument` to get started with using Mongoize-ORM.
 
 ```
-import { Schema, BaseDocument } from 'mongoize-orm'
+import { Schema, BaseDocument, BaseModelType } from 'mongoize-orm'
 
 // define a ts type interface for strong typing
-type IAnimal = {
+export interface AnimalType extends BaseModelType {
   name: string;
   legs?: number;
-};
+}
 
 // define a db schema for validating data passed
-class AnimalSchema extends Schema<IAnimal> {
+export class AnimalSchema extends Schema<AnimalType> {
   joiBaseSchema(): object {
     return {
       name: Joi.string().required(),
@@ -53,7 +53,7 @@ class AnimalSchema extends Schema<IAnimal> {
 
 // hey presto you now have an instance with an abstract method to implement
 // with a strong interface type
-class Animal extends BaseDocument<IAnimal, AnimalSchema> {
+class Animal extends BaseDocument<AnimalType, AnimalSchema> {
   joiSchema(): AnimalSchema {
     return new AnimalSchema();
   }
@@ -217,4 +217,28 @@ Returns `true` if the query contains at least 1 record. Returns `false` if not.
 
 ##### .updateOne
 
-Dispatches the update when validated to the db. Returns an updated record if successfully validated. Returns `undefined` if record doesn't exist.
+Dispatches the update when validated to the db. Returns an updated record if successfully validated. Throws an error if the record does not exist.
+
+For auto-completion on the param types, the full list of generics needs to be passed to the static repository instance:
+
+```
+Repository
+    .with<AnimalType, Animal, AnimalSchema>(Animal)
+    .updateOne(client, animal.toJson()._id, { name: "Doggo" });
+```
+
+If you know the params, then you can just pass them untyped.
+
+```
+Repository
+    .with(Animal)
+    .updateOne(client, animal.toJson()._id, { name: "Doggo" });
+```
+
+Beware though that the validator will cut out any unknown keys unless you manually turn it off as the final parameter.
+
+```
+Repository
+    .with(Animal)
+    .updateOne(client, animal.toJson()._id, { newParameter: "Cool" }, **false**);
+```
