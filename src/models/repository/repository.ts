@@ -122,7 +122,7 @@ export class Repository<
     client: DatabaseClient,
     _id: string,
     updatedFields: Partial<Type>,
-    validateUpdate: boolean = true
+    validateUpdate = true
   ): Promise<DocumentClass> {
     if (!(await this.existsById(client, _id))) {
       throw new Error("instance does not exist");
