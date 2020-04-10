@@ -6,7 +6,6 @@ import Schema, {
 import Logger from "../../../logger";
 import { MongoClient } from "../../../persistence/client";
 import Repository from "../../repository";
-import DatabaseClient from "../../../persistence/client/base.client";
 
 export type DeletionParams = Partial<{
   hard: boolean;
