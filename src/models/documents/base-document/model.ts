@@ -55,17 +55,14 @@ export abstract class BaseDocument<
   build(
     payload: Omit<Type, keyof InternalModelType>
   ): BaseDocument<Type, JoiSchema, RelationshipSchema> {
-    // TODO parse keys extending BaseDocument to set the record using parseRelationalKey
-    //      what about splitting db & document? record needs to be populated after that is dispatched to the db
-
     this.record = { ...payload, ...this.joiSchema().baseSchemaContent() };
     return this;
   }
 
   async relationalFields(
-    /*eslint-disable */
+    /* eslint-disable */
     client: MongoClient
-    /*eslint-enable */
+    /* eslint-enable */
   ): Promise<RelationshipSchema | any> {
     return {};
   }
