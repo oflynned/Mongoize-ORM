@@ -2,6 +2,14 @@ import Schema, { BaseModelType } from "../documents/base-document/schema";
 import BaseDocument, { DeletionParams } from "../documents/base-document";
 import DatabaseClient from "../../persistence/client/base.client";
 
+type UpdateOptions = Partial<{
+  validateUpdate: boolean;
+}>;
+
+const defaultUpdateOptions: UpdateOptions = {
+  validateUpdate: true
+};
+
 export class Repository<
   Type extends BaseModelType,
   DocumentClass extends BaseDocument<Type, JoiSchema>,
@@ -25,6 +33,14 @@ export class Repository<
     );
   }
 
+  private static newInstance<
+    Type extends BaseModelType,
+    DocumentClass extends BaseDocument<Type, JoiSchema>,
+    JoiSchema extends Schema<Type>
+  >(instance: DocumentClass): DocumentClass {
+    return new (instance.constructor as { new (): DocumentClass })();
+  }
+
   async count(client: DatabaseClient, query: object = {}): Promise<number> {
     return client.count(this.instanceType.collection(), query);
   }
@@ -40,11 +56,11 @@ export class Repository<
   ): Promise<DocumentClass[]> {
     if (params.hard) {
       await client.deleteMany(this.instanceType.collection(), query);
-      return [];
+      return this.findMany(client, query);
     }
 
     const records = await this.findMany(client, query);
-    return await Promise.all(
+    return Promise.all(
       records.map(async (record: DocumentClass) =>
         this.updateOne(client, record.toJson()._id, {
           deletedAt: new Date(),
@@ -62,17 +78,14 @@ export class Repository<
     if (await this.existsById(client, _id)) {
       if (params.hard) {
         await client.deleteOne(this.instanceType.collection(), _id);
-        return undefined;
+        return this.findById(client, _id);
       }
 
       return this.updateOne(
         client,
         _id,
-        {
-          deletedAt: new Date(),
-          deleted: true
-        } as object,
-        false
+        { deletedAt: new Date(), deleted: true } as object,
+        { validateUpdate: false }
       );
     }
 
@@ -118,21 +131,19 @@ export class Repository<
     return this.existsById(client, instance.toJson()._id);
   }
 
-  // TODO pass options instead of a boolean for .validateUpdate
   async updateOne(
     client: DatabaseClient,
     _id: string,
     updatedFields: Partial<Type>,
-    validateUpdate = true
+    options: UpdateOptions = defaultUpdateOptions
   ): Promise<DocumentClass> {
     if (!(await this.existsById(client, _id))) {
       throw new Error("instance does not exist");
     }
 
-    if (validateUpdate) {
+    if (options.validateUpdate) {
       // validate the new payload as the repo should still respect db restraints
       // unless the `Type` generic is passed, the `updatedFields` param will not respect the instance type properties
-      // this could be beneficial or a drawback? tbd
       const instance = await this.findById(client, _id);
       const { value, error } = instance
         .joiSchema()
@@ -149,9 +160,7 @@ export class Repository<
       updatedFields = value;
     }
 
-    // dispatch an update to the db once validations pass
     await client.updateOne(this.instanceType.collection(), _id, updatedFields);
-
     return this.findById(client, _id);
   }
 
@@ -165,16 +174,8 @@ export class Repository<
   ): Promise<DocumentClass[]> {
     const records = await client.read(this.instanceType.collection(), query);
     return records.map(
-      (record: object) =>
+      record =>
         Repository.newInstance(this.instanceType).from(record) as DocumentClass
     );
-  }
-
-  private static newInstance<
-    Type extends BaseModelType,
-    DocumentClass extends BaseDocument<Type, JoiSchema>,
-    JoiSchema extends Schema<Type>
-  >(instance: DocumentClass): DocumentClass {
-    return new (instance.constructor as { new (): DocumentClass })();
   }
 }
