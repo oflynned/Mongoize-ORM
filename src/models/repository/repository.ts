@@ -62,6 +62,7 @@ export class Repository<
     const records = await this.findMany(client, query);
     return Promise.all(
       records.map(async (record: DocumentClass) =>
+        // TODO same here, `as object` looks somewhat hacky for internal methods
         this.updateOne(client, record.toJson()._id, {
           deletedAt: new Date(),
           deleted: true
