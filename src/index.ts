@@ -7,7 +7,8 @@ import {
 import BaseDocument, {
   Schema,
   DeletionParams,
-  BaseModelType
+  BaseModelType,
+  BaseRelationshipType
 } from "./models/documents/base-document";
 import CredentialDocument, {
   CredentialSchema,
@@ -16,6 +17,7 @@ import CredentialDocument, {
 import Joi from "@hapi/joi";
 
 export {
+  BaseRelationshipType,
   BaseModelType,
   DeletionParams,
   Repository,

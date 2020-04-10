@@ -77,12 +77,12 @@ describe("base-document", () => {
       model = await new Animal().build({ name: "Name" }).save(client);
     });
 
-    it("should be undefined before #build", () => {
-      expect(new Animal().toJson()).toBeUndefined();
+    it("should not be undefined before #build", () => {
+      expect(new Animal().toJson()).toEqual({});
     });
 
-    it("should build model", () => {
-      expect(model.toJson()).not.toBeUndefined();
+    it("should not empty object after build", () => {
+      expect(model.toJson()).not.toEqual({});
     });
   });
 
@@ -137,7 +137,7 @@ describe("base-document", () => {
       });
 
       it("should hard delete", () => {
-        expect(model.toJson()).toBeUndefined();
+        expect(model.toJson()).toEqual({});
       });
     });
 

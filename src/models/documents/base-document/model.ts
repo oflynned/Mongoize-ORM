@@ -18,7 +18,7 @@ export abstract class BaseDocument<
   RelationshipSchema extends BaseRelationshipType
 > {
   protected record: (Type & InternalModelType) | any;
-  protected relationships: RelationshipSchema;
+  protected relationships: RelationshipSchema | any;
 
   collection(): string {
     return `${this.constructor.name.toLowerCase()}s`;
@@ -26,11 +26,11 @@ export abstract class BaseDocument<
 
   abstract joiSchema(): JoiSchema;
 
-  get _id(): string {
+  get _id(): string | undefined {
     return this.toJson()._id;
   }
 
-  get createdAt(): Date {
+  get createdAt(): Date | undefined {
     return this.toJson().createdAt;
   }
 
