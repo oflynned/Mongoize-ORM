@@ -83,14 +83,20 @@ export abstract class BaseDocument<
     }
 
     this.onPreUpdate();
-    await this.joiSchema().validateOnUpdate(payload);
+    await this.joiSchema().validateUpdate(payload);
 
     const newInstance = await Repository.with(
       this.constructor as any
-    ).updateOne(client, this.record._id, {
-      ...payload,
-      updatedAt: new Date()
-    } as object);
+    ).updateOne(
+      client,
+      this.record._id,
+      {
+        ...payload,
+        updatedAt: new Date()
+      } as object,
+      // update has already been validated on .validateOnUpdate with Joi
+      false
+    );
 
     this.record = newInstance.record;
     this.onPostUpdate();

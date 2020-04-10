@@ -65,10 +65,15 @@ export class Repository<
         return undefined;
       }
 
-      return this.updateOne(client, _id, {
-        deletedAt: new Date(),
-        deleted: true
-      } as object);
+      return this.updateOne(
+        client,
+        _id,
+        {
+          deletedAt: new Date(),
+          deleted: true
+        } as object,
+        false
+      );
     }
 
     return undefined;
@@ -124,17 +129,19 @@ export class Repository<
       // unless the `Type` generic is passed, the `updatedFields` param will not respect the instance type properties
       // this could be beneficial or a drawback? tbd
       const instance = await this.findById(client, _id);
-      const prunedUpdateFields = this.instanceType.pruneUpdateFields(
-        updatedFields as any
-      );
-      await instance
-        .from({
-          ...instance.toJson(),
-          ...prunedUpdateFields
-        })
-        .validate();
+      const { value, error } = instance
+        .joiSchema()
+        .validateUpdate(updatedFields);
 
-      updatedFields = prunedUpdateFields;
+      if (error) {
+        throw error;
+      }
+
+      if (Object.keys(value).length === 0) {
+        throw new Error("pruned update was empty");
+      }
+
+      updatedFields = value;
     }
 
     if (await this.existsById(client, _id)) {

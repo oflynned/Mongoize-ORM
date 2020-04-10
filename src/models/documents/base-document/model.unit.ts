@@ -105,7 +105,7 @@ describe("base-document", () => {
 
     beforeAll(async done => {
       model = await new Animal().build({ name: "test" }).save(client);
-      await model.update(client, { name: "not test" });
+      await model.update(client, { name: "not a test" });
       done();
     });
 
@@ -114,7 +114,7 @@ describe("base-document", () => {
     });
 
     it("should update field", () => {
-      expect(model.toJson().name).toEqual("not test");
+      expect(model.toJson().name).toEqual("not a test");
     });
 
     it("should update .updatedAt field", function() {

@@ -39,7 +39,7 @@ export abstract class Schema<T extends BaseModelType> {
     return joiSchema.validate(data, { stripUnknown: true });
   }
 
-  validateOnUpdate(data: Partial<Omit<T, keyof InternalModelType>>) {
+  validateUpdate(data: Partial<Omit<T, keyof InternalModelType>>) {
     const joiSchema = Joi.object({ ...this.joiUpdateSchema() });
     return joiSchema.validate(data, { stripUnknown: true });
   }
