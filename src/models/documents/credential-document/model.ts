@@ -6,9 +6,9 @@ import { MongoClient } from "../../../persistence/client";
 import { InternalModelType } from "../base-document/schema";
 
 abstract class CredentialDocument<
-  T extends CredentialType,
-  S extends CredentialSchema<T>
-> extends BaseDocument<T, S> {
+  Type extends CredentialType,
+  JoiSchema extends CredentialSchema<Type>
+> extends BaseDocument<Type, JoiSchema> {
   // recommended cost factor
   saltRounds = 12;
 
@@ -20,8 +20,10 @@ abstract class CredentialDocument<
   // must contain at least 1 lowercase letter, 1 uppercase letter, 1 number, 1 special character
   passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).+$/;
 
-  build(payload: Omit<T, keyof InternalModelType>): CredentialDocument<T, S> {
-    return super.build(payload) as CredentialDocument<T, S>;
+  build(
+    payload: Omit<Type, keyof InternalModelType>
+  ): CredentialDocument<Type, JoiSchema> {
+    return super.build(payload) as CredentialDocument<Type, JoiSchema>;
   }
 
   async passwordAttemptMatches(passwordAttempt: string): Promise<boolean> {
@@ -80,7 +82,7 @@ abstract class CredentialDocument<
     await this.onPostPasswordHash();
     await this.update(client, {
       passwordHash: this.record.passwordHash
-    } as T);
+    } as Type);
   }
 
   async hashPassword(): Promise<void> {
