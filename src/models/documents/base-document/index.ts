@@ -1,6 +1,12 @@
 import { DeletionParams, BaseDocument } from "./model";
-import { BaseModelType, Schema } from "./schema";
+import { BaseModelType, Schema, BaseRelationshipType } from "./schema";
 
-export { DeletionParams, BaseDocument, Schema, BaseModelType };
+export {
+  DeletionParams,
+  BaseDocument,
+  Schema,
+  BaseModelType,
+  BaseRelationshipType
+};
 
 export default BaseDocument;

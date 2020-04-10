@@ -2,64 +2,60 @@ import Schema, { BaseModelType, InternalModelType } from "./schema";
 import Logger from "../../../logger";
 import { MongoClient } from "../../../persistence/client";
 import Repository from "../../repository";
+import Lifecycle from "../lifecycle";
 
 export type DeletionParams = Partial<{
   hard: boolean;
 }>;
 
-type PropertyField = {
-  [key: string]: string | number | boolean | object;
-};
-
 export abstract class BaseDocument<
-  T extends BaseModelType,
-  S extends Schema<T>
-> {
-  protected record: T | InternalModelType | any;
+  Type extends BaseModelType,
+  JoiSchema extends Schema<Type>
+> extends Lifecycle {
+  protected record: Type | InternalModelType | any;
 
   collection(): string {
     return `${this.constructor.name.toLowerCase()}s`;
   }
 
-  abstract joiSchema(): S;
+  abstract joiSchema(): JoiSchema;
 
-  from(payload: T | InternalModelType | object): BaseDocument<T, S> {
+  get _id(): string | undefined {
+    return this.toJson()._id;
+  }
+
+  get createdAt(): Date | undefined {
+    return this.toJson().createdAt;
+  }
+
+  get updatedAt(): Date | undefined {
+    return this.toJson().updatedAt;
+  }
+
+  get deletedAt(): Date | undefined {
+    return this.toJson().deletedAt;
+  }
+
+  get deleted(): boolean {
+    return this.toJson().deleted;
+  }
+
+  from(
+    payload: (Type & InternalModelType) | object
+  ): BaseDocument<Type, JoiSchema> {
     this.record = { ...payload };
     return this;
   }
 
-  build(payload: Omit<T, keyof InternalModelType>): BaseDocument<T, S> {
+  build(
+    payload: Omit<Type, keyof InternalModelType>
+  ): BaseDocument<Type, JoiSchema> {
     this.record = { ...payload, ...this.joiSchema().baseSchemaContent() };
     return this;
   }
 
-  // TODO should be used to populate related documents after find/save/update/delete
-  async populate(): Promise<void> {}
-
-  pruneUpdateFields(fields: PropertyField): object {
-    const updatableKeys = Object.keys(this.joiSchema().joiUpdateSchema());
-    const relevantKeys = Object.keys(fields).filter(
-      (key: string) => updatableKeys.includes(key),
-      []
-    );
-
-    const output: PropertyField = {};
-    relevantKeys.map((key: string) => {
-      output[key] = fields[key];
-    });
-
-    if (Object.keys(output).length === 0) {
-      throw new Error("invalid update, all keys were pruned");
-    }
-
-    return output as object;
-  }
-
-  async validate(): Promise<T | InternalModelType> {
-    Logger.debug("validate()");
+  async validate(): Promise<Type | InternalModelType> {
     await this.onPreValidate();
-
-    Logger.debug("validating...");
     const { value, error } = await this.joiSchema().validate(this.record);
 
     if (error) {
@@ -74,8 +70,8 @@ export abstract class BaseDocument<
 
   async update(
     client: MongoClient,
-    payload: Partial<Omit<T, keyof InternalModelType>>
-  ): Promise<BaseDocument<T, S>> {
+    payload: Partial<Omit<Type, keyof InternalModelType>>
+  ): Promise<BaseDocument<Type, JoiSchema>> {
     Logger.debug("update()");
 
     if (Object.keys(payload).length === 0) {
@@ -100,7 +96,6 @@ export abstract class BaseDocument<
 
     this.record = newInstance.record;
     this.onPostUpdate();
-
     return this;
   }
 
@@ -117,52 +112,21 @@ export abstract class BaseDocument<
     this.onPostDelete();
   }
 
-  async onPostDelete(): Promise<void> {
-    Logger.debug("onPostDelete");
+  toJson(): Type & InternalModelType {
+    return { ...this.record };
   }
 
-  async onPostSave(): Promise<void> {
-    Logger.debug("onPostSave");
-  }
-
-  async onPostValidate(): Promise<void> {
-    Logger.debug("onPostValidate");
-  }
-
-  async onPreDelete(): Promise<void> {
-    Logger.debug("onPreDelete");
-  }
-
-  async onPreSave(): Promise<void> {
-    Logger.debug("onPreSave");
-  }
-
-  async onPreValidate(): Promise<void> {
-    Logger.debug("onPreValidate");
-  }
-
-  async onPostUpdate(): Promise<void> {
-    Logger.debug("onPostUpdate");
-  }
-
-  async onPreUpdate(): Promise<void> {
-    Logger.debug("onPreUpdate");
-  }
-
-  toJson(): T & InternalModelType {
-    return this.record as T & InternalModelType;
-  }
-
-  async save(client: MongoClient): Promise<BaseDocument<T, S> | any> {
+  async save(
+    client: MongoClient
+  ): Promise<BaseDocument<Type, JoiSchema> | any> {
     const validatedPayload = await this.validate();
-    Logger.debug("save()");
     await this.onPreSave();
-    Logger.debug("saving...");
 
     this.record = (await client.create(
       this.collection(),
       validatedPayload as object
-    )) as T & InternalModelType;
+    )) as Type & InternalModelType;
+
     await this.onPostSave();
     return this;
   }

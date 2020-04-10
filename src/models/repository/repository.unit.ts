@@ -227,7 +227,7 @@ describe("repository", () => {
 
     describe("with empty db", () => {
       it("should return false", async () => {
-        const instance: Animal = new Animal().build({ name: "Doggo" });
+        const instance = new Animal().build({ name: "Doggo" });
         await expect(
           Repository.with(Animal).exists(client, instance)
         ).resolves.toBeFalsy();

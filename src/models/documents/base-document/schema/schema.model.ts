@@ -3,6 +3,8 @@ import { v4 as uuid } from "uuid";
 
 export type BaseModelType = {};
 
+export type BaseRelationshipType = {};
+
 export type InternalModelType = {
   readonly _id: string;
   readonly createdAt: Date;

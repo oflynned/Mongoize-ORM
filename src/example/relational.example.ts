@@ -1,30 +1,52 @@
 import Logger from "../logger";
 import Animal from "./models/animal";
 import Person from "./models/person";
-import { InMemoryClient, Repository } from "../../src";
+import { InMemoryClient } from "../../src";
 
 const main = async (client: InMemoryClient): Promise<void> => {
-  await new Animal().build({ name: "Doggo", legs: 4 }).save(client);
+  const person: Person = await new Person()
+    .build({
+      name: "John Smith"
+    })
+    .save(client);
 
-  const animals = await Repository.with(Animal).findAll(client);
-  // Logger.info(animals);
+  const animal: Animal = await new Animal()
+    .build({ name: "Doggo", legs: 4, ownerId: person._id })
+    .save(client);
 
-  const person = await new Person().build({
-    name: "John Smith",
-    pet: animals[0]
-  });
-
+  await animal.populate(client);
   Logger.info(
-    `${person.toJson().name} is the owner of ${
-      person.toJson().pet.toJson().name
-    }`
+    `${animal.toJson().name} is owned by ${animal.toJson().owner.toJson().name}`
   );
 
-  // const p2 = await p1.save(client);
-  // Logger.info(p2);
+  // it updates internal references to fetch relationships
+  // without calling this, the relationships are ___not___ refreshed
+  // should probably be automatically called on calling a relational descendent in the first place
+  await person.populate(client);
+  Logger.info(
+    `${person.toJson().name} owns ${person.toJson().pets.length} pet(s)`
+  );
+  Logger.info(
+    person
+      .toJson()
+      .pets.map((animal: Animal) => animal.toJson().name)
+      .join(", ")
+  );
 
-  // const people = await Repository.with(Person).findMany(client);
-  // Logger.info(people);
+  await new Animal()
+    .build({ name: "Spot", legs: 4, ownerId: person._id })
+    .save(client);
+  await person.populate(client);
+
+  Logger.info(
+    `${person.toJson().name} owns ${person.toJson().pets.length} pet(s)`
+  );
+  Logger.info(
+    person
+      .toJson()
+      .pets.map((animal: Animal) => animal.toJson().name)
+      .join(", ")
+  );
 };
 
 (async (): Promise<void> => {
