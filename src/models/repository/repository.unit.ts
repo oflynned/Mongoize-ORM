@@ -85,12 +85,9 @@ describe("repository", () => {
       animal = await new Animal()
         .build({ name: "Doggo", legs: 4 })
         .save(client);
-      animal = await Repository.with<
-        AnimalType,
-        Animal,
-        AnimalSchema,
-        AnimalRelationships
-      >(Animal).updateOne(client, animal.toJson()._id, { legs: 0 });
+      animal = await Repository.with<AnimalType, Animal, AnimalSchema>(
+        Animal
+      ).updateOne(client, animal.toJson()._id, { legs: 0 });
     });
 
     afterAll(async () => {
