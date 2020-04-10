@@ -1,7 +1,7 @@
 import Logger from "../logger";
 import Animal from "./models/animal";
 import Person from "./models/person";
-import { InMemoryClient, Repository } from "../../src";
+import { InMemoryClient } from "../../src";
 
 const main = async (client: InMemoryClient): Promise<void> => {
   const person: Person = await new Person()
