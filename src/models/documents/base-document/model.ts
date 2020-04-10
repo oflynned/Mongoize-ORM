@@ -95,7 +95,7 @@ export abstract class BaseDocument<
         updatedAt: new Date()
       } as object,
       // update has already been validated on .validateOnUpdate with Joi
-      false
+      { validateUpdate: false }
     );
 
     this.record = newInstance.record;

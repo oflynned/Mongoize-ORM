@@ -84,6 +84,7 @@ export class Repository<
       return this.updateOne(
         client,
         _id,
+        // should probably try to abstract out typing internal properties instead of just using `as object`
         { deletedAt: new Date(), deleted: true } as object,
         { validateUpdate: false }
       );
