@@ -235,10 +235,10 @@ Repository
     .updateOne(client, animal.toJson()._id, { name: "Doggo" });
 ```
 
-Beware though that the validator will cut out any unknown keys unless you manually turn it off as the final parameter.
+Beware - the validator will cut out any unknown keys unless you manually turn it off in the options parameter.
 
 ```
 Repository
     .with(Animal)
-    .updateOne(client, animal.toJson()._id, { newParameter: "Cool" }, **false**);
+    .updateOne(client, animal.toJson()._id, { newParameter: "Cool" }, { validateUpdate: false });
 ```
