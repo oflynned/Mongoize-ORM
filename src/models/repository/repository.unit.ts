@@ -131,7 +131,7 @@ describe("repository", () => {
           {
             cool: "cool"
           },
-          false
+          { validateUpdate: false }
         );
       });
 
