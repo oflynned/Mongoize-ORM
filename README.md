@@ -231,6 +231,8 @@ class Animal extends RelationalDocument<
 export default Animal;
 ```
 
+**You need to call** `.populate` **on the instance to populate that level of relationships. Otherwise it will be undefined!**
+
 ### Database Clients
 
 All clients extend from the abstract class `DatabaseClient` which has no functionality directly.
