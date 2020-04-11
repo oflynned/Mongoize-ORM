@@ -231,6 +231,53 @@ class Animal extends RelationalDocument<
 export default Animal;
 ```
 
+### Database Clients
+
+All clients extend from the abstract class `DatabaseClient` which has no functionality directly.
+To interact with a database, you should use `MongoClient` or `InMemoryClient` depending on your use case.
+
+#### MongoClient
+
+`MongoClient` extends `DatabaseClient` and implements the MongoDB driver so it acts as a wrapper for it.
+
+It takes a config on connect (via the validator), a URI will be prioritised over a raw config with individual options:
+
+```
+type UriConnectionOptions = {
+  uri: string;
+};
+
+type AuthConnectionOptions = {
+  username?: string;
+  password?: string;
+  host: string;
+  port: number;
+  database: string;
+};
+```
+
+Mongo client options can be customised by overriding the typed `.mongoOptions` method. It defaults to:
+
+```
+mongoOptions(): MongoClientOptions {
+    return {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    };
+  }
+```
+
+#### InMemoryClient
+
+This is great for use in ephemeral testing scenarios, or short-lived servers (would not recommend that).
+No config is needed as it does all the setup & teardown itself as part of the lifecycle of the in-memory server.
+
+```
+const client = await new InMemoryClient().connect();
+
+// your db client is now ready for use
+```
+
 ### Model Definition
 
 Models comprise of three distinct parts:
