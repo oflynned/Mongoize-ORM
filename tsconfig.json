@@ -14,5 +14,11 @@
     "baseUrl": "./"
   },
   "include": ["./src/**/*.ts"],
-  "exclude": ["./node_modules", "./src/example"]
+  "exclude": [
+    "./node_modules",
+    "./src/example",
+    "./src/logger",
+    "./src/**/*.unit.ts",
+    "./src/**/*.integration.ts"
+  ]
 }
