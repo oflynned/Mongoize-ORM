@@ -13,7 +13,7 @@ abstract class RelationalDocument<
 > extends BaseDocument<Type, JoiSchema> {
   protected relationships: RelationshipSchema | any;
 
-  async relationalFields(
+  protected async relationalFields(
     /* eslint-disable */
     client: MongoClient
     /* eslint-enable */
