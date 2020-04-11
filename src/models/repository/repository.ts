@@ -1,7 +1,4 @@
-import Schema, {
-  BaseModelType,
-  BaseRelationshipType
-} from "../documents/base-document/schema";
+import Schema, { BaseModelType } from "../documents/base-document/schema";
 import BaseDocument, { DeletionParams } from "../documents/base-document";
 import DatabaseClient from "../../persistence/client/base.client";
 import { MongoClient } from "../../index";
@@ -40,8 +37,7 @@ export class Repository<
   private static newInstance<
     Type extends BaseModelType,
     DocumentClass extends BaseDocument<Type, JoiSchema>,
-    JoiSchema extends Schema<Type>,
-    RelationalFields extends BaseRelationshipType
+    JoiSchema extends Schema<Type>
   >(instance: DocumentClass): DocumentClass {
     return new (instance.constructor as { new (): DocumentClass })();
   }
@@ -67,11 +63,15 @@ export class Repository<
     const records = await this.findMany(client, query);
     return Promise.all(
       records.map(async (record: DocumentClass) =>
-        // TODO same here, `as object` looks somewhat hacky for internal methods
-        this.updateOne(client, record.toJson()._id, {
-          deletedAt: new Date(),
-          deleted: true
-        } as object)
+        this.updateOne(
+          client,
+          record.toJson()._id,
+          {
+            deletedAt: new Date(),
+            deleted: true
+          } as object,
+          { validateUpdate: false }
+        )
       )
     );
   }
@@ -90,7 +90,6 @@ export class Repository<
       return this.updateOne(
         client,
         _id,
-        // TODO should probably try to abstract out typing internal properties instead of just using `as object`
         { deletedAt: new Date(), deleted: true } as object,
         { validateUpdate: false }
       );
