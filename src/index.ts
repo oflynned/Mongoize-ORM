@@ -1,5 +1,7 @@
 import Repository from "./models/repository";
+import { bindGlobalDatabaseClient } from "./express";
 import {
+  DatabaseClient,
   MongoClient,
   InMemoryClient,
   ConnectionOptions
@@ -18,12 +20,14 @@ import RelationalDocument from "./models/documents/relational-document";
 import Joi from "@hapi/joi";
 
 export {
+  bindGlobalDatabaseClient,
   BaseRelationshipType,
   BaseModelType,
   DeletionParams,
   Repository,
   MongoClient,
   InMemoryClient,
+  DatabaseClient,
   ConnectionOptions,
   CredentialSchema,
   CredentialDocument,

@@ -1,7 +1,6 @@
 import { compare, hash } from "bcrypt";
-import Logger from "../../../logger";
 import CredentialSchema, { CredentialType } from "./schema";
-import { MongoClient } from "../../../persistence/client";
+import { DatabaseClient } from "../../../persistence/client";
 import {
   BaseRelationshipType,
   InternalModelType
@@ -53,11 +52,8 @@ abstract class CredentialDocument<
     });
   }
 
-  async onPrePasswordHash(): Promise<void> {
-    Logger.debug("onPrePasswordHash()");
-    Logger.debug(
-      "Override any password checks here as necessary to your use case"
-    );
+  protected async onPrePasswordHash(): Promise<void> {
+    // override any password checks here as necessary to your use case
 
     if (this.record.password.length < this.minPlaintextPasswordLength) {
       throw new Error("password is too short");
@@ -72,7 +68,7 @@ abstract class CredentialDocument<
     }
   }
 
-  async onPreValidate(): Promise<void> {
+  protected async onPreValidate(): Promise<void> {
     await super.onPreValidate();
     await this.onPrePasswordHash();
     this.record.passwordHash = await this.hashPassword();
@@ -81,8 +77,8 @@ abstract class CredentialDocument<
   }
 
   async updatePassword(
-    client: MongoClient,
-    newPassword: string
+    newPassword: string,
+    client: DatabaseClient = global.databaseClient
   ): Promise<void> {
     this.record.password = newPassword;
 
@@ -91,9 +87,10 @@ abstract class CredentialDocument<
     delete this.record.password;
 
     await this.onPostPasswordHash();
-    await this.update(client, {
-      passwordHash: this.record.passwordHash
-    } as Type);
+    await this.update(
+      { passwordHash: this.record.passwordHash } as Type,
+      client
+    );
   }
 
   async hashPassword(): Promise<string> {
@@ -109,9 +106,7 @@ abstract class CredentialDocument<
     });
   }
 
-  async onPostPasswordHash(): Promise<void> {
-    Logger.debug("onPostPasswordHash()");
-  }
+  protected async onPostPasswordHash(): Promise<void> {}
 }
 
 export default CredentialDocument;

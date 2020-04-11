@@ -1,4 +1,4 @@
-import { MongoClient, RelationalDocument, Repository } from "../../../../src";
+import { RelationalDocument, Repository } from "../../../../src";
 import { AnimalType, AnimalSchema, AnimalRelationships } from "./schema";
 import Person from "../person";
 
@@ -11,14 +11,14 @@ class Animal extends RelationalDocument<
     return new AnimalSchema();
   }
 
-  async relationalFields(client: MongoClient): Promise<AnimalRelationships> {
+  async relationalFields(): Promise<AnimalRelationships> {
     return {
-      owner: await this.owner(client)
+      owner: await this.owner()
     };
   }
 
-  private async owner(client: MongoClient): Promise<Person> {
-    return Repository.with(Person).findById(client, this.toJson().ownerId);
+  private async owner(): Promise<Person> {
+    return Repository.with(Person).findById(this.toJson().ownerId);
   }
 }
 

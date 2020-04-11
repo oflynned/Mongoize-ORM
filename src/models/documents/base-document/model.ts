@@ -1,6 +1,5 @@
 import Schema, { BaseModelType, InternalModelType } from "./schema";
-import Logger from "../../../logger";
-import { MongoClient } from "../../../persistence/client";
+import { DatabaseClient } from "../../../persistence/client";
 import Repository from "../../repository";
 import Lifecycle from "../lifecycle";
 
@@ -50,7 +49,10 @@ export abstract class BaseDocument<
   build(
     payload: Omit<Type, keyof InternalModelType>
   ): BaseDocument<Type, JoiSchema> {
-    this.record = { ...payload, ...this.joiSchema().baseSchemaContent() };
+    this.record = {
+      ...payload,
+      ...this.joiSchema().baseSchemaContent()
+    };
     return this;
   }
 
@@ -69,11 +71,9 @@ export abstract class BaseDocument<
   }
 
   async update(
-    client: MongoClient,
-    payload: Partial<Omit<Type, keyof InternalModelType>>
+    payload: Partial<Omit<Type, keyof InternalModelType>>,
+    client: DatabaseClient = global.databaseClient
   ): Promise<BaseDocument<Type, JoiSchema>> {
-    Logger.debug("update()");
-
     if (Object.keys(payload).length === 0) {
       throw new Error("payload is empty");
     }
@@ -84,14 +84,14 @@ export abstract class BaseDocument<
     const newInstance = await Repository.with(
       this.constructor as any
     ).updateOne(
-      client,
       this.record._id,
       {
         ...payload,
         updatedAt: new Date()
       } as object,
       // update has already been validated on .validateOnUpdate with Joi
-      { validateUpdate: false }
+      { validateUpdate: false },
+      client
     );
 
     this.record = newInstance.record;
@@ -100,13 +100,13 @@ export abstract class BaseDocument<
   }
 
   async delete(
-    client: MongoClient,
-    params: DeletionParams = { hard: false }
+    params: DeletionParams = { hard: false },
+    client: DatabaseClient = global.databaseClient
   ): Promise<void> {
     this.onPreDelete();
     const newInstance = await Repository.with(
       this.constructor as any
-    ).deleteOne(client, this.record._id, params);
+    ).deleteOne(this.record._id, params, client);
 
     this.record = newInstance ? newInstance.record : undefined;
     this.onPostDelete();
@@ -117,7 +117,7 @@ export abstract class BaseDocument<
   }
 
   async save(
-    client: MongoClient
+    client: DatabaseClient = global.databaseClient
   ): Promise<BaseDocument<Type, JoiSchema> | any> {
     const validatedPayload = await this.validate();
     await this.onPreSave();

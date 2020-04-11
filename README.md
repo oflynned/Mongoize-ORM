@@ -15,6 +15,8 @@ $ yarn add mongoize-orm
 
 Data generally becomes relational after a while, you should switch to a relational database at some point when your POC becomes mature enough instead of using a pseudo-relational wrapper on documents.
 
+Seriously, use Postgres or MySQL when you get to this point.
+
 ### Show me some actual examples
 
 Have a look here for some simple examples

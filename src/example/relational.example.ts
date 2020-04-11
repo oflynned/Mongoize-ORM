@@ -1,20 +1,20 @@
 import Logger from "../logger";
 import Animal from "./models/animal";
 import Person from "./models/person";
-import { InMemoryClient } from "../../src";
+import { bindGlobalDatabaseClient, InMemoryClient } from "../../src";
 
-const main = async (client: InMemoryClient): Promise<void> => {
+const main = async (): Promise<void> => {
   const person: Person = await new Person()
     .build({
       name: "John Smith"
     })
-    .save(client);
+    .save();
 
   const animal: Animal = await new Animal()
     .build({ name: "Doggo", legs: 4, ownerId: person._id })
-    .save(client);
+    .save();
 
-  await animal.populate(client);
+  await animal.populate();
   Logger.info(
     `${animal.toJson().name} is owned by ${animal.toJson().owner.toJson().name}`
   );
@@ -22,7 +22,7 @@ const main = async (client: InMemoryClient): Promise<void> => {
   // it updates internal references to fetch relationships
   // without calling this, the relationships are ___not___ refreshed
   // should probably be automatically called on calling a relational descendent in the first place
-  await person.populate(client);
+  await person.populate();
   Logger.info(
     `${person.toJson().name} owns ${person.toJson().pets.length} pet(s)`
   );
@@ -35,8 +35,8 @@ const main = async (client: InMemoryClient): Promise<void> => {
 
   await new Animal()
     .build({ name: "Spot", legs: 4, ownerId: person._id })
-    .save(client);
-  await person.populate(client);
+    .save();
+  await person.populate();
 
   Logger.info(
     `${person.toJson().name} owns ${person.toJson().pets.length} pet(s)`
@@ -50,9 +50,9 @@ const main = async (client: InMemoryClient): Promise<void> => {
 };
 
 (async (): Promise<void> => {
-  const client = await new InMemoryClient().connect();
+  const client = await bindGlobalDatabaseClient(new InMemoryClient());
   try {
-    await main(client);
+    await main();
   } catch (e) {
     console.log(e);
   } finally {
