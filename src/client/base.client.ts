@@ -1,7 +1,4 @@
-import {
-  ConnectionOptions,
-  ConnectionValidator
-} from "./connection-validator";
+import { ConnectionOptions, ConnectionValidator } from "./connection-validator";
 
 export abstract class DatabaseClient {
   validator: ConnectionValidator;
