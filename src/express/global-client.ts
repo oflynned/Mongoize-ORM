@@ -14,8 +14,6 @@ export async function bindGlobalDatabaseClient(
   client: DatabaseClient,
   options?: ConnectionOptions
 ): Promise<DatabaseClient> {
-  global.databaseClient = options
-    ? await client.connect(options)
-    : await client.connect();
+  global.databaseClient = await client.connect(options);
   return global.databaseClient;
 }
