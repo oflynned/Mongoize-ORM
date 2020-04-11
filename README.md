@@ -240,7 +240,14 @@ To interact with a database, you should use `MongoClient` or `InMemoryClient` de
 
 `MongoClient` extends `DatabaseClient` and implements the MongoDB driver so it acts as a wrapper for it.
 
-It takes a config on connect (via the validator), a URI will be prioritised over a raw config with individual options:
+Using the client is simple, it will default to `localhost:27017`. You need to pass the database as an option or through the URI.
+
+```
+const client = await new MongoClient().connect({ database: 'mongoize' });
+```
+
+Passing options is done through the `.connect` method.
+Keep in mind that a URI will be prioritised over a raw config with individual options:
 
 ```
 type UriConnectionOptions = {
@@ -255,6 +262,9 @@ type AuthConnectionOptions = {
   database: string;
 };
 ```
+
+There is also an option to append the `NODE_ENV` environment value to the db when you enable the option `appendDatabaseEnvironment`.
+For a database named `mongoize` on the `development` environment, the database is automatically set to `mongoize-development`.
 
 Mongo client options can be customised by overriding the typed `.mongoOptions` method. It defaults to:
 

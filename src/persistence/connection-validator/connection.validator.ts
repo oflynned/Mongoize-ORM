@@ -84,6 +84,10 @@ export class ConnectionValidator {
       return;
     }
 
+    if (!connection.database) {
+      throw new Error("database is required");
+    }
+
     const environment = (process.env.NODE_ENV || "development").toLowerCase();
     const database = connection.appendDatabaseEnvironment
       ? `${connection.database}-${environment}`
