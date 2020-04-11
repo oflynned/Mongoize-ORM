@@ -1,5 +1,5 @@
 import Schema, { BaseModelType, InternalModelType } from "./schema";
-import { DatabaseClient } from "../../../persistence/client";
+import { DatabaseClient } from "../../client";
 import Repository from "../../repository";
 import Lifecycle from "../lifecycle";
 

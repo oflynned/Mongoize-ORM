@@ -1,6 +1,6 @@
-import Schema, { BaseModelType } from "../documents/base-document/schema";
-import BaseDocument, { DeletionParams } from "../documents/base-document";
-import DatabaseClient from "../../persistence/client/base.client";
+import Schema, { BaseModelType } from "../document/base-document/schema";
+import BaseDocument, { DeletionParams } from "../document/base-document";
+import DatabaseClient from "../client/base.client";
 
 type UpdateOptions = Partial<{
   validateUpdate: boolean;

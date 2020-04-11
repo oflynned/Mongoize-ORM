@@ -4,7 +4,7 @@ import Schema, {
   BaseRelationshipType,
   InternalModelType
 } from "../base-document/schema";
-import { DatabaseClient } from "../../../persistence/client";
+import { DatabaseClient } from "../../client";
 
 abstract class RelationalDocument<
   Type extends BaseModelType,

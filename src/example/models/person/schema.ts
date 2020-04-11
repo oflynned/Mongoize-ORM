@@ -1,6 +1,6 @@
 import Animal from "../animal";
 import { Schema, Joi, BaseModelType } from "../../../../src";
-import { BaseRelationshipType } from "../../../models/documents/base-document/schema";
+import { BaseRelationshipType } from "../../../document/base-document/schema";
 
 export interface PersonType extends BaseModelType {
   name: string;

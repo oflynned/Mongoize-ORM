@@ -1,7 +1,7 @@
-import { InMemoryClient } from "../../../persistence/client";
-import User, { UserType } from "../../../example/models/user";
+import { InMemoryClient } from "../../client";
+import User, { UserType } from "../../example/models/user";
 import sinon, { SinonSpy } from "sinon";
-import { bindGlobalDatabaseClient } from "../../../express";
+import { bindGlobalDatabaseClient } from "../../express";
 
 describe("credential-document", () => {
   const client: InMemoryClient = new InMemoryClient();

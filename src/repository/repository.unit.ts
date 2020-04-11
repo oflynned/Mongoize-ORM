@@ -1,8 +1,8 @@
-import Animal from "../../example/models/animal";
+import Animal from "../example/models/animal";
 import { Repository } from "./repository";
-import { InMemoryClient } from "../../persistence/client";
-import { AnimalSchema, AnimalType } from "../../example/models/animal/schema";
-import { bindGlobalDatabaseClient } from "../../express";
+import { InMemoryClient } from "../client";
+import { AnimalSchema, AnimalType } from "../example/models/animal/schema";
+import { bindGlobalDatabaseClient } from "../express";
 
 describe("repository", () => {
   const client: InMemoryClient = new InMemoryClient();

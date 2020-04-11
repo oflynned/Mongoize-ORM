@@ -1,6 +1,6 @@
 import Mongo, { Collection, Db, MongoClientOptions } from "mongodb";
 import DatabaseClient from "./base.client";
-import { ConnectionOptions } from "../connection-validator";
+import { ConnectionOptions } from "./connection-validator";
 
 class MongoClient extends DatabaseClient {
   private client: Mongo.MongoClient;

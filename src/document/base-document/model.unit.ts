@@ -1,6 +1,6 @@
-import { InMemoryClient } from "../../../persistence/client";
-import { bindGlobalDatabaseClient } from "../../../express";
-import Animal from "../../../example/models/animal";
+import { InMemoryClient } from "../../client";
+import { bindGlobalDatabaseClient } from "../../express";
+import Animal from "../../example/models/animal";
 
 describe("base-document", () => {
   let client: InMemoryClient;

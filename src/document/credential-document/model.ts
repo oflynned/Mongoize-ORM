@@ -1,6 +1,6 @@
 import { compare, hash } from "bcrypt";
 import CredentialSchema, { CredentialType } from "./schema";
-import { DatabaseClient } from "../../../persistence/client";
+import { DatabaseClient } from "../../client";
 import {
   BaseRelationshipType,
   InternalModelType
