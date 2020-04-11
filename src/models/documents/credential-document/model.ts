@@ -1,6 +1,6 @@
 import { compare, hash } from "bcrypt";
 import CredentialSchema, { CredentialType } from "./schema";
-import { MongoClient } from "../../../persistence/client";
+import { DatabaseClient } from "../../../persistence/client";
 import {
   BaseRelationshipType,
   InternalModelType
@@ -77,8 +77,8 @@ abstract class CredentialDocument<
   }
 
   async updatePassword(
-    client: MongoClient,
-    newPassword: string
+    newPassword: string,
+    client: DatabaseClient = global.databaseClient
   ): Promise<void> {
     this.record.password = newPassword;
 
@@ -87,9 +87,10 @@ abstract class CredentialDocument<
     delete this.record.password;
 
     await this.onPostPasswordHash();
-    await this.update(client, {
-      passwordHash: this.record.passwordHash
-    } as Type);
+    await this.update(
+      { passwordHash: this.record.passwordHash } as Type,
+      client
+    );
   }
 
   async hashPassword(): Promise<string> {

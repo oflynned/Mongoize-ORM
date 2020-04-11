@@ -3,7 +3,7 @@ import {
   ConnectionValidator
 } from "../connection-validator";
 
-abstract class DatabaseClient {
+export abstract class DatabaseClient {
   validator: ConnectionValidator;
 
   constructor() {

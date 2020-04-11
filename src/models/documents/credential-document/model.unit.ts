@@ -1,12 +1,13 @@
 import { InMemoryClient } from "../../../persistence/client";
 import User, { UserType } from "../../../example/models/user";
 import sinon, { SinonSpy } from "sinon";
+import { bindGlobalDatabaseClient } from "../../../express";
 
 describe("credential-document", () => {
-  let client: InMemoryClient;
+  const client: InMemoryClient = new InMemoryClient();
 
   beforeAll(async () => {
-    client = await new InMemoryClient().connect();
+    await bindGlobalDatabaseClient(client);
   });
 
   beforeEach(async () => {
@@ -147,9 +148,9 @@ describe("credential-document", () => {
           name: "user",
           email: "user@email.com"
         })
-        .save(client);
+        .save();
 
-      await user.updatePassword(client, "newPlaintextPassword1!");
+      await user.updatePassword("newPlaintextPassword1!");
     });
 
     it("should not match original password after update", async () => {

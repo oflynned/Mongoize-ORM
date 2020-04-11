@@ -4,7 +4,7 @@ import Schema, {
   BaseRelationshipType,
   InternalModelType
 } from "../base-document/schema";
-import { MongoClient } from "../../../persistence/client";
+import { DatabaseClient } from "../../../persistence/client";
 
 abstract class RelationalDocument<
   Type extends BaseModelType,
@@ -15,29 +15,29 @@ abstract class RelationalDocument<
 
   protected async relationalFields(
     /* eslint-disable */
-    client: MongoClient
+    client: DatabaseClient = global.databaseClient
     /* eslint-enable */
   ): Promise<RelationshipSchema | any> {
     return {};
   }
 
   async populate(
-    client: MongoClient
+    client: DatabaseClient = global.databaseClient
   ): Promise<RelationalDocument<Type, JoiSchema, RelationshipSchema>> {
     this.relationships = { ...(await this.relationalFields(client)) };
     return this;
   }
 
   async update(
-    client: MongoClient,
-    payload: Partial<Omit<Type, keyof InternalModelType>>
+    payload: Partial<Omit<Type, keyof InternalModelType>>,
+    client: DatabaseClient = global.databaseClient
   ): Promise<RelationalDocument<Type, JoiSchema, RelationshipSchema>> {
-    await super.update(client, payload);
+    await super.update(payload, client);
     return this.populate(client);
   }
 
   async save(
-    client: MongoClient
+    client: DatabaseClient = global.databaseClient
   ): Promise<RelationalDocument<Type, JoiSchema, RelationshipSchema> | any> {
     await super.save(client);
     return this.populate(client);

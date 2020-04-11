@@ -1,11 +1,14 @@
-import Animal from "../../../example/models/animal";
 import { InMemoryClient } from "../../../persistence/client";
+import { bindGlobalDatabaseClient } from "../../../express";
+import Animal from "../../../example/models/animal";
 
 describe("base-document", () => {
   let client: InMemoryClient;
 
   beforeAll(async () => {
-    client = await new InMemoryClient().connect();
+    client = (await bindGlobalDatabaseClient(
+      new InMemoryClient()
+    )) as InMemoryClient;
   });
 
   beforeEach(async () => {
@@ -24,7 +27,7 @@ describe("base-document", () => {
     let model: Animal;
 
     beforeAll(async () => {
-      model = await new Animal().build({ name: "Name" }).save(client);
+      model = await new Animal().build({ name: "test" }).save(client);
     });
 
     // TODO fix this, it's inheriting from the relational document and so .owner is appearing
@@ -107,12 +110,12 @@ describe("base-document", () => {
 
     beforeAll(async done => {
       model = await new Animal().build({ name: "test" }).save(client);
-      await model.update(client, { name: "not a test" });
+      await model.update({ name: "not a test" }, client);
       done();
     });
 
     it("should require at least one field in payload", () => {
-      expect(model.update(client, {})).rejects.toThrowError("payload is empty");
+      expect(model.update({}, client)).rejects.toThrowError("payload is empty");
     });
 
     it("should update field", () => {
@@ -126,7 +129,7 @@ describe("base-document", () => {
 
   describe("#delete", () => {
     it("should throw error on deleting a record that doesn't exist", () => {
-      expect(new Animal().delete(client)).rejects.toThrowError();
+      expect(new Animal().delete()).rejects.toThrowError();
     });
 
     describe("with hard delete", () => {
@@ -134,7 +137,7 @@ describe("base-document", () => {
 
       beforeAll(async done => {
         model = await new Animal().build({ name: "test" }).save(client);
-        await model.delete(client, { hard: true });
+        await model.delete({ hard: true }, client);
         done();
       });
 
@@ -148,7 +151,7 @@ describe("base-document", () => {
 
       beforeAll(async done => {
         model = await new Animal().build({ name: "test" }).save(client);
-        await model.delete(client, { hard: false });
+        await model.delete({ hard: false }, client);
         done();
       });
 

@@ -2,12 +2,13 @@ import Animal from "../../example/models/animal";
 import { Repository } from "./repository";
 import { InMemoryClient } from "../../persistence/client";
 import { AnimalSchema, AnimalType } from "../../example/models/animal/schema";
+import { bindGlobalDatabaseClient } from "../../express";
 
 describe("repository", () => {
   const client: InMemoryClient = new InMemoryClient();
 
   beforeAll(async () => {
-    await client.connect();
+    await bindGlobalDatabaseClient(client);
   });
 
   afterAll(async () => {
@@ -32,20 +33,20 @@ describe("repository", () => {
     });
 
     it("should return count 0 with no records", async () => {
-      await expect(Repository.with(Animal).count(client)).resolves.toEqual(0);
+      await expect(Repository.with(Animal).count()).resolves.toEqual(0);
     });
 
     it("should return count with populated records", async () => {
-      await new Animal().build({ name: "Doggo", legs: 4 }).save(client);
+      await new Animal().build({ name: "Doggo", legs: 4 }).save();
 
-      await expect(Repository.with(Animal).count(client)).resolves.toEqual(1);
+      await expect(Repository.with(Animal).count()).resolves.toEqual(1);
     });
 
     it("should return count with record query", async () => {
-      await new Animal().build({ name: "Doggo", legs: 4 }).save(client);
+      await new Animal().build({ name: "Doggo", legs: 4 }).save();
 
       await expect(
-        Repository.with(Animal).count(client, { name: "Doggo" })
+        Repository.with(Animal).count({ name: "Doggo" })
       ).resolves.toEqual(1);
     });
   });
@@ -61,14 +62,14 @@ describe("repository", () => {
 
     it("should require collection to exist", async () => {
       await expect(
-        Repository.with(Animal).deleteCollection(client)
+        Repository.with(Animal).deleteCollection()
       ).rejects.toBeDefined();
     });
 
     it("should drop collection", async () => {
-      await new Animal().build({ name: "aaa" }).save(client);
+      await new Animal().build({ name: "aaa" }).save();
       await expect(
-        Repository.with(Animal).deleteCollection(client)
+        Repository.with(Animal).deleteCollection()
       ).resolves.toBeUndefined();
     });
   });
@@ -78,12 +79,10 @@ describe("repository", () => {
 
     beforeAll(async () => {
       await client.dropDatabase();
-      animal = await new Animal()
-        .build({ name: "Doggo", legs: 4 })
-        .save(client);
+      animal = await new Animal().build({ name: "Doggo", legs: 4 }).save();
       animal = await Repository.with<AnimalType, Animal, AnimalSchema>(
         Animal
-      ).updateOne(client, animal.toJson()._id, { legs: 0 });
+      ).updateOne(animal.toJson()._id, { legs: 0 });
     });
 
     afterAll(async () => {
@@ -104,7 +103,7 @@ describe("repository", () => {
 
     it("should obey joi schema", async () => {
       await expect(
-        Repository.with(Animal).updateOne(client, animal.toJson()._id, {
+        Repository.with(Animal).updateOne(animal.toJson()._id, {
           legs: -1
         })
       ).rejects.toThrowError(/must be larger than or equal to 0/);
@@ -112,7 +111,7 @@ describe("repository", () => {
 
     it("should not update non-existent record", async () => {
       await expect(
-        Repository.with(Animal).updateOne(client, "doesn't exist", { legs: 0 })
+        Repository.with(Animal).updateOne("doesn't exist", { legs: 0 })
       ).rejects.toThrowError("instance does not exist");
     });
 
@@ -121,12 +120,9 @@ describe("repository", () => {
 
       beforeAll(async () => {
         await client.dropDatabase();
-        animal = await new Animal()
-          .build({ name: "Doggo", legs: 4 })
-          .save(client);
+        animal = await new Animal().build({ name: "Doggo", legs: 4 }).save();
 
         animal = await Repository.with(Animal).updateOne(
-          client,
           animal.toJson()._id,
           {
             cool: "cool"
@@ -150,9 +146,7 @@ describe("repository", () => {
 
     beforeAll(async () => {
       await client.dropDatabase();
-      animal = await new Animal()
-        .build({ name: "Doggo", legs: 4 })
-        .save(client);
+      animal = await new Animal().build({ name: "Doggo", legs: 4 }).save();
     });
 
     afterAll(async () => {
@@ -161,13 +155,13 @@ describe("repository", () => {
 
     it("should return true", async () => {
       await expect(
-        Repository.with(Animal).existsById(client, animal.toJson()._id)
+        Repository.with(Animal).existsById(animal.toJson()._id)
       ).resolves.toBeTruthy();
     });
 
     it("should return false", async () => {
       await expect(
-        Repository.with(Animal).existsById(client, "uuid does not exist")
+        Repository.with(Animal).existsById("uuid does not exist")
       ).resolves.toBeFalsy();
     });
   });
@@ -184,31 +178,31 @@ describe("repository", () => {
     describe("without empty db", () => {
       it("should return false", async () => {
         await expect(
-          Repository.with(Animal).existsByQuery(client, {})
+          Repository.with(Animal).existsByQuery({})
         ).resolves.toBeFalsy();
       });
     });
 
     describe("with fixture", () => {
       beforeAll(async () => {
-        await new Animal().build({ name: "Doggo", legs: 4 }).save(client);
+        await new Animal().build({ name: "Doggo", legs: 4 }).save();
       });
 
       it("should return true with empty query", async () => {
         await expect(
-          Repository.with(Animal).existsByQuery(client, {})
+          Repository.with(Animal).existsByQuery({})
         ).resolves.toBeTruthy();
       });
 
       it("should return true", async () => {
         await expect(
-          Repository.with(Animal).existsByQuery(client, { name: "Doggo" })
+          Repository.with(Animal).existsByQuery({ name: "Doggo" })
         ).resolves.toBeTruthy();
       });
 
       it("should return false", async () => {
         await expect(
-          Repository.with(Animal).existsByQuery(client, {
+          Repository.with(Animal).existsByQuery({
             name: "Does not exist"
           })
         ).resolves.toBeFalsy();
@@ -229,7 +223,7 @@ describe("repository", () => {
       it("should return false", async () => {
         const instance = new Animal().build({ name: "Doggo" });
         await expect(
-          Repository.with(Animal).exists(client, instance)
+          Repository.with(Animal).exists(instance)
         ).resolves.toBeFalsy();
       });
     });
@@ -238,25 +232,25 @@ describe("repository", () => {
       let instance: Animal;
 
       beforeAll(async () => {
-        instance = await new Animal().build({ name: "Doggo" }).save(client);
+        instance = await new Animal().build({ name: "Doggo" }).save();
       });
 
       it("should return true with empty query", async () => {
         await expect(
-          Repository.with(Animal).exists(client, instance)
+          Repository.with(Animal).exists(instance)
         ).resolves.toBeTruthy();
       });
 
       it("should return true", async () => {
         await expect(
-          Repository.with(Animal).exists(client, instance)
+          Repository.with(Animal).exists(instance)
         ).resolves.toBeTruthy();
       });
 
       it("should return false", async () => {
-        await instance.delete(client, { hard: true });
+        await instance.delete({ hard: true });
         await expect(
-          Repository.with(Animal).exists(client, instance)
+          Repository.with(Animal).exists(instance)
         ).resolves.toBeFalsy();
       });
     });

@@ -1,7 +1,6 @@
 import Schema, { BaseModelType } from "../documents/base-document/schema";
 import BaseDocument, { DeletionParams } from "../documents/base-document";
 import DatabaseClient from "../../persistence/client/base.client";
-import { MongoClient } from "../../index";
 
 type UpdateOptions = Partial<{
   validateUpdate: boolean;
@@ -42,56 +41,61 @@ export class Repository<
     return new (instance.constructor as { new (): DocumentClass })();
   }
 
-  async count(client: DatabaseClient, query: object = {}): Promise<number> {
+  async count(
+    query: object = {},
+    client: DatabaseClient = global.databaseClient
+  ): Promise<number> {
     return client.count(this.documentInstance.collection(), query);
   }
 
-  async deleteCollection(client: DatabaseClient): Promise<void> {
+  async deleteCollection(
+    client: DatabaseClient = global.databaseClient
+  ): Promise<void> {
     await client.dropCollection(this.documentInstance.collection());
   }
 
   async deleteMany(
-    client: MongoClient,
     query: object = {},
-    params: DeletionParams = { hard: false }
+    params: DeletionParams = { hard: false },
+    client: DatabaseClient = global.databaseClient
   ): Promise<DocumentClass[]> {
     if (params.hard) {
       await client.deleteMany(this.documentInstance.collection(), query);
-      return this.findMany(client, query);
+      return this.findMany(query, client);
     }
 
-    const records = await this.findMany(client, query);
+    const records = await this.findMany(query, client);
     return Promise.all(
       records.map(async (record: DocumentClass) =>
         this.updateOne(
-          client,
           record.toJson()._id,
           {
             deletedAt: new Date(),
             deleted: true
           } as object,
-          { validateUpdate: false }
+          { validateUpdate: false },
+          client
         )
       )
     );
   }
 
   async deleteOne(
-    client: MongoClient,
     _id: string,
-    params: DeletionParams = { hard: false }
+    params: DeletionParams = { hard: false },
+    client: DatabaseClient = global.databaseClient
   ): Promise<DocumentClass | undefined> {
-    if (await this.existsById(client, _id)) {
+    if (await this.existsById(_id, client)) {
       if (params.hard) {
         await client.deleteOne(this.documentInstance.collection(), _id);
-        return this.findById(client, _id);
+        return this.findById(_id, client);
       }
 
       return this.updateOne(
-        client,
         _id,
         { deletedAt: new Date(), deleted: true } as object,
-        { validateUpdate: false }
+        { validateUpdate: false },
+        client
       );
     }
 
@@ -99,8 +103,8 @@ export class Repository<
   }
 
   async findOne(
-    client: MongoClient,
-    query: object
+    query: object,
+    client: DatabaseClient = global.databaseClient
   ): Promise<DocumentClass | undefined> {
     const records = await client.read(
       this.documentInstance.collection(),
@@ -115,21 +119,30 @@ export class Repository<
     return undefined;
   }
 
-  async findById(client: MongoClient, _id: string): Promise<DocumentClass> {
-    return this.findOne(client, { _id });
+  async findById(
+    _id: string,
+    client: DatabaseClient = global.databaseClient
+  ): Promise<DocumentClass> {
+    return this.findOne({ _id }, client);
   }
 
-  async existsByQuery(client: DatabaseClient, query: object): Promise<boolean> {
-    return (await this.count(client, query)) > 0;
+  async existsByQuery(
+    query: object,
+    client: DatabaseClient = global.databaseClient
+  ): Promise<boolean> {
+    return (await this.count(query, client)) > 0;
   }
 
-  async existsById(client: DatabaseClient, _id: string): Promise<boolean> {
-    return this.existsByQuery(client, { _id });
+  async existsById(
+    _id: string,
+    client: DatabaseClient = global.databaseClient
+  ): Promise<boolean> {
+    return this.existsByQuery({ _id }, client);
   }
 
   async exists<Instance extends BaseDocument<Type, JoiSchema>>(
-    client: DatabaseClient,
-    instance: Instance
+    instance: Instance,
+    client: DatabaseClient = global.databaseClient
   ): Promise<boolean> {
     // if record was already hard deleted in another scope ... edge-case.
     if (!instance.toJson()) {
@@ -137,23 +150,23 @@ export class Repository<
     }
 
     // schrödinger's instance? is this method even needed?
-    return this.existsById(client, instance.toJson()._id);
+    return this.existsById(instance.toJson()._id, client);
   }
 
   async updateOne(
-    client: MongoClient,
     _id: string,
     updatedFields: Partial<Type>,
-    options: UpdateOptions = defaultUpdateOptions
+    options: UpdateOptions = defaultUpdateOptions,
+    client: DatabaseClient = global.databaseClient
   ): Promise<DocumentClass> {
-    if (!(await this.existsById(client, _id))) {
+    if (!(await this.existsById(_id, client))) {
       throw new Error("instance does not exist");
     }
 
     if (options.validateUpdate) {
       // validate the new payload as the repo should still respect db restraints
       // unless the `Type` generic is passed, the `updatedFields` param will not respect the instance type properties
-      const instance = await this.findById(client, _id);
+      const instance = await this.findById(_id, client);
       const { value, error } = instance
         .joiSchema()
         .validateUpdate(updatedFields);
@@ -174,14 +187,17 @@ export class Repository<
       _id,
       updatedFields
     );
-    return this.findById(client, _id);
+    return this.findById(_id, client);
   }
 
-  async findAll(client: MongoClient): Promise<DocumentClass[]> {
-    return this.findMany(client, {});
+  async findAll(): Promise<DocumentClass[]> {
+    return this.findMany({});
   }
 
-  async findMany(client: MongoClient, query: object): Promise<DocumentClass[]> {
+  async findMany(
+    query: object,
+    client: DatabaseClient = global.databaseClient
+  ): Promise<DocumentClass[]> {
     const records = await client.read(
       this.documentInstance.collection(),
       query
