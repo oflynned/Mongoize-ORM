@@ -17,7 +17,7 @@ class Animal extends RelationalDocument<
     };
   }
 
-  async owner(client: MongoClient): Promise<Person> {
+  private async owner(client: MongoClient): Promise<Person> {
     return Repository.with(Person).findById(client, this.toJson().ownerId);
   }
 }

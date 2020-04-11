@@ -11,6 +11,10 @@ $ npm install -S mongoize-orm
 $ yarn add mongoize-orm
 ```
 
+### Disclaimer
+
+Data generally becomes relational after a while, you should switch to a relational database at some point when your POC becomes mature enough instead of using a pseudo-relational wrapper on documents.
+
 ### Show me some actual examples
 
 Have a look here for some simple examples
@@ -24,6 +28,7 @@ https://github.com/oflynned/Mongoize-ORM-Example/
 ### Quick start
 
 You just need to implement the two abstract classes `Schema` and `BaseDocument` to get started with using Mongoize-ORM.
+You'll also need to implement your own model type extending `BaseModelType` for the TypeScript layer of things.
 
 ```
 import { Schema, BaseDocument, BaseModelType } from 'mongoize-orm'
@@ -60,7 +65,7 @@ class Animal extends BaseDocument<AnimalType, AnimalSchema> {
 }
 ```
 
-You'll also need a client (either in-memory or mongodb) to connect to for use.
+To persist records, you need a database client (either in-memory or mongodb) to connect in order to use Mongoize ORM.
 
 ```
 import { InMemoryClient, MongoClient } from 'mongoize-orm';
@@ -88,7 +93,143 @@ await client.close();
 }
 ```
 
-### Reference
+### Non-Relational Data
+
+For any records that correspond to being documents where you either want to nest everything as a property, or don't care about relationships (yet),
+then your model needs to extend `BaseDocument` and you follow your own schema that you set. No redundant abstract methods, no hackiness.
+
+#### Type
+
+```
+import { BaseModelType } from "mongoize-orm";
+
+export interface AnimalType extends BaseModelType {
+  name: string;
+  legs?: number;
+}
+```
+
+#### Schema
+
+```
+import { Schema, Joi } from "mongoize-orm";
+import { AnimalType } from "./type
+
+export class AnimalSchema extends Schema<AnimalType> {
+  joiBaseSchema(): object {
+    return {
+      name: Joi.string().required(),
+      legs: Joi.number().min(0)
+    };
+  }
+
+  joiUpdateSchema(): object {
+    return {
+      name: Joi.string(),
+      legs: Joi.number().min(0)
+    };
+  }
+}
+```
+
+#### Model
+
+```
+import { MongoClient, BaseDocument, Repository } from "mongoize-orm";
+import { AnimalType } from "./type";
+import { AnimalSchema } from "./schema";
+
+class Animal extends BaseDocument<AnimalType, AnimalSchema> {
+  joiSchema(): AnimalSchema {
+    return new AnimalSchema();
+  }
+}
+
+export default Animal;
+```
+
+### Relational Data
+
+Models generally have relationships to one another, the `RelationalDocument` type is a subtype of `BaseDocument` that allows you to specify how documents are related to each other.
+The `.populate` method on a relational document fetches the document's layer of relationships, and does not populate relationships of relationships to prevent infinite loops.
+
+#### Type
+
+```
+import { BaseModelType } from "mongoize-orm";
+
+export interface AnimalType extends BaseModelType {
+  name: string;
+  legs?: number;
+  ownerId?: string;
+}
+```
+
+### Relationship
+
+```
+import { BaseRelationshipType } from "mongoize-orm";
+
+export interface AnimalRelationships extends BaseRelationshipType {
+  owner?: Person;
+}
+```
+
+#### Schema
+
+```
+import { Schema, Joi } from "mongoize-orm";
+import { AnimalType } from "./type
+
+export class AnimalSchema extends Schema<AnimalType> {
+  joiBaseSchema(): object {
+    return {
+      name: Joi.string().required(),
+      legs: Joi.number().min(0)
+    };
+  }
+
+  joiUpdateSchema(): object {
+    return {
+      name: Joi.string(),
+      legs: Joi.number().min(0)
+    };
+  }
+}
+```
+
+#### Model
+
+```
+import { MongoClient, RelationalDocument, Repository } from "mongoize-orm";
+import { AnimalType } from "./type" }
+import { AnimalSchema } from "./schema";
+import { AnimalRelationships } from "./relationships";
+
+import Person from "../person";
+
+class Animal extends RelationalDocument<
+  AnimalType,
+  AnimalSchema,
+  AnimalRelationships
+> {
+  joiSchema(): AnimalSchema {
+    return new AnimalSchema();
+  }
+
+  async relationalFields(client: MongoClient): Promise<AnimalRelationships> {
+    return {
+      owner: await this.owner(client)
+    };
+  }
+
+  private async owner(client: MongoClient): Promise<Person> {
+    return Repository.with(Person).findById(client, this.toJson().ownerId);
+  }
+}
+
+export default Animal;
+```
 
 ### Model Definition
 
