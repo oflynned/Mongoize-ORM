@@ -104,7 +104,7 @@ describe("credential-document", () => {
         password: "a".repeat(5)
       });
 
-      await expect(user.onPrePasswordHash()).rejects.toThrowError(
+      await expect(user.save(client)).rejects.toThrowError(
         "password is too short"
       );
     });
@@ -114,14 +114,14 @@ describe("credential-document", () => {
         ...userParams,
         password: "a".repeat(129)
       });
-      await expect(user.onPrePasswordHash()).rejects.toThrowError(
+      await expect(user.save(client)).rejects.toThrowError(
         "password is too long"
       );
     });
 
     it("should reject weak password", async () => {
       const user = new User().build({ ...userParams, password: "password1" });
-      await expect(user.onPrePasswordHash()).rejects.toThrowError(
+      await expect(user.save(client)).rejects.toThrowError(
         "password does not match minimum requirements"
       );
     });
@@ -129,9 +129,11 @@ describe("credential-document", () => {
     it("should require one number, one capital letter, one special character", async () => {
       const user = new User().build({
         ...userParams,
+        name: "test",
+        email: "email@test.com",
         password: "ZgZ9nHML3!ey"
       });
-      await expect(user.onPrePasswordHash()).resolves.toBeUndefined();
+      await expect(user.save(client)).resolves.toBeDefined();
     });
   });
 
@@ -174,8 +176,8 @@ describe("credential-document", () => {
         email: "user@email.com"
       });
 
-      onPrePasswordHashSpy = sinon.spy(user, "onPrePasswordHash");
-      onPostPasswordHashSpy = sinon.spy(user, "onPostPasswordHash");
+      onPrePasswordHashSpy = sinon.spy(user, "onPrePasswordHash" as any);
+      onPostPasswordHashSpy = sinon.spy(user, "onPostPasswordHash" as any);
 
       await user.save(client);
     });
