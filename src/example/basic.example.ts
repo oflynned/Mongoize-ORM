@@ -8,6 +8,7 @@ const main = async (client: InMemoryClient): Promise<void> => {
     .save(client);
 
   Logger.info("I've been saved");
+  Logger.info(animal.toJson());
 
   const count = await Repository.with(Animal).count(client);
   Logger.info(`There are ${count} record(s) in the db`);
