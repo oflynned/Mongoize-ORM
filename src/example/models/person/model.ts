@@ -1,4 +1,4 @@
-import { MongoClient, RelationalDocument, Repository } from "../../../../src";
+import { RelationalDocument, Repository } from "../../../../src";
 import { PersonType, PersonSchema, PersonRelationships } from "./schema";
 import Animal from "../animal";
 
@@ -15,9 +15,9 @@ class Person extends RelationalDocument<
     return "people";
   }
 
-  async relationalFields(client: MongoClient): Promise<PersonRelationships> {
+  async relationalFields(): Promise<PersonRelationships> {
     return {
-      pets: await Repository.with(Animal).findMany(client, {
+      pets: await Repository.with(Animal).findMany({
         ownerId: this.record._id
       })
     };
