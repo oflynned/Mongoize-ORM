@@ -265,7 +265,7 @@ type AuthConnectionOptions = {
 
 There is also an option to append the `NODE_ENV` environment value to the db when you enable the option `appendDatabaseEnvironment`.
 For a database named `mongoize` on the `development` environment, the database is automatically set to `mongoize-development`.
-This value defaults to false, it must be set to true through options on connect.
+This value defaults to false, it must be set to true through options on connect. It is not available on the in-memory client.
 
 Mongo client options can be customised by overriding the typed `.mongoOptions` method. It defaults to:
 

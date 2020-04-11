@@ -1,8 +1,8 @@
 import Logger from "../logger";
 import Animal from "./models/animal";
-import { InMemoryClient, MongoClient, Repository } from "../../src";
+import { InMemoryClient, Repository } from "../../src";
 
-const main = async (client: MongoClient): Promise<void> => {
+const main = async (client: InMemoryClient): Promise<void> => {
   const animal = await new Animal()
     .build({ name: "Doggo", legs: 4 })
     .save(client);
@@ -15,7 +15,7 @@ const main = async (client: MongoClient): Promise<void> => {
 };
 
 (async (): Promise<void> => {
-  const client = await new MongoClient().connect({ database: "test" });
+  const client = await new InMemoryClient().connect();
   try {
     await main(client);
   } catch (e) {
