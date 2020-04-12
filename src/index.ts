@@ -1,4 +1,11 @@
-import Repository from "./repository";
+import Repository, {
+  UpdateOptions,
+  QueryOptions,
+  DeleteOptions,
+  defaultQueryOptions,
+  defaultDeleteOptions,
+  defaultUpdateOptions
+} from "./repository";
 import { bindGlobalDatabaseClient } from "./express";
 import {
   DatabaseClient,
@@ -8,7 +15,6 @@ import {
 } from "./client";
 import BaseDocument, {
   Schema,
-  DeletionParams,
   BaseModelType,
   BaseRelationshipType
 } from "./document/base-document";
@@ -23,8 +29,10 @@ export {
   bindGlobalDatabaseClient,
   BaseRelationshipType,
   BaseModelType,
-  DeletionParams,
   Repository,
+  UpdateOptions,
+  QueryOptions,
+  DeleteOptions,
   MongoClient,
   InMemoryClient,
   DatabaseClient,
@@ -35,5 +43,8 @@ export {
   Schema,
   BaseDocument,
   RelationalDocument,
-  Joi
+  Joi,
+  defaultDeleteOptions,
+  defaultUpdateOptions,
+  defaultQueryOptions
 };

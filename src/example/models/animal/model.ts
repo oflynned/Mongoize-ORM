@@ -1,4 +1,8 @@
-import { RelationalDocument, Repository } from "../../../../src";
+import {
+  DatabaseClient,
+  RelationalDocument,
+  Repository
+} from "../../../../src";
 import { AnimalType, AnimalSchema, AnimalRelationships } from "./schema";
 import Person from "../person";
 
@@ -11,14 +15,20 @@ class Animal extends RelationalDocument<
     return new AnimalSchema();
   }
 
-  async relationalFields(): Promise<AnimalRelationships> {
+  async relationalFields(
+    depth: number,
+    client: DatabaseClient
+  ): Promise<AnimalRelationships> {
+    await super.relationalFields(depth, client);
     return {
-      owner: await this.owner()
+      owner: await this._owner()
     };
   }
 
-  private async owner(): Promise<Person> {
-    return Repository.with(Person).findById(this.toJson().ownerId);
+  private async _owner(): Promise<Person> {
+    return Repository.with(Person).findById(this.toJson().ownerId, {
+      populate: false
+    });
   }
 }
 

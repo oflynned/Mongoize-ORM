@@ -3,6 +3,18 @@ import Animal from "./models/animal";
 import Person from "./models/person";
 import { bindGlobalDatabaseClient, InMemoryClient } from "../../src";
 
+const printRelationship = (person: Person) => {
+  Logger.info(
+    `${person.toJson().name} owns ${person.toJson().pets.length} pet(s)`
+  );
+  Logger.info(
+    person
+      .toJson()
+      .pets.map((animal: Animal) => animal.toJson().name)
+      .join(", ")
+  );
+};
+
 const main = async (): Promise<void> => {
   const person: Person = await new Person()
     .build({
@@ -11,10 +23,9 @@ const main = async (): Promise<void> => {
     .save();
 
   const animal: Animal = await new Animal()
-    .build({ name: "Doggo", legs: 4, ownerId: person._id })
+    .build({ name: "Doggo", legs: 4, ownerId: person.toJson()._id })
     .save();
 
-  await animal.populate();
   Logger.info(
     `${animal.toJson().name} is owned by ${animal.toJson().owner.toJson().name}`
   );
@@ -23,30 +34,17 @@ const main = async (): Promise<void> => {
   // without calling this, the relationships are ___not___ refreshed
   // should probably be automatically called on calling a relational descendent in the first place
   await person.populate();
-  Logger.info(
-    `${person.toJson().name} owns ${person.toJson().pets.length} pet(s)`
-  );
-  Logger.info(
-    person
-      .toJson()
-      .pets.map((animal: Animal) => animal.toJson().name)
-      .join(", ")
-  );
+  printRelationship(person);
 
   await new Animal()
-    .build({ name: "Spot", legs: 4, ownerId: person._id })
+    .build({ name: "Spot", legs: 4, ownerId: person.toJson()._id })
     .save();
   await person.populate();
+  printRelationship(person);
 
-  Logger.info(
-    `${person.toJson().name} owns ${person.toJson().pets.length} pet(s)`
-  );
-  Logger.info(
-    person
-      .toJson()
-      .pets.map((animal: Animal) => animal.toJson().name)
-      .join(", ")
-  );
+  await animal.update({ ownerId: undefined });
+  await person.populate();
+  printRelationship(person);
 };
 
 (async (): Promise<void> => {
