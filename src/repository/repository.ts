@@ -1,14 +1,31 @@
 import Schema, { BaseModelType } from "../document/base-document/schema";
-import BaseDocument, { DeletionParams } from "../document/base-document";
+import BaseDocument from "../document/base-document";
 import DatabaseClient from "../client/base.client";
 
-type UpdateOptions = Partial<{
+export const defaultQueryOptions: QueryOptions = {
+  populate: false
+};
+
+export const defaultUpdateOptions: UpdateOptions = {
+  validateUpdate: true
+};
+
+export const defaultDeleteOptions: DeleteOptions = {
+  hard: false
+};
+
+export type QueryOptions = Partial<{
+  populate: boolean;
+  client?: DatabaseClient;
+}>;
+
+export type UpdateOptions = Partial<{
   validateUpdate: boolean;
 }>;
 
-const defaultUpdateOptions: UpdateOptions = {
-  validateUpdate: true
-};
+export type DeleteOptions = Partial<{
+  hard: boolean;
+}>;
 
 export class Repository<
   Type extends BaseModelType,
@@ -16,6 +33,8 @@ export class Repository<
   JoiSchema extends Schema<Type>
 > {
   private documentInstance: DocumentClass;
+
+  private defaultQueryOptions: QueryOptions;
 
   private constructor(documentInstance: DocumentClass) {
     this.documentInstance = documentInstance;
@@ -28,9 +47,20 @@ export class Repository<
   >(ChildModelClass: {
     new (...args: any[]): DocumentClass;
   }): Repository<Type, DocumentClass, JoiSchema> {
-    return new Repository<Type, DocumentClass, JoiSchema>(
-      new ChildModelClass()
-    );
+    const repository: Repository<
+      Type,
+      DocumentClass,
+      JoiSchema
+    > = new Repository<Type, DocumentClass, JoiSchema>(new ChildModelClass());
+    return repository.initialiseDefaults();
+  }
+
+  private initialiseDefaults(): Repository<Type, DocumentClass, JoiSchema> {
+    this.defaultQueryOptions = {
+      ...defaultQueryOptions,
+      client: global.databaseClient
+    };
+    return this;
   }
 
   private static newInstance<
@@ -43,28 +73,33 @@ export class Repository<
 
   async count(
     query: object = {},
-    client: DatabaseClient = global.databaseClient
+    options: QueryOptions = this.defaultQueryOptions
   ): Promise<number> {
-    return client.count(this.documentInstance.collection(), query);
+    return options.client.count(this.documentInstance.collection(), query);
   }
 
   async deleteCollection(
-    client: DatabaseClient = global.databaseClient
+    options: QueryOptions = this.defaultQueryOptions
   ): Promise<void> {
-    await client.dropCollection(this.documentInstance.collection());
+    await options.client.dropCollection(this.documentInstance.collection());
   }
 
   async deleteMany(
     query: object = {},
-    params: DeletionParams = { hard: false },
-    client: DatabaseClient = global.databaseClient
+    options: QueryOptions & DeleteOptions = {
+      ...this.defaultQueryOptions,
+      ...defaultDeleteOptions
+    }
   ): Promise<DocumentClass[]> {
-    if (params.hard) {
-      await client.deleteMany(this.documentInstance.collection(), query);
-      return this.findMany(query, client);
+    if (options.hard) {
+      await options.client.deleteMany(
+        this.documentInstance.collection(),
+        query
+      );
+      return this.findMany(query, options);
     }
 
-    const records = await this.findMany(query, client);
+    const records = await this.findMany(query, options);
     return Promise.all(
       records.map(async (record: DocumentClass) =>
         this.updateOne(
@@ -73,8 +108,7 @@ export class Repository<
             deletedAt: new Date(),
             deleted: true
           } as object,
-          { validateUpdate: false },
-          client
+          { ...options, validateUpdate: false }
         )
       )
     );
@@ -82,20 +116,21 @@ export class Repository<
 
   async deleteOne(
     _id: string,
-    params: DeletionParams = { hard: false },
-    client: DatabaseClient = global.databaseClient
+    options: DeleteOptions & QueryOptions = {
+      ...this.defaultQueryOptions,
+      ...defaultDeleteOptions
+    }
   ): Promise<DocumentClass | undefined> {
-    if (await this.existsById(_id, client)) {
-      if (params.hard) {
-        await client.deleteOne(this.documentInstance.collection(), _id);
-        return this.findById(_id, client);
+    if (await this.existsById(_id, options)) {
+      if (options.hard) {
+        await options.client.deleteOne(this.documentInstance.collection(), _id);
+        return this.findById(_id, options);
       }
 
       return this.updateOne(
         _id,
         { deletedAt: new Date(), deleted: true } as object,
-        { validateUpdate: false },
-        client
+        { ...options, validateUpdate: false }
       );
     }
 
@@ -104,16 +139,20 @@ export class Repository<
 
   async findOne(
     query: object,
-    client: DatabaseClient = global.databaseClient
+    options: QueryOptions = this.defaultQueryOptions
   ): Promise<DocumentClass | undefined> {
-    const records = await client.read(
+    options = { ...this.defaultQueryOptions, ...options };
+    const records = await options.client.read(
       this.documentInstance.collection(),
       query
     );
     if (records.length > 0) {
-      return Repository.newInstance(this.documentInstance).from(
-        records[0]
-      ) as DocumentClass;
+      const instance: DocumentClass = (await Repository.newInstance(
+        this.documentInstance
+      ).from(records[0])) as DocumentClass;
+
+      options.populate ? await instance.populate() : undefined;
+      return instance;
     }
 
     return undefined;
@@ -121,28 +160,28 @@ export class Repository<
 
   async findById(
     _id: string,
-    client: DatabaseClient = global.databaseClient
+    options: QueryOptions = this.defaultQueryOptions
   ): Promise<DocumentClass> {
-    return this.findOne({ _id }, client);
+    return this.findOne({ _id }, options);
   }
 
   async existsByQuery(
     query: object,
-    client: DatabaseClient = global.databaseClient
+    options: QueryOptions = this.defaultQueryOptions
   ): Promise<boolean> {
-    return (await this.count(query, client)) > 0;
+    return (await this.count(query, options)) > 0;
   }
 
   async existsById(
     _id: string,
-    client: DatabaseClient = global.databaseClient
+    options: QueryOptions = this.defaultQueryOptions
   ): Promise<boolean> {
-    return this.existsByQuery({ _id }, client);
+    return this.existsByQuery({ _id }, options);
   }
 
   async exists<Instance extends BaseDocument<Type, JoiSchema>>(
     instance: Instance,
-    client: DatabaseClient = global.databaseClient
+    options: QueryOptions = this.defaultQueryOptions
   ): Promise<boolean> {
     // if record was already hard deleted in another scope ... edge-case.
     if (!instance.toJson()) {
@@ -150,23 +189,25 @@ export class Repository<
     }
 
     // schrödinger's instance? is this method even needed?
-    return this.existsById(instance.toJson()._id, client);
+    return this.existsById(instance.toJson()._id, options);
   }
 
   async updateOne(
     _id: string,
     updatedFields: Partial<Type>,
-    options: UpdateOptions = defaultUpdateOptions,
-    client: DatabaseClient = global.databaseClient
+    options: UpdateOptions & QueryOptions = {
+      ...this.defaultQueryOptions,
+      ...defaultUpdateOptions
+    }
   ): Promise<DocumentClass> {
-    if (!(await this.existsById(_id, client))) {
+    if (!(await this.existsById(_id, options))) {
       throw new Error("instance does not exist");
     }
 
     if (options.validateUpdate) {
       // validate the new payload as the repo should still respect db restraints
       // unless the `Type` generic is passed, the `updatedFields` param will not respect the instance type properties
-      const instance = await this.findById(_id, client);
+      const instance = await this.findById(_id, options);
       const { value, error } = instance
         .joiSchema()
         .validateUpdate(updatedFields);
@@ -182,32 +223,38 @@ export class Repository<
       updatedFields = value;
     }
 
-    await client.updateOne(
+    await options.client.updateOne(
       this.documentInstance.collection(),
       _id,
       updatedFields
     );
-    return this.findById(_id, client);
+    return this.findById(_id, options);
   }
 
-  async findAll(): Promise<DocumentClass[]> {
-    return this.findMany({});
+  async findAll(
+    options: QueryOptions = this.defaultQueryOptions
+  ): Promise<DocumentClass[]> {
+    return this.findMany({}, options);
   }
 
   async findMany(
     query: object,
-    client: DatabaseClient = global.databaseClient
+    options: QueryOptions = this.defaultQueryOptions
   ): Promise<DocumentClass[]> {
-    const records = await client.read(
+    options = { ...this.defaultQueryOptions, ...options };
+    const records = await options.client.read(
       this.documentInstance.collection(),
       query
     );
 
     return Promise.all(
       records.map(async (record: object) => {
-        return Repository.newInstance(this.documentInstance).from(
-          record
-        ) as DocumentClass;
+        const instance: DocumentClass = (await Repository.newInstance(
+          this.documentInstance
+        ).from(record)) as DocumentClass;
+
+        options.populate ? await instance.populate() : undefined;
+        return instance;
       })
     );
   }

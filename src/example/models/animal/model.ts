@@ -13,12 +13,10 @@ class Animal extends RelationalDocument<
 
   async relationalFields(): Promise<AnimalRelationships> {
     return {
-      owner: await this.owner()
+      owner: await Repository.with(Person).findById(this.toJson().ownerId, {
+        populate: true
+      })
     };
-  }
-
-  private async owner(): Promise<Person> {
-    return Repository.with(Person).findById(this.toJson().ownerId);
   }
 }
 

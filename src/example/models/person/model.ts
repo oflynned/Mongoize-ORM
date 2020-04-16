@@ -17,9 +17,7 @@ class Person extends RelationalDocument<
 
   async relationalFields(): Promise<PersonRelationships> {
     return {
-      pets: await Repository.with(Animal).findMany({
-        ownerId: this.record._id
-      })
+      pets: await Repository.with(Animal).findMany({ ownerId: this.record._id })
     };
   }
 }

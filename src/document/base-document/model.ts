@@ -1,11 +1,10 @@
 import Schema, { BaseModelType, InternalModelType } from "./schema";
 import { DatabaseClient } from "../../client";
-import Repository from "../../repository";
 import Lifecycle from "../lifecycle";
-
-export type DeletionParams = Partial<{
-  hard: boolean;
-}>;
+import Repository, {
+  defaultDeleteOptions,
+  DeleteOptions
+} from "../../repository";
 
 export abstract class BaseDocument<
   Type extends BaseModelType,
@@ -18,26 +17,6 @@ export abstract class BaseDocument<
   }
 
   abstract joiSchema(): JoiSchema;
-
-  get _id(): string | undefined {
-    return this.toJson()._id;
-  }
-
-  get createdAt(): Date | undefined {
-    return this.toJson().createdAt;
-  }
-
-  get updatedAt(): Date | undefined {
-    return this.toJson().updatedAt;
-  }
-
-  get deletedAt(): Date | undefined {
-    return this.toJson().deletedAt;
-  }
-
-  get deleted(): boolean {
-    return this.toJson().deleted;
-  }
 
   from(
     payload: (Type & InternalModelType) | object
@@ -55,6 +34,15 @@ export abstract class BaseDocument<
     };
     return this;
   }
+
+  /* eslint-disable */
+  async populate(
+    client: DatabaseClient = global.databaseClient
+  ): Promise<BaseDocument<Type, JoiSchema>> {
+    Object.assign(this as any, this.record as Type);
+    return this;
+  }
+  /* eslint-enable */
 
   async validate(): Promise<Type | InternalModelType> {
     await this.onPreValidate();
@@ -90,23 +78,23 @@ export abstract class BaseDocument<
         updatedAt: new Date()
       } as object,
       // update has already been validated on .validateOnUpdate with Joi
-      { validateUpdate: false },
-      client
+      { validateUpdate: false, client }
     );
 
     this.record = newInstance.record;
     this.onPostUpdate();
+    await this.populate();
     return this;
   }
 
   async delete(
-    params: DeletionParams = { hard: false },
+    options: DeleteOptions = defaultDeleteOptions,
     client: DatabaseClient = global.databaseClient
   ): Promise<void> {
     this.onPreDelete();
     const newInstance = await Repository.with(
       this.constructor as any
-    ).deleteOne(this.record._id, params, client);
+    ).deleteOne(this.record._id, { ...options, client });
 
     this.record = newInstance ? newInstance.record : undefined;
     this.onPostDelete();
@@ -128,6 +116,7 @@ export abstract class BaseDocument<
     )) as Type & InternalModelType;
 
     await this.onPostSave();
+    await this.populate();
     return this;
   }
 }

@@ -9,41 +9,57 @@ import { DatabaseClient } from "../../client";
 abstract class RelationalDocument<
   Type extends BaseModelType,
   JoiSchema extends Schema<Type>,
-  RelationshipSchema extends BaseRelationshipType
+  RelationshipType extends BaseRelationshipType
 > extends BaseDocument<Type, JoiSchema> {
-  protected relationships: RelationshipSchema | any;
+  protected relationships: RelationshipType | any;
+  protected maxPopulateDepth = 10;
+  private currentPopulateDepth = 0;
 
+  /* eslint-disable */
   protected async relationalFields(
-    /* eslint-disable */
+    depth: number,
     client: DatabaseClient = global.databaseClient
-    /* eslint-enable */
-  ): Promise<RelationshipSchema | any> {
+  ): Promise<RelationshipType | any> {
+    this.currentPopulateDepth = depth + 1;
     return {};
   }
+  /* eslint-enable */
 
   async populate(
     client: DatabaseClient = global.databaseClient
-  ): Promise<RelationalDocument<Type, JoiSchema, RelationshipSchema>> {
-    this.relationships = { ...(await this.relationalFields(client)) };
+  ): Promise<RelationalDocument<Type, JoiSchema, RelationshipType>> {
+    if (this.currentPopulateDepth >= this.maxPopulateDepth) {
+      return this;
+    }
+
+    this.relationships = {
+      ...(await this.relationalFields(this.currentPopulateDepth, client))
+    };
+
+    Object.assign(
+      this as any,
+      this.record as Type,
+      this.relationships as RelationshipType
+    );
     return this;
   }
 
   async update(
     payload: Partial<Omit<Type, keyof InternalModelType>>,
     client: DatabaseClient = global.databaseClient
-  ): Promise<RelationalDocument<Type, JoiSchema, RelationshipSchema>> {
+  ): Promise<RelationalDocument<Type, JoiSchema, RelationshipType>> {
     await super.update(payload, client);
-    return this.populate(client);
+    return this;
   }
 
   async save(
     client: DatabaseClient = global.databaseClient
-  ): Promise<RelationalDocument<Type, JoiSchema, RelationshipSchema> | any> {
+  ): Promise<RelationalDocument<Type, JoiSchema, RelationshipType> | any> {
     await super.save(client);
-    return this.populate(client);
+    return this;
   }
 
-  toJson(): Type & InternalModelType & RelationshipSchema {
+  toJson(): InternalModelType & Type & RelationshipType {
     return { ...this.record, ...this.relationships };
   }
 }
