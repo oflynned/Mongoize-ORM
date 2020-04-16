@@ -87,7 +87,7 @@ export class Repository<
   async deleteMany(
     query: object = {},
     options: QueryOptions & DeleteOptions = {
-      ...defaultQueryOptions,
+      ...this.defaultQueryOptions,
       ...defaultDeleteOptions
     }
   ): Promise<DocumentClass[]> {
@@ -117,7 +117,7 @@ export class Repository<
   async deleteOne(
     _id: string,
     options: DeleteOptions & QueryOptions = {
-      ...defaultQueryOptions,
+      ...this.defaultQueryOptions,
       ...defaultDeleteOptions
     }
   ): Promise<DocumentClass | undefined> {
@@ -196,8 +196,8 @@ export class Repository<
     _id: string,
     updatedFields: Partial<Type>,
     options: UpdateOptions & QueryOptions = {
-      ...defaultUpdateOptions,
-      ...defaultQueryOptions
+      ...this.defaultQueryOptions,
+      ...defaultUpdateOptions
     }
   ): Promise<DocumentClass> {
     if (!(await this.existsById(_id, options))) {

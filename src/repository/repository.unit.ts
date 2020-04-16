@@ -115,7 +115,7 @@ describe("repository", () => {
       ).rejects.toThrowError("instance does not exist");
     });
 
-    describe("with no validation on update", () => {
+    describe.skip("with no validation on update", () => {
       let animal: Animal;
 
       beforeAll(async () => {
