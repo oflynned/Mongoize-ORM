@@ -35,12 +35,14 @@ export abstract class BaseDocument<
     return this;
   }
 
+  /* eslint-disable */
   async populate(
     client: DatabaseClient = global.databaseClient
   ): Promise<BaseDocument<Type, JoiSchema>> {
     Object.assign(this as any, this.record as Type);
     return this;
   }
+  /* eslint-enable */
 
   async validate(): Promise<Type | InternalModelType> {
     await this.onPreValidate();

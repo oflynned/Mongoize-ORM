@@ -22,12 +22,12 @@ const main = async (): Promise<void> => {
     })
     .save();
 
-  const animal: Animal = await new Animal()
+  const doggo: Animal = await new Animal()
     .build({ name: "Doggo", legs: 4, ownerId: person.toJson()._id })
     .save();
 
   Logger.info(
-    `${animal.toJson().name} is owned by ${animal.toJson().owner.toJson().name}`
+    `${doggo.toJson().name} is owned by ${doggo.toJson().owner.toJson().name}`
   );
 
   // it updates internal references to fetch relationships
@@ -36,13 +36,17 @@ const main = async (): Promise<void> => {
   await person.populate();
   printRelationship(person);
 
-  await new Animal()
+  const spot = await new Animal()
     .build({ name: "Spot", legs: 4, ownerId: person.toJson()._id })
     .save();
   await person.populate();
   printRelationship(person);
 
-  await animal.update({ ownerId: undefined });
+  await spot.update({ ownerId: undefined });
+  Logger.info(
+    `${doggo.toJson().name} is no longer owned by ${person.toJson().name}`
+  );
+
   await person.populate();
   printRelationship(person);
 };
