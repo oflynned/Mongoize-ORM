@@ -66,7 +66,7 @@ export abstract class BaseDocument<
       throw new Error("payload is empty");
     }
 
-    this.onPreUpdate();
+    await this.onPreUpdate();
     await this.joiSchema().validateUpdate(payload);
 
     const newInstance = await Repository.with(
@@ -82,7 +82,7 @@ export abstract class BaseDocument<
     );
 
     this.record = newInstance.record;
-    this.onPostUpdate();
+    await this.onPostUpdate();
     await this.populate();
     return this;
   }
@@ -91,13 +91,14 @@ export abstract class BaseDocument<
     options: DeleteOptions = defaultDeleteOptions,
     client: DatabaseClient = global.databaseClient
   ): Promise<void> {
-    this.onPreDelete();
+    options = {...defaultDeleteOptions, ...options}
+    await this.onPreDelete();
     const newInstance = await Repository.with(
       this.constructor as any
     ).deleteOne(this.record._id, { ...options, client });
 
     this.record = newInstance ? newInstance.record : undefined;
-    this.onPostDelete();
+    await this.onPostDelete();
   }
 
   toJson(): Type & InternalModelType {
