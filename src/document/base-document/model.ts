@@ -32,6 +32,16 @@ export abstract class BaseDocument<
     return this;
   }
 
+  override(
+    internalFields: Partial<InternalModelType>
+  ): BaseDocument<Type, JoiSchema> {
+    this.record = {
+      ...this.record,
+      ...internalFields
+    };
+    return this;
+  }
+
   /* eslint-disable */
   async populate(
     client: DatabaseClient = global.databaseClient
