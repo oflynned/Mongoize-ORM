@@ -62,7 +62,7 @@ export abstract class BaseDocument<
     }
 
     if (Object.keys(value).length === 0) {
-      throw new Error('empty update payload');
+      throw new Error("empty update payload");
     }
 
     return value;

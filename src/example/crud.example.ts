@@ -14,9 +14,15 @@ const main = async (): Promise<void> => {
   Logger.info("I've been created");
   Logger.info(animal);
 
-  await animal.update({ legs: -1 });
+  await animal.update({ legs: 3 });
   Logger.info("I've been updated");
   Logger.info(animal);
+
+  console.log(animal.toJson().legs); // should be 3
+  await Repository.with(Animal).updateOne(animal.toJson()._id, {legs: 4});
+  console.log(animal.toJson().legs); // should be 3
+  await animal.refresh();
+  console.log(animal.toJson().legs); // should be 4
 
   try {
     await animal.update({ legs: -1 });

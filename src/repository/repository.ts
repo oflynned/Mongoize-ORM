@@ -1,4 +1,4 @@
-import Schema, {BaseModelType} from "../document/base-document/schema";
+import Schema, { BaseModelType } from "../document/base-document/schema";
 import BaseDocument from "../document/base-document";
 import DatabaseClient from "../client/base.client";
 
