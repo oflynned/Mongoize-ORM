@@ -248,7 +248,7 @@ describe("repository", () => {
       });
 
       it("should return false", async () => {
-        await instance.delete({ hard: true });
+        await instance.hardDelete();
         await expect(
           Repository.with(Animal).exists(instance)
         ).resolves.toBeFalsy();

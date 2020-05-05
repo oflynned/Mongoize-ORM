@@ -85,7 +85,80 @@ export class Repository<
     await options.client.dropCollection(this.documentInstance.collection());
   }
 
-  async deleteMany(
+  async hardDeleteOne(
+    _id: string,
+    options: QueryOptions = { ...defaultQueryOptions }
+  ): Promise<DocumentClass | undefined> {
+    return this.deleteOne(_id, {
+      ...defaultQueryOptions,
+      ...options,
+      hard: true
+    });
+  }
+
+  async hardDeleteMany(
+    query: object,
+    options: QueryOptions = { ...defaultQueryOptions }
+  ): Promise<DocumentClass[] | undefined[]> {
+    return this.deleteMany(query, {
+      ...defaultQueryOptions,
+      ...options,
+      hard: true
+    });
+  }
+
+  async softDeleteOne(
+    _id: string,
+    options: QueryOptions = { ...defaultQueryOptions }
+  ): Promise<DocumentClass | undefined> {
+    return this.deleteOne(_id, {
+      ...defaultQueryOptions,
+      ...options,
+      hard: false
+    });
+  }
+
+  async softDeleteMany(
+    query: object,
+    options: QueryOptions = { ...defaultQueryOptions }
+  ): Promise<DocumentClass[] | undefined[]> {
+    return this.deleteMany(query, {
+      ...defaultQueryOptions,
+      ...options,
+      hard: false
+    });
+  }
+
+  private async deleteOne(
+    _id: string,
+    options: DeleteOptions & QueryOptions = {
+      ...this.defaultQueryOptions,
+      ...defaultDeleteOptions
+    }
+  ): Promise<DocumentClass | undefined> {
+    options = {
+      ...this.defaultQueryOptions,
+      ...defaultDeleteOptions,
+      ...options
+    };
+
+    if (await this.existsById(_id, options)) {
+      if (options.hard) {
+        await options.client.deleteOne(this.documentInstance.collection(), _id);
+        return this.findById(_id, options);
+      }
+
+      return this.updateOne(
+        _id,
+        { deletedAt: new Date(), deleted: true } as object,
+        { ...options, validateUpdate: false }
+      );
+    }
+
+    return undefined;
+  }
+
+  private async deleteMany(
     query: object = {},
     options: QueryOptions & DeleteOptions = {
       ...this.defaultQueryOptions,
@@ -120,35 +193,6 @@ export class Repository<
         )
       )
     );
-  }
-
-  async deleteOne(
-    _id: string,
-    options: DeleteOptions & QueryOptions = {
-      ...this.defaultQueryOptions,
-      ...defaultDeleteOptions
-    }
-  ): Promise<DocumentClass | undefined> {
-    options = {
-      ...this.defaultQueryOptions,
-      ...defaultDeleteOptions,
-      ...options
-    };
-
-    if (await this.existsById(_id, options)) {
-      if (options.hard) {
-        await options.client.deleteOne(this.documentInstance.collection(), _id);
-        return this.findById(_id, options);
-      }
-
-      return this.updateOne(
-        _id,
-        { deletedAt: new Date(), deleted: true } as object,
-        { ...options, validateUpdate: false }
-      );
-    }
-
-    return undefined;
   }
 
   async findOne(

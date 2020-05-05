@@ -1,10 +1,7 @@
 import Schema, { BaseModelType, InternalModelType } from "./schema";
 import { DatabaseClient } from "../../client";
 import Lifecycle from "../lifecycle";
-import Repository, {
-  defaultDeleteOptions,
-  DeleteOptions
-} from "../../repository";
+import Repository from "../../repository";
 
 export abstract class BaseDocument<
   Type extends BaseModelType,
@@ -87,18 +84,38 @@ export abstract class BaseDocument<
     return this;
   }
 
-  async delete(
-    options: DeleteOptions = defaultDeleteOptions,
+  async hardDelete(
     client: DatabaseClient = global.databaseClient
   ): Promise<void> {
-    options = { ...defaultDeleteOptions, ...options };
     await this.onPreDelete();
     const newInstance = await Repository.with(
       this.constructor as any
-    ).deleteOne(this.record._id, { ...options, client });
+    ).hardDeleteOne(this.record._id, { client });
 
     this.record = newInstance ? newInstance.record : undefined;
     await this.onPostDelete();
+  }
+
+  async softDelete(
+    client: DatabaseClient = global.databaseClient
+  ): Promise<void> {
+    await this.onPreDelete();
+    const newInstance = await Repository.with(
+      this.constructor as any
+    ).softDeleteOne(this.record._id, { client });
+
+    this.record = newInstance?.record;
+    await this.onPostDelete();
+  }
+
+  async refresh(
+    client: DatabaseClient = global.databaseClient
+  ): Promise<BaseDocument<Type, Schema<Type>>> {
+    const refreshedInstance = await Repository.with(
+      this.constructor as any
+    ).findById(this.toJson()._id, { client });
+    this.record = refreshedInstance?.record;
+    return this;
   }
 
   toJson(): Type & InternalModelType {

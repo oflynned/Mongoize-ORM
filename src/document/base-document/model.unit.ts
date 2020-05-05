@@ -129,7 +129,7 @@ describe("base-document", () => {
 
   describe("#delete", () => {
     it("should throw error on deleting a record that doesn't exist", () => {
-      expect(new Animal().delete()).rejects.toThrowError();
+      expect(new Animal().hardDelete(client)).rejects.toThrowError();
     });
 
     describe("with hard delete", () => {
@@ -137,7 +137,7 @@ describe("base-document", () => {
 
       beforeAll(async done => {
         model = await new Animal().build({ name: "test" }).save(client);
-        await model.delete({ hard: true }, client);
+        await model.hardDelete(client);
         done();
       });
 
@@ -151,7 +151,7 @@ describe("base-document", () => {
 
       beforeAll(async done => {
         model = await new Animal().build({ name: "test" }).save(client);
-        await model.delete({ hard: false }, client);
+        await model.softDelete(client);
         done();
       });
 

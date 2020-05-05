@@ -7,7 +7,9 @@ import {
 } from "../../src";
 
 const main = async (): Promise<void> => {
-  const animal = await new Animal().build({ name: "Doggo", legs: 4 }).save();
+  const animal: Animal = await new Animal()
+    .build({ name: "Doggo", legs: 4 })
+    .save();
 
   Logger.info("I've been created");
   Logger.info(animal);
@@ -23,7 +25,7 @@ const main = async (): Promise<void> => {
     Logger.info(animal);
   }
 
-  await animal.delete();
+  await animal.softDelete();
   Logger.info("I've been soft deleted");
   Logger.info(animal);
 
@@ -32,7 +34,7 @@ const main = async (): Promise<void> => {
   Logger.info("I've been read");
   Logger.info(a);
 
-  await a.delete({ hard: true });
+  await a.hardDelete();
   Logger.info("I've been hard deleted");
   Logger.info(a);
 };

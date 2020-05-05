@@ -6,7 +6,7 @@ import {
 } from "../../src";
 
 const main = async (): Promise<void> => {
-  await Repository.with(User).deleteMany();
+  await Repository.with(User).hardDeleteMany({});
 
   const user: User = await new User().build({
     name: "John Smith",
