@@ -19,7 +19,7 @@ const main = async (): Promise<void> => {
   Logger.info(animal);
 
   console.log(animal.toJson().legs); // should be 3
-  await Repository.with(Animal).updateOne(animal.toJson()._id, {legs: 4});
+  await Repository.with(Animal).updateOne(animal.toJson()._id, { legs: 4 });
   console.log(animal.toJson().legs); // should be 3
   await animal.refresh();
   console.log(animal.toJson().legs); // should be 4
