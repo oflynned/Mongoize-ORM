@@ -1,4 +1,4 @@
-import Schema, { BaseModelType } from "../document/base-document/schema";
+import Schema, {BaseModelType} from "../document/base-document/schema";
 import BaseDocument from "../document/base-document";
 import DatabaseClient from "../client/base.client";
 
@@ -273,19 +273,7 @@ export class Repository<
       // validate the new payload as the repo should still respect db restraints
       // unless the `Type` generic is passed, the `updatedFields` param will not respect the instance type properties
       const instance = await this.findById(_id, options);
-      const { value, error } = instance
-        .joiSchema()
-        .validateUpdate(updatedFields);
-
-      if (error) {
-        throw error;
-      }
-
-      if (Object.keys(value).length === 0) {
-        throw new Error("pruned update was empty");
-      }
-
-      updatedFields = value;
+      updatedFields = await instance.validateUpdate(updatedFields);
     }
 
     await options.client.updateOne(

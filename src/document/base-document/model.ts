@@ -55,10 +55,14 @@ export abstract class BaseDocument<
     return this.record;
   }
 
-  async validateUpdate(payload: Type):Promise<Type | InternalModelType> {
-    const {value, error} = await this.joiSchema().validateUpdate(payload);
+  async validateUpdate(payload: Partial<Type>): Promise<Partial<Type>> {
+    const { value, error } = await this.joiSchema().validateUpdate(payload);
     if (error) {
-      throw error
+      throw error;
+    }
+
+    if (Object.keys(value).length === 0) {
+      throw new Error('empty update payload');
     }
 
     return value;
