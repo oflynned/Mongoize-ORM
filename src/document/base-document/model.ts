@@ -55,6 +55,15 @@ export abstract class BaseDocument<
     return this.record;
   }
 
+  async validateUpdate(payload: Type):Promise<Type | InternalModelType> {
+    const {value, error} = await this.joiSchema().validateUpdate(payload);
+    if (error) {
+      throw error
+    }
+
+    return value;
+  }
+
   async update(
     payload: Partial<Omit<Type, keyof InternalModelType>>,
     client: DatabaseClient = global.databaseClient
