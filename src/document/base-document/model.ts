@@ -91,7 +91,7 @@ export abstract class BaseDocument<
     options: DeleteOptions = defaultDeleteOptions,
     client: DatabaseClient = global.databaseClient
   ): Promise<void> {
-    options = {...defaultDeleteOptions, ...options}
+    options = { ...defaultDeleteOptions, ...options };
     await this.onPreDelete();
     const newInstance = await Repository.with(
       this.constructor as any

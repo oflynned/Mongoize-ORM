@@ -75,6 +75,7 @@ export class Repository<
     query: object = {},
     options: QueryOptions = this.defaultQueryOptions
   ): Promise<number> {
+    options = { ...this.defaultQueryOptions, ...options };
     return options.client.count(this.documentInstance.collection(), query);
   }
 
@@ -91,6 +92,13 @@ export class Repository<
       ...defaultDeleteOptions
     }
   ): Promise<DocumentClass[]> {
+    // passing .hard but not passing .client will set .client to null instead of coalescing defaults
+    options = {
+      ...this.defaultQueryOptions,
+      ...defaultDeleteOptions,
+      ...options
+    };
+
     if (options.hard) {
       await options.client.deleteMany(
         this.documentInstance.collection(),
@@ -121,6 +129,12 @@ export class Repository<
       ...defaultDeleteOptions
     }
   ): Promise<DocumentClass | undefined> {
+    options = {
+      ...this.defaultQueryOptions,
+      ...defaultDeleteOptions,
+      ...options
+    };
+
     if (await this.existsById(_id, options)) {
       if (options.hard) {
         await options.client.deleteOne(this.documentInstance.collection(), _id);
@@ -169,6 +183,7 @@ export class Repository<
     query: object,
     options: QueryOptions = this.defaultQueryOptions
   ): Promise<boolean> {
+    options = { ...this.defaultQueryOptions, ...options };
     return (await this.count(query, options)) > 0;
   }
 
@@ -200,6 +215,12 @@ export class Repository<
       ...defaultUpdateOptions
     }
   ): Promise<DocumentClass> {
+    options = {
+      ...this.defaultQueryOptions,
+      ...defaultUpdateOptions,
+      ...options
+    };
+
     if (!(await this.existsById(_id, options))) {
       throw new Error("instance does not exist");
     }
