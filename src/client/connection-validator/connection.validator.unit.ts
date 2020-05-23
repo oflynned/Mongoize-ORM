@@ -82,6 +82,24 @@ describe("Connection Validator", () => {
       });
     });
 
+    describe("with cluster connection string", () => {
+      it("should parse correctly", () => {
+        const options: ConnectionOptions = {
+          uri: "mongodb+srv://user:password@host:1234/database"
+        };
+
+        validator.validate(options);
+        expect(validator.options.uri).toEqual(
+          "mongodb+srv://user:password@host:1234/database"
+        );
+        expect(validator.options.username).toEqual("user");
+        expect(validator.options.password).toEqual("password");
+        expect(validator.options.host).toEqual("host");
+        expect(validator.options.port).toEqual(1234);
+        expect(validator.options.database).toEqual("database");
+      });
+    });
+
     describe("with auth", () => {
       describe(".appendDatabaseEnvironment", () => {
         it("should mutate database name", function() {
