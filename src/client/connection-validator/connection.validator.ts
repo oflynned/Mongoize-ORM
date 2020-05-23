@@ -6,7 +6,7 @@ type AuthConnectionOptions = {
   username?: string;
   password?: string;
   host: string;
-  port: number;
+  port?: number;
   database: string;
 };
 
@@ -30,42 +30,72 @@ const parseUriString = (uri: string): ConnectionOptions => {
     );
   }
 
-  const regex = uri.startsWith("mongodb://")
-    ? new RegExp(
-        /^(mongodb:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\S+?):(\d+)\/(\S+?)(\?replicaSet=(\S+?))?$/
-      )
-    : new RegExp(
-        /^(mongodb\+srv:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\S+?):(\d+)\/(\S+?)(\?replicaSet=(\S+?))?$/
-      );
+  let fields;
+  if (uri.startsWith("mongodb://")) {
+    const regex = new RegExp(
+      /^(mongodb:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\S+?):(\d+)\/(\S+?)(\?replicaSet=(\S+?))?$/
+    );
+    fields = uri.split(regex);
+    if (fields.length < 8) {
+      throw new Error("bad connection string passed");
+    }
+    /**
+         * [ '',
+         'mongodb://',
+         'username:password@',
+         'username',
+         'password',
+         'host',
+         '1234',
+         'database',
+         '' ]
+         */
+    const [, , , username, password, host, port, database] = fields;
+    // a connection string needs to have
+    if (!(host || port || database)) {
+      throw new Error("missing connection string field");
+    }
 
-  const fields = uri.split(regex);
-  if (fields.length < 8) {
+    return {
+      uri,
+      username,
+      password,
+      host,
+      port: parseInt(port, 10),
+      database
+    };
+  }
+
+  const regex = new RegExp(
+    /^(mongodb\+srv:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\S+?)\/(\S+?)(\?replicaSet=(\S+?))?$/
+  );
+  fields = uri.split(regex);
+  if (fields.length <= 1) {
     throw new Error("bad connection string passed");
   }
 
   /**
      * [ '',
-     'mongodb://',
-     'username:password@',
-     'username',
+     'mongodb+srv://',
+     'user:password@',
+     'user',
      'password',
      'host',
-     '1234',
      'database',
+     undefined,
+     undefined,
      '' ]
      */
-  const [, , , username, password, host, port, database] = fields;
-  // a connection string needs to have
-  if (!(host || port || database)) {
+  const [, , , username, password, host, database] = fields;
+  if (!(host || database)) {
     throw new Error("missing connection string field");
   }
 
   return {
-    uri,
+    uri: `mongodb+srv://${username}:${password}@${host}/${database}`,
     username,
     password,
     host,
-    port: parseInt(port, 10),
     database
   };
 };

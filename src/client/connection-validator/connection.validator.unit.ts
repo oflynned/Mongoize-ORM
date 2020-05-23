@@ -82,20 +82,20 @@ describe("Connection Validator", () => {
       });
     });
 
-    describe("with cluster connection string", () => {
+    describe("with cluster srv connection string", () => {
       it("should parse correctly", () => {
         const options: ConnectionOptions = {
-          uri: "mongodb+srv://user:password@host:1234/database"
+          uri: "mongodb+srv://user:password@host/database"
         };
 
         validator.validate(options);
         expect(validator.options.uri).toEqual(
-          "mongodb+srv://user:password@host:1234/database"
+          "mongodb+srv://user:password@host/database"
         );
         expect(validator.options.username).toEqual("user");
         expect(validator.options.password).toEqual("password");
         expect(validator.options.host).toEqual("host");
-        expect(validator.options.port).toEqual(1234);
+        expect(validator.options.port).toBeUndefined();
         expect(validator.options.database).toEqual("database");
       });
     });
