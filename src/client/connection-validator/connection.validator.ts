@@ -23,9 +23,20 @@ const defaultOptions: ConnectionOptions = {
 };
 
 const parseUriString = (uri: string): ConnectionOptions => {
-  const regex = new RegExp(
-    /^(mongodb:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\S+?):(\d+)\/(\S+?)(\?replicaSet=(\S+?))?$/
-  );
+  // only supporting mongodb and mongodb+srv protocols
+  if (!(uri.startsWith("mongodb://") || uri.startsWith("mongodb+srv://"))) {
+    throw new Error(
+      "invalid protocol -- needs to be mongodb:// or mongodb+srv:// type"
+    );
+  }
+
+  const regex = uri.startsWith("mongodb://")
+    ? new RegExp(
+        /^(mongodb:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\S+?):(\d+)\/(\S+?)(\?replicaSet=(\S+?))?$/
+      )
+    : new RegExp(
+        /^(mongodb\+srv:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\S+?):(\d+)\/(\S+?)(\?replicaSet=(\S+?))?$/
+      );
 
   const fields = uri.split(regex);
   if (fields.length < 8) {
@@ -43,13 +54,7 @@ const parseUriString = (uri: string): ConnectionOptions => {
      'database',
      '' ]
      */
-  const [, protocol, , username, password, host, port, database] = fields;
-
-  // only supporting mongodb type
-  if (protocol !== "mongodb://") {
-    throw new Error("invalid protocol -- needs to be mongodb:// type");
-  }
-
+  const [, , , username, password, host, port, database] = fields;
   // a connection string needs to have
   if (!(host || port || database)) {
     throw new Error("missing connection string field");
