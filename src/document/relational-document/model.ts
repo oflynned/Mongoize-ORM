@@ -15,16 +15,6 @@ abstract class RelationalDocument<
   protected maxPopulateDepth = 10;
   private currentPopulateDepth = 0;
 
-  /* eslint-disable */
-  protected async relationalFields(
-    depth: number,
-    client: DatabaseClient = global.databaseClient
-  ): Promise<RelationshipType | any> {
-    this.currentPopulateDepth = depth + 1;
-    return {};
-  }
-  /* eslint-enable */
-
   async populate(
     client: DatabaseClient = global.databaseClient
   ): Promise<RelationalDocument<Type, JoiSchema, RelationshipType>> {
@@ -44,6 +34,8 @@ abstract class RelationalDocument<
     return this;
   }
 
+  /* eslint-enable */
+
   async update(
     payload: Partial<Omit<Type, keyof InternalModelType>>,
     client: DatabaseClient = global.databaseClient
@@ -59,8 +51,17 @@ abstract class RelationalDocument<
     return this;
   }
 
-  toJson(): InternalModelType & Type & RelationshipType {
+  toJsonWithRelationships(): InternalModelType & Type & RelationshipType {
     return { ...this.record, ...this.relationships };
+  }
+
+  /* eslint-disable */
+  protected async relationalFields(
+    depth: number,
+    client: DatabaseClient = global.databaseClient
+  ): Promise<RelationshipType | any> {
+    this.currentPopulateDepth = depth + 1;
+    return {};
   }
 }
 
