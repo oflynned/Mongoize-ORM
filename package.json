@@ -1,6 +1,6 @@
 {
   "name": "mongoize-orm",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Simplify MongoDB model persistence with a smart layer in between you and your database",
   "keywords": [
     "mongodb",
