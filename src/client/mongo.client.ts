@@ -3,7 +3,7 @@ import DatabaseClient from "./base.client";
 import { ConnectionOptions } from "./connection-validator";
 
 class MongoClient extends DatabaseClient {
-  private client: Mongo.MongoClient;
+  private _client: Mongo.MongoClient;
 
   async create(collection: string, payload: object): Promise<object> {
     await this.withCollection(collection).insertOne(payload);
@@ -63,7 +63,7 @@ class MongoClient extends DatabaseClient {
 
   async connect(options?: ConnectionOptions): Promise<MongoClient> {
     await super.connect(options);
-    this.client = await Mongo.MongoClient.connect(
+    this._client = await Mongo.MongoClient.connect(
       this.validator.options.uri,
       this.mongoOptions()
     );
@@ -71,7 +71,7 @@ class MongoClient extends DatabaseClient {
   }
 
   async close(): Promise<void> {
-    await this.client?.close();
+    await this._client?.close();
   }
 
   async count(collection: string, query: object): Promise<number> {
@@ -85,8 +85,12 @@ class MongoClient extends DatabaseClient {
     };
   }
 
+  client(): Mongo.MongoClient {
+    return this._client;
+  }
+
   withDb(): Db {
-    return this.client.db(this.validator.options.database);
+    return this._client.db(this.validator.options.database);
   }
 
   private withCollection(collection: string): Collection {
