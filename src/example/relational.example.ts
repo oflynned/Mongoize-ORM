@@ -5,11 +5,13 @@ import { bindGlobalDatabaseClient, InMemoryClient } from "../../src";
 
 const printRelationship = (person: Person) => {
   Logger.info(
-    `${person.toJson().name} owns ${person.toJson().pets.length} pet(s)`
+    `${person.toJson().name} owns ${
+      person.toJsonWithRelationships().pets.length
+    } pet(s)`
   );
   Logger.info(
     person
-      .toJson()
+      .toJsonWithRelationships()
       .pets.map((animal: Animal) => animal.toJson().name)
       .join(", ")
   );
@@ -27,7 +29,9 @@ const main = async (): Promise<void> => {
     .save();
 
   Logger.info(
-    `${doggo.toJson().name} is owned by ${doggo.toJson().owner.toJson().name}`
+    `${doggo.toJson().name} is owned by ${
+      doggo.toJsonWithRelationships().owner.toJson().name
+    }`
   );
 
   // it updates internal references to fetch relationships

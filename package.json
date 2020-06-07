@@ -29,6 +29,7 @@
     "example:basic": "node_modules/.bin/ts-node src/example/basic.example.ts",
     "example:credentials": "node_modules/.bin/ts-node src/example/credential-validation.example.ts",
     "example:crud": "node_modules/.bin/ts-node src/example/crud.example.ts",
+    "example:limit-offset": "node_modules/.bin/ts-node src/example/limit-offset.example.ts",
     "example:relational": "node_modules/.bin/ts-node src/example/relational.example.ts",
     "lint:code:check": "node_modules/.bin/eslint '**/*.{js,ts}' --ignore-path .gitignore",
     "lint:code:fix": "node_modules/.bin/eslint '**/*.{js,ts}' --ignore-path .gitignore --quiet --fix",
