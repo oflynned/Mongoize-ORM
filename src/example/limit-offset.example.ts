@@ -13,15 +13,21 @@ const main = async (): Promise<void> => {
   const count = await Repository.with(Animal).count();
   Logger.info(`There are ${count} record(s) in the db`);
 
-  const records = await Repository.with(Animal).findMany(
+  const r1 = await Repository.with(Animal).findMany(
     {},
     { limit: 2, offset: 1 }
   );
-  records.map((animal: Animal) => {
+  r1.map((animal: Animal) => {
     console.log(animal.toJson());
   });
 
-  Logger.info(`There are ${records.length} record(s) returned in the query`);
+  const r2 = await Repository.with(Animal).findMany(
+    {},
+    { orderBy: { name: -1 } }
+  );
+  r2.map((animal: Animal) => {
+    console.log(animal.toJson());
+  });
 };
 
 (async (): Promise<void> => {
