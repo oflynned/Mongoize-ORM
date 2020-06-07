@@ -19,6 +19,7 @@ export type QueryOptions = Partial<{
   client?: DatabaseClient;
   limit?: number;
   offset?: number;
+  orderBy?: object;
 }>;
 
 export type UpdateOptions = Partial<{
@@ -301,7 +302,7 @@ export class Repository<
     const records = await options.client.read(
       this.documentInstance.collection(),
       query,
-      { limit: options.limit, offset: options.offset }
+      { limit: options.limit, offset: options.offset, orderBy: options.orderBy }
     );
 
     return Promise.all(

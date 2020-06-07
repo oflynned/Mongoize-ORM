@@ -27,9 +27,13 @@ class MongoClient extends DatabaseClient {
   async read(
     collection: string,
     query: object,
-    options: { limit?: number; offset?: number } = {}
+    options: { limit?: number; offset?: number; orderBy?: object } = {}
   ): Promise<object[]> {
     const cursor = this.withCollection(collection).find(query, {});
+    if (options.orderBy) {
+      cursor.sort(options.orderBy);
+    }
+
     if (options.offset) {
       cursor.skip(options.offset);
     }

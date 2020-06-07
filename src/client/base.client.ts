@@ -27,7 +27,7 @@ export abstract class DatabaseClient {
   abstract async read(
     collection: string,
     query: object,
-    options: { limit?: number; offset?: number }
+    options: { limit?: number; offset?: number; orderBy?: object }
   ): Promise<object[]>;
 
   abstract async updateOne(
