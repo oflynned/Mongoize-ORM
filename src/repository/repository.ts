@@ -17,6 +17,8 @@ export const defaultDeleteOptions: DeleteOptions = {
 export type QueryOptions = Partial<{
   populate: boolean;
   client?: DatabaseClient;
+  limit?: number;
+  offset?: number;
 }>;
 
 export type UpdateOptions = Partial<{
@@ -202,7 +204,8 @@ export class Repository<
     options = { ...this.defaultQueryOptions, ...options };
     const records = await options.client.read(
       this.documentInstance.collection(),
-      query
+      query,
+      {}
     );
     if (records.length > 0) {
       const instance: DocumentClass = (await Repository.newInstance(
@@ -297,7 +300,8 @@ export class Repository<
     options = { ...this.defaultQueryOptions, ...options };
     const records = await options.client.read(
       this.documentInstance.collection(),
-      query
+      query,
+      { limit: options.limit, offset: options.offset }
     );
 
     return Promise.all(

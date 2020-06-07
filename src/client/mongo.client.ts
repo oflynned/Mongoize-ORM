@@ -24,18 +24,29 @@ class MongoClient extends DatabaseClient {
     return deletedCount;
   }
 
+  async read(
+    collection: string,
+    query: object,
+    options: { limit?: number; offset?: number } = {}
+  ): Promise<object[]> {
+    const cursor = this.withCollection(collection).find(query, {});
+    if (options.offset) {
+      cursor.skip(options.offset);
+    }
+
+    if (options.limit) {
+      cursor.limit(options.limit);
+    }
+
+    return cursor.toArray();
+  }
+
   async dropCollection(collection: string): Promise<void> {
     await this.withCollection(collection).drop();
   }
 
   async dropDatabase(): Promise<void> {
     await this.withDb().dropDatabase();
-  }
-
-  async read(collection: string, query: object): Promise<object[]> {
-    return this.withCollection(collection)
-      .find(query, {})
-      .toArray();
   }
 
   async updateOne(

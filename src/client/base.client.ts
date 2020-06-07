@@ -24,7 +24,11 @@ export abstract class DatabaseClient {
 
   abstract async dropDatabase(): Promise<void>;
 
-  abstract async read(collection: string, query: object): Promise<object[]>;
+  abstract async read(
+    collection: string,
+    query: object,
+    options: { limit?: number; offset?: number }
+  ): Promise<object[]>;
 
   abstract async updateOne(
     collection: string,
